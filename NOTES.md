@@ -10,6 +10,9 @@ Running notes for the Friday team share. Newest at the bottom of each section.
 - 4 Nov. Sankey view added to the plan (AMPD-24) as the fund-flow overview, next to the node graph.
 - 4 Nov. UI rethink with the Design Engineer: built around an incident responder's questions (how much, where is it now, what to act on next), not raw transactions.
 
+- 4 Nov. ak approved the responder layout: incident preloaded, address input secondary, Sankey as the main visual, node graph can go. AMPD-24 builds it.
+- 4 Nov. ak has his own staging JWT. It goes in the gitignored `amp-poc/.env`, never in the repo or issues.
+
 ## What worked
 
 - Amp staging had `edgeandnode/ethereum_mainnet@0.0.2` synced through the window. No local `ampd` needed.
@@ -29,7 +32,7 @@ Running notes for the Friday team share. Newest at the bottom of each section.
 ## Help needed from other teams
 
 - Amp core or data: does the hosted Ethereum dataset have traces? If not, what would it take (Phaser with an Erigon bridge, or a `traces` table in `evm-rpc`)? Ask in #amp-hackathon.
-- Amp infra: hosted instance access for ak at the start of the hackathon (endpoint and token).
+- Amp infra: hosted instance access for ak. Staging access arrived 4 Nov; still waiting on the hackathon instance.
 - Amp data: USD prices for long-tail ERC-20s, or a recommended price dataset.
 
 ## Open
