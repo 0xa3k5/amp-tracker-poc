@@ -4,6 +4,7 @@ import { TerminalWindowIcon } from "@edgeandnode/eds-react/icons"
 
 import { isMock, queries } from "./data.ts"
 import { useOpenDetails } from "./details.ts"
+import { EthereumMark } from "./TokenAmount.tsx"
 import { isAddress, normalizeAddress } from "./trace.ts"
 
 export function Header() {
@@ -14,7 +15,10 @@ export function Header() {
   return (
     <header className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-16 font-medium">Binance hot wallet hack · 29 October 2026</h1>
+        <h1 className="text-16 flex items-center gap-2 font-medium">
+          <EthereumMark size={20} />
+          Binance hot wallet hack · 29 October 2026
+        </h1>
         {isMock ? <Tag variant="solar">Mock data</Tag> : null}
       </div>
       <div className="flex flex-wrap items-start gap-2">

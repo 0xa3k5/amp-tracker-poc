@@ -4,10 +4,11 @@ import { XIcon } from "@edgeandnode/eds-react/icons"
 
 import { addressBook, transactions, transfers } from "./data.ts"
 import type { Details } from "./details.ts"
-import { formatAmount, formatUsd } from "./format.ts"
+import { formatUsd } from "./format.ts"
 import { fullLabel, labelFor, ROLES } from "./roles.ts"
 import { SqlPanel } from "./SqlPanel.tsx"
 import { Timeline, TimelineDetails } from "./Timeline.tsx"
+import { TokenAmount } from "./TokenAmount.tsx"
 import { freezeTargets, isFreeze, touches } from "./trace.ts"
 
 const transfersByTx = Map.groupBy(transfers, (t) => t.tx_hash)
@@ -65,9 +66,15 @@ function AddressDetails({ address }: { address: string }) {
         <DescriptionList.Item label="Received">{formatUsd(summary.received)}</DescriptionList.Item>
         <DescriptionList.Item label="Sent">{formatUsd(summary.sent)}</DescriptionList.Item>
         <DescriptionList.Item label="Left at end of window">
-          {summary.holdings.length > 0
-            ? summary.holdings.map(([token, h]) => `${formatAmount(h.amount)} ${token}`).join(", ")
-            : "Nothing traced"}
+          {summary.holdings.length > 0 ? (
+            <span className="flex flex-col gap-1">
+              {summary.holdings.map(([token, h]) => (
+                <TokenAmount key={token} symbol={token} amount={h.amount} />
+              ))}
+            </span>
+          ) : (
+            "Nothing traced"
+          )}
         </DescriptionList.Item>
       </DescriptionList>
       <div className="flex flex-col gap-3">

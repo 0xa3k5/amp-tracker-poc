@@ -3,8 +3,9 @@ import { Address, CodeInline, CopyButton, DescriptionList, Status } from "@edgea
 import { CaretDownInteractiveIcon } from "@edgeandnode/eds-react/icons"
 
 import { FREEZE_EVENTS, tokenBook } from "./data.ts"
-import { formatAmount, formatBlock, formatInteger, formatTime, formatUnits, shortHash } from "./format.ts"
+import { formatBlock, formatInteger, formatTime, formatUnits, shortHash } from "./format.ts"
 import { fullLabel, knownLabel, labelFor } from "./roles.ts"
+import { TokenAmount, TokenMark } from "./TokenAmount.tsx"
 import { isAddress, isFreeze } from "./trace.ts"
 import type { DecodedEvent, Transaction, Transfer } from "./types.ts"
 
@@ -16,14 +17,22 @@ interface TimelineProps {
 
 const AMOUNT_ARGS = new Set(["value", "wad", "amount", "_balance"])
 
-function amountSummary(tx: Transaction, txTransfers: Array<Transfer>) {
+function AmountSummary({ tx, txTransfers }: { tx: Transaction; txTransfers: Array<Transfer> }) {
   const destroyed = tx.events.find((event) => event.name === "DestroyedBlackFunds")?.args._balance
-  if (destroyed) return `${formatUnits(destroyed, 6)} USDT destroyed`
+  if (destroyed) return <span>{`${formatUnits(destroyed, 6)} USDT destroyed`}</span>
   const byToken = new Map<string, number>()
   for (const t of txTransfers) byToken.set(t.token, (byToken.get(t.token) ?? 0) + Number(t.amount))
-  const parts = [...byToken].map(([token, amount]) => `${formatAmount(amount)} ${token}`)
-  if (parts.length === 0) return Number(tx.value_eth) > 0 ? `${formatAmount(Number(tx.value_eth))} ETH` : null
-  return parts.length > 2 ? `${parts.slice(0, 2).join(", ")} +${parts.length - 2}` : parts.join(", ")
+  if (byToken.size === 0 && Number(tx.value_eth) > 0) byToken.set("ETH", Number(tx.value_eth))
+  if (byToken.size === 0) return null
+  const parts = [...byToken]
+  return (
+    <span className="flex flex-col items-end gap-1">
+      {parts.slice(0, 2).map(([token, amount]) => (
+        <TokenAmount key={token} symbol={token} amount={amount} />
+      ))}
+      {parts.length > 2 ? <span className="text-12 text-muted">{`+${parts.length - 2} more`}</span> : null}
+    </span>
+  )
 }
 
 function LabelledAddress({ address }: { address: string }) {
@@ -40,7 +49,14 @@ function ArgValue({ name, value, contract }: { name: string; value: string; cont
   if (isAddress(value)) return <LabelledAddress address={value} />
   if (!/^\d+$/.test(value)) return <span className="font-mono break-all">{value}</span>
   const token = AMOUNT_ARGS.has(name) ? tokenBook.get(contract) : undefined
-  if (token) return <span>{`${formatUnits(value, token.decimals)} ${token.symbol}`}</span>
+  if (token) {
+    return (
+      <span className="inline-flex items-center gap-1">
+        <TokenMark symbol={token.symbol} />
+        {`${formatUnits(value, token.decimals)} ${token.symbol}`}
+      </span>
+    )
+  }
   return <span className="font-mono break-all">{formatInteger(value)}</span>
 }
 
@@ -105,7 +121,6 @@ function TimelineItem({
 }) {
   const [open, setOpen] = useState(false)
   const freeze = isFreeze(tx)
-  const amount = amountSummary(tx, txTransfers)
 
   return (
     <li id={`tx-${tx.hash}`} className="not-first:border-subtle scroll-mt-2 not-first:border-t">
@@ -127,7 +142,9 @@ function TimelineItem({
               {labelFor(tx.from)} to {labelFor(tx.to)}
             </span>
           </span>
-          {amount ? <span className="text-14 max-w-40 shrink-0 text-end">{amount}</span> : null}
+          <span className="text-14 shrink-0 text-end">
+            <AmountSummary tx={tx} txTransfers={txTransfers} />
+          </span>
           <CaretDownInteractiveIcon alt="" className="text-muted h-lh shrink-0" />
         </summary>
         {open ? <TimelineDetails tx={tx} /> : null}

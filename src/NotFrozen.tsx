@@ -3,10 +3,11 @@ import { formatAddress } from "@edgeandnode/eds-utils"
 
 import { addressBook } from "./data.ts"
 import { useOpenDetails } from "./details.ts"
-import { formatAmount, formatUsd } from "./format.ts"
+import { formatUsd } from "./format.ts"
 import type { Incident } from "./incident.ts"
 import { labelFor, ROLES } from "./roles.ts"
 import { SqlButton } from "./SqlButton.tsx"
+import { TokenAmount } from "./TokenAmount.tsx"
 
 export function NotFrozen({ incident }: { incident: Incident }) {
   const open = useOpenDetails()
@@ -43,12 +44,12 @@ export function NotFrozen({ incident }: { incident: Incident }) {
                       ) : null}
                     </span>
                     <span className="text-12 text-muted">
-                      <span className="font-mono">{formatAddress(balance.address)}</span>
-                      {" · "}
-                      {balance.holdings
-                        .slice(0, 2)
-                        .map((h) => `${formatAmount(h.amount)} ${h.token}`)
-                        .join(", ")}
+                      <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="font-mono">{formatAddress(balance.address)}</span>
+                        {balance.holdings.slice(0, 2).map((h) => (
+                          <TokenAmount key={h.token} symbol={h.token} amount={h.amount} />
+                        ))}
+                      </span>
                     </span>
                   </span>
                   <span className="text-14 shrink-0 font-medium">{formatUsd(balance.usd)}</span>
