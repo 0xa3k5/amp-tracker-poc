@@ -78,7 +78,10 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
       </span>
       <span className="text-14 truncate">{data.label}</span>
       <span className="text-12 text-muted flex justify-between gap-2">
-        <span className="font-mono">{data.address ? formatAddress(data.address) : ""}</span>
+        <span className="flex gap-2">
+          <span className="font-mono">{data.address ? formatAddress(data.address) : ""}</span>
+          {data.hiddenCount > 0 ? <span>+{data.hiddenCount} smaller</span> : null}
+        </span>
         <span className="text-default font-medium">{formatUsd(data.value)}</span>
       </span>
       <Handle type="source" position={Position.Right} className={HANDLE} />
