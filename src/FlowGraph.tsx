@@ -16,8 +16,8 @@ import {
 import { addressBook } from "./data.ts"
 import { FlowNode, NODE_HEIGHT, NODE_WIDTH, type AddressNode } from "./FlowNode.tsx"
 import { formatAmount } from "./format.ts"
-import { labelFor } from "./roles.ts"
-import type { Trace } from "./trace.ts"
+import { fullLabel, labelFor } from "./roles.ts"
+import type { FlowEdge, Trace, TraceNode } from "./trace.ts"
 
 import "@xyflow/react/dist/style.css"
 
@@ -46,15 +46,45 @@ function layout(trace: Trace) {
   const graph = new dagre.graphlib.Graph()
   graph.setGraph({ rankdir: "LR", nodesep: 32, ranksep: 140 })
   graph.setDefaultEdgeLabel(() => ({}))
-  for (const address of trace.addresses) graph.setNode(address, { width: NODE_WIDTH, height: NODE_HEIGHT })
+  for (const node of trace.nodes) graph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT })
   for (const edge of trace.edges) graph.setEdge(edge.from, edge.to)
   dagre.layout(graph)
   return new Map(
-    trace.addresses.map((address) => {
-      const { x, y } = graph.node(address)
-      return [address, { x: x - NODE_WIDTH / 2, y: y - NODE_HEIGHT / 2 }]
+    trace.nodes.map((node) => {
+      const { x, y } = graph.node(node.id)
+      return [node.id, { x: x - NODE_WIDTH / 2, y: y - NODE_HEIGHT / 2 }]
     }),
   )
+}
+
+function edgeLabel(edge: FlowEdge) {
+  const tokens = [...edge.tokens].sort((a, b) => b[1].usd - a[1].usd || b[1].amount - a[1].amount)
+  const shown = tokens.slice(0, 2).map(([token, { amount }]) => `${formatAmount(amount)} ${token}`)
+  return tokens.length > 2 ? `${shown.join(", ")} +${tokens.length - 2}` : shown.join(", ")
+}
+
+function nodeData(trace: Trace, node: TraceNode) {
+  if (node.group) {
+    const parent = node.id.slice(node.group.length + 1)
+    const count = node.members.length
+    return {
+      address: null,
+      label: `${count} ${node.group === "out" ? "recipients" : "senders"}`,
+      title: `${count} unlabelled addresses that only ${node.group === "out" ? "received from" : "sent to"} ${labelFor(parent)}`,
+      role: undefined,
+      frozen: false,
+      count,
+    }
+  }
+  const address = node.members[0]!
+  return {
+    address,
+    label: labelFor(address),
+    title: fullLabel(address) ?? address,
+    role: addressBook.get(address)?.role,
+    frozen: trace.frozen.has(address),
+    count: 1,
+  }
 }
 
 export function FlowGraph({ trace, selected, onSelect, className }: FlowGraphProps) {
@@ -71,17 +101,24 @@ export function FlowGraph({ trace, selected, onSelect, className }: FlowGraphPro
     return set
   }, [trace, selected])
 
-  const nodes: Array<AddressNode> = trace.addresses.map((address) => ({
-    id: address,
+  const focus = useMemo(() => {
+    const ids = new Set([trace.root])
+    for (const edge of trace.edges) {
+      if (edge.from === trace.root) ids.add(edge.to)
+      if (edge.to === trace.root) ids.add(edge.from)
+    }
+    return [...ids].map((id) => ({ id }))
+  }, [trace])
+
+  const nodes: Array<AddressNode> = trace.nodes.map((node) => ({
+    id: node.id,
     type: "address",
-    position: positions.get(address) ?? { x: 0, y: 0 },
+    position: positions.get(node.id) ?? { x: 0, y: 0 },
     data: {
-      address,
-      label: labelFor(address),
-      role: addressBook.get(address)?.role,
-      frozen: trace.frozen.has(address),
-      selected: address === selected,
-      dimmed: neighbours !== null && !neighbours.has(address),
+      ...nodeData(trace, node),
+      root: node.id === trace.root,
+      selected: node.id === selected,
+      dimmed: neighbours !== null && !neighbours.has(node.id),
     },
   }))
 
@@ -93,7 +130,7 @@ export function FlowGraph({ trace, selected, onSelect, className }: FlowGraphPro
       id: `${edge.from}>${edge.to}`,
       source: edge.from,
       target: edge.to,
-      label: [...edge.tokens].map(([token, amount]) => `${formatAmount(amount)} ${token}`).join(", "),
+      label: edgeLabel(edge),
       markerEnd: { type: MarkerType.ArrowClosed, color: stroke },
       style: { stroke, strokeWidth: 1 + 7 * Math.sqrt(edge.usd / maxUsd) },
       zIndex: active ? 1 : 0,
@@ -114,8 +151,8 @@ export function FlowGraph({ trace, selected, onSelect, className }: FlowGraphPro
         nodeTypes={NODE_TYPES}
         colorMode={activeTheme}
         fitView
-        fitViewOptions={{ padding: 0.1 }}
-        minZoom={0.2}
+        fitViewOptions={{ padding: 0.15, nodes: focus }}
+        minZoom={0.05}
         nodesDraggable={false}
         nodesConnectable={false}
         edgesFocusable={false}

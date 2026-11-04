@@ -70,13 +70,13 @@ known_exits AS (
 ),
 txs AS (
   SELECT block_num, timestamp, tx_index, tx_hash, "from", "to", value
-  FROM "edgeandnode/ethereum_mainnet@0.0.2".transactions
+  FROM "{{dataset}}".transactions
   WHERE _block_num BETWEEN 26300743 AND 26322290
 ),
 hop0_erc20 AS (
   SELECT block_num, timestamp, tx_hash, log_index, address AS token,
          evm_decode_log(topic1, topic2, topic3, data, 'Transfer(address indexed from, address indexed to, uint256 value)') AS d
-  FROM "edgeandnode/ethereum_mainnet@0.0.2".logs
+  FROM "{{dataset}}".logs
   WHERE _block_num BETWEEN 26300743 AND 26322290
     AND topic0 = evm_topic('Transfer(address indexed from, address indexed to, uint256 value)')
     AND topic3 IS NULL  -- ERC-20 only, ERC-721 indexes tokenId in topic3
@@ -100,7 +100,7 @@ hop1 AS (
 hop1_erc20 AS (
   SELECT block_num, timestamp, tx_hash, log_index, address AS token,
          evm_decode_log(topic1, topic2, topic3, data, 'Transfer(address indexed from, address indexed to, uint256 value)') AS d
-  FROM "edgeandnode/ethereum_mainnet@0.0.2".logs
+  FROM "{{dataset}}".logs
   WHERE _block_num BETWEEN 26300743 AND 26322290
     AND topic0 = evm_topic('Transfer(address indexed from, address indexed to, uint256 value)')
     AND topic3 IS NULL

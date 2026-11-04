@@ -24,3 +24,17 @@ export function formatTime(iso: string) {
 export function shortHash(hash: string) {
   return `${hash.slice(0, 10)}…${hash.slice(-6)}`
 }
+
+const integer = new Intl.NumberFormat("en-US")
+
+export function formatUnits(raw: string, decimals: number) {
+  return formatAmount(Number(raw) / 10 ** decimals)
+}
+
+export function formatInteger(raw: string) {
+  return integer.format(BigInt(raw))
+}
+
+export function formatSeconds(ms: number) {
+  return `${(ms / 1000).toFixed(1)} s`
+}

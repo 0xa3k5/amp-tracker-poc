@@ -35,7 +35,7 @@ binance AS (
 ),
 traced_txs AS (
   SELECT *
-  FROM "edgeandnode/ethereum_mainnet@0.0.2".transactions AS t
+  FROM "{{dataset}}".transactions AS t
   WHERE t._block_num BETWEEN 26300743 AND 26322290
     AND (
       -- sent by a seed

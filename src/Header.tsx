@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Button, DescriptionList, Input, Tag } from "@edgeandnode/eds-react"
+import { SnowflakeIcon } from "@edgeandnode/eds-react/icons"
 
 import { isMock } from "./data.ts"
 import { formatAmount, formatBlock, formatTime } from "./format.ts"
@@ -8,10 +9,12 @@ import { isAddress, normalizeAddress, type Trace } from "./trace.ts"
 interface HeaderProps {
   root: string
   trace: Trace
+  freezeIndex: number
   onTrace: (address: string) => void
+  onJumpToFreeze: () => void
 }
 
-export function Header({ root, trace, onTrace }: HeaderProps) {
+export function Header({ root, trace, freezeIndex, onTrace, onJumpToFreeze }: HeaderProps) {
   const [value, setValue] = useState(root)
   const [invalid, setInvalid] = useState(false)
   const range = trace.blockRange
@@ -23,7 +26,7 @@ export function Header({ root, trace, onTrace }: HeaderProps) {
         {isMock ? <Tag variant="solar">Mock data</Tag> : null}
       </div>
       <form
-        className="flex max-w-180 items-end gap-3"
+        className="flex max-w-240 flex-wrap items-end gap-3"
         onSubmit={(event) => {
           event.preventDefault()
           const address = normalizeAddress(value)
@@ -44,6 +47,19 @@ export function Header({ root, trace, onTrace }: HeaderProps) {
         <Button type="submit" variant="primary" className="shrink-0">
           Trace
         </Button>
+        {trace.freezes.length > 0 ? (
+          <Button
+            type="button"
+            variant="secondary"
+            addonBefore={SnowflakeIcon}
+            className="shrink-0"
+            onClick={onJumpToFreeze}
+          >
+            {freezeIndex < 0
+              ? `Jump to USDT freeze (${trace.freezes.length})`
+              : `Freeze ${freezeIndex + 1} of ${trace.freezes.length}`}
+          </Button>
+        ) : null}
       </form>
       <DescriptionList orientation="horizontal">
         <DescriptionList.Item

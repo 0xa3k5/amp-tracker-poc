@@ -13,6 +13,25 @@ export const ROLES: Record<Role, { name: string; tag: TagProps["variant"] }> = {
   issuer: { name: "Issuer", tag: "starfield" },
 }
 
+function shorten(address: string, label: string) {
+  const first = label
+    .split(/\.\s/)[0]!
+    .replace(/^Etherscan label:\s*/, "")
+    .replace(/\.$/, "")
+    .replace(/\s*\([^)]*\)$/, "")
+  return first.length < 16 ? `${first} ${formatAddress(address)}` : first
+}
+
+const shortLabels = new Map([...addressBook].map(([address, info]) => [address, shorten(address, info.label)]))
+
+export function knownLabel(address: string) {
+  return shortLabels.get(address)
+}
+
 export function labelFor(address: string) {
-  return addressBook.get(address)?.label ?? formatAddress(address)
+  return shortLabels.get(address) ?? formatAddress(address)
+}
+
+export function fullLabel(address: string) {
+  return addressBook.get(address)?.label
 }

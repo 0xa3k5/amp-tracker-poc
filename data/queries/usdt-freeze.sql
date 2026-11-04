@@ -16,7 +16,7 @@ WITH frozen AS (
 freezes AS (
   SELECT block_num, timestamp, tx_hash, log_index,
          evm_decode_log(topic1, topic2, topic3, data, 'AddedBlackList(address _user)') AS d
-  FROM "edgeandnode/ethereum_mainnet@0.0.2".logs
+  FROM "{{dataset}}".logs
   WHERE _block_num BETWEEN 26300743 AND 26322290
     AND address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7')
     AND topic0 = evm_topic('AddedBlackList(address _user)')
@@ -31,7 +31,7 @@ SELECT
   evm_decode_hex(t."to") AS to_address,
   '0x' || substr(encode(t.input, 'hex'), 1, 8) AS method_selector
 FROM freezes AS f
-JOIN "edgeandnode/ethereum_mainnet@0.0.2".transactions AS t
+JOIN "{{dataset}}".transactions AS t
   ON t.tx_hash = f.tx_hash AND t.block_num = f.block_num
 WHERE t._block_num BETWEEN 26300743 AND 26322290
   AND f.d['_user'] IN (SELECT address FROM frozen)
