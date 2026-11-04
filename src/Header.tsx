@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Input, Tag } from "@edgeandnode/eds-react"
+import { Button, Input, SegmentedControl, Tag } from "@edgeandnode/eds-react"
 import { TerminalWindowIcon } from "@edgeandnode/eds-react/icons"
 
 import { isMock, queries } from "./data.ts"
@@ -7,7 +7,9 @@ import { useOpenDetails } from "./details.ts"
 import { EthereumMark } from "./TokenAmount.tsx"
 import { isAddress, normalizeAddress } from "./trace.ts"
 
-export function Header() {
+export type View = "canvas" | "report"
+
+export function Header({ view, onViewChange }: { view: View; onViewChange: (view: View) => void }) {
   const open = useOpenDetails()
   const [value, setValue] = useState("")
   const [invalid, setInvalid] = useState(false)
@@ -22,6 +24,15 @@ export function Header() {
         {isMock ? <Tag variant="solar">Mock data</Tag> : null}
       </div>
       <div className="flex flex-wrap items-start gap-2">
+        <SegmentedControl
+          size="small"
+          aria-label="View"
+          value={view}
+          onValueChange={(value) => onViewChange(value as View)}
+        >
+          <SegmentedControl.Option value="canvas">Canvas</SegmentedControl.Option>
+          <SegmentedControl.Option value="report">Report</SegmentedControl.Option>
+        </SegmentedControl>
         <form
           className="flex items-start gap-2"
           onSubmit={(event) => {

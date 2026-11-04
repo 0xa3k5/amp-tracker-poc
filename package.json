@@ -17,6 +17,7 @@
     "@edgeandnode/eds-react": "1.2.0",
     "@edgeandnode/eds-utils": "1.0.2",
     "@web3icons/react": "^4.1.24",
+    "@xyflow/react": "^12.12.1",
     "d3-sankey": "0.12.3",
     "react": "19.3.1",
     "react-dom": "19.3.1"

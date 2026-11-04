@@ -1,3 +1,9 @@
 @import "@edgeandnode/eds-react";
 
 @source '.';
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}

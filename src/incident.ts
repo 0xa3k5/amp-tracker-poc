@@ -19,6 +19,7 @@ export interface FlowLinkSpec {
   target: string
   value: number
   transfers: number
+  firstTs: string
   tokens: Map<string, number>
 }
 
@@ -206,7 +207,14 @@ export function buildIncident(): Incident {
   }
 
   const links = new Map<string, FlowLinkSpec>()
-  const link = (source: FlowNodeSpec, target: FlowNodeSpec, value: number, token: string, transfers: number) => {
+  const link = (
+    source: FlowNodeSpec,
+    target: FlowNodeSpec,
+    value: number,
+    token: string,
+    transfers: number,
+    ts: string,
+  ) => {
     if (value <= 0 || source.column >= target.column) return
     nodes.set(source.id, source)
     nodes.set(target.id, target)
@@ -217,7 +225,9 @@ export function buildIncident(): Incident {
       value: 0,
       transfers: 0,
       tokens: new Map(),
+      firstTs: ts,
     }
+    if (ts < current.firstTs) current.firstTs = ts
     current.value += value
     current.transfers += transfers
     current.tokens.set(token, (current.tokens.get(token) ?? 0) + value)
@@ -244,16 +254,22 @@ export function buildIncident(): Incident {
       swapReturn.set(key, returned - netted)
       value -= netted
     }
-    link(source, target, value, t.token, 1)
+    link(source, target, value, t.token, 1, t.ts)
   }
+  const freezeTs = new Map<string, string>()
+  for (const tx of freezes)
+    for (const address of freezeTargets(tx)) if (!freezeTs.has(address)) freezeTs.set(address, tx.ts)
+  const lastSeen = new Map<string, string>()
+  for (const t of scope) lastSeen.set(t.to, t.ts)
   for (const address of wallets) {
     const source = nodeFor(address)!
-    link(source, SINKS.frozen, frozenUsdt(address), "USDT", 0)
+    link(source, SINKS.frozen, frozenUsdt(address), "USDT", 0, freezeTs.get(address) ?? "")
     const net = [...(held.get(address)?.values() ?? [])].reduce((sum, h) => sum + h.usd, 0) - frozenUsdt(address)
     const holdings = openHoldings(address)
     const positive = holdings.reduce((sum, h) => sum + h.usd, 0)
     if (net <= 0 || positive <= 0) continue
-    for (const holding of holdings) link(source, SINKS.held, (holding.usd / positive) * net, holding.token, 0)
+    for (const holding of holdings)
+      link(source, SINKS.held, (holding.usd / positive) * net, holding.token, 0, lastSeen.get(address) ?? "")
   }
 
   for (let column = 1; column < sinkColumn; column += 1) {
