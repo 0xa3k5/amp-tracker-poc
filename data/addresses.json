@@ -1,0 +1,110 @@
+[
+  {
+    "address": "0x4499f93345f9410e581ec24e7c0bb5ae3afb525a",
+    "label": "Binance hot wallet 1",
+    "role": "binance",
+    "source": "mock"
+  },
+  {
+    "address": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+    "label": "Binance hot wallet 2",
+    "role": "binance",
+    "source": "mock"
+  },
+  {
+    "address": "0xa5a15175bb0a40116e63af111ada8e7586817fef",
+    "label": "Binance batch sender",
+    "role": "binance",
+    "source": "mock"
+  },
+  {
+    "address": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "label": "Attacker 1",
+    "role": "attacker",
+    "source": "mock"
+  },
+  {
+    "address": "0xc3e896d7d94c522a984301707fd324997282ac79",
+    "label": "Attacker 2",
+    "role": "attacker",
+    "source": "mock"
+  },
+  {
+    "address": "0xfc7d641059cff8b904b339c6a0f84f22281bdaef",
+    "label": "Intermediary A",
+    "role": "intermediary",
+    "source": "mock"
+  },
+  {
+    "address": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
+    "label": "Intermediary B",
+    "role": "intermediary",
+    "source": "mock"
+  },
+  {
+    "address": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+    "label": "Intermediary C",
+    "role": "intermediary",
+    "source": "mock"
+  },
+  {
+    "address": "0x6e2587166324a311b59173c0bf29e882415d84e6",
+    "label": "Intermediary D",
+    "role": "intermediary",
+    "source": "mock"
+  },
+  {
+    "address": "0xbd1e94e83d815a2a2245b817b5f1d2831b9ea098",
+    "label": "Intermediary E",
+    "role": "intermediary",
+    "source": "mock"
+  },
+  {
+    "address": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+    "label": "Intermediary F",
+    "role": "intermediary",
+    "source": "mock"
+  },
+  {
+    "address": "0x0faabb6455f6792e9c03ce24a24431186a739d27",
+    "label": "Intermediary G",
+    "role": "intermediary",
+    "source": "mock"
+  },
+  {
+    "address": "0x808701d41eb4d7e22db6b43a8f20b96c80f3b80d",
+    "label": "Intermediary H",
+    "role": "intermediary",
+    "source": "mock"
+  },
+  {
+    "address": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+    "label": "DEX router",
+    "role": "exchange",
+    "source": "mock"
+  },
+  {
+    "address": "0xecdedaf0cd583d321937580d2b083ec1b1650f00",
+    "label": "Exchange deposit",
+    "role": "exchange",
+    "source": "mock"
+  },
+  {
+    "address": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+    "label": "Bridge router",
+    "role": "bridge",
+    "source": "mock"
+  },
+  {
+    "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "label": "Tether: USDT",
+    "role": "issuer",
+    "source": "mock"
+  },
+  {
+    "address": "0x86c795e65c14cc61c6462b6347c545ab33beb2d9",
+    "label": "Tether: owner",
+    "role": "issuer",
+    "source": "mock"
+  }
+]

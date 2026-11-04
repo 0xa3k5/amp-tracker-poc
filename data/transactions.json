@@ -1,0 +1,580 @@
+[
+  {
+    "hash": "0x045ef594d81d2f2134d61151ed71260d8f79e657c7cb6ed1d893688532017409",
+    "block_num": 26341207,
+    "ts": "2026-10-29T13:02:11Z",
+    "from": "0x4499f93345f9410e581ec24e7c0bb5ae3afb525a",
+    "to": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "value_eth": "12000",
+    "method": "",
+    "events": []
+  },
+  {
+    "hash": "0x0ab25f3049004ce5969100672c92a2768481db2abf7e0267a3b0828a639d5f75",
+    "block_num": 26341210,
+    "ts": "2026-10-29T13:02:47Z",
+    "from": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+    "to": "0xa5a15175bb0a40116e63af111ada8e7586817fef",
+    "value_eth": "0",
+    "method": "batchTransfer",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+          "to": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "value": "180000000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "args": {
+          "from": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+          "to": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "value": "95000000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xae7ab96520de3a18e5e111b4eaab095312d7fe84",
+        "args": {
+          "from": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+          "to": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "value": "40000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xc02aaa39b223fe8d0a0e5c47f27ead083c756cc2",
+        "args": {
+          "from": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+          "to": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "value": "8500"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+          "to": "0xc3e896d7d94c522a984301707fd324997282ac79",
+          "value": "20000000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "args": {
+          "from": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+          "to": "0xc3e896d7d94c522a984301707fd324997282ac79",
+          "value": "5000000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0xeea1ad3fbf2142ede510d0220518d902a5ba9b502851530d7fc1454f5147206c",
+    "block_num": 26341212,
+    "ts": "2026-10-29T13:03:11Z",
+    "from": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
+    "to": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "value_eth": "4200",
+    "method": "",
+    "events": []
+  },
+  {
+    "hash": "0x54cc301a70fd9f3b497965ba192cda510ea6f789d9cbfd25b83864e5deef5c15",
+    "block_num": 26341248,
+    "ts": "2026-10-29T13:10:23Z",
+    "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "to": "0xc3e896d7d94c522a984301707fd324997282ac79",
+    "value_eth": "6000",
+    "method": "",
+    "events": []
+  },
+  {
+    "hash": "0x9b66130d2c7c05ee662b24fdca0a32bfda1a0cb1102fb3e53168eb61b378fc6d",
+    "block_num": 26341267,
+    "ts": "2026-10-29T13:14:11Z",
+    "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "value_eth": "0",
+    "method": "transfer",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "to": "0xfc7d641059cff8b904b339c6a0f84f22281bdaef",
+          "value": "60000000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0x54b32b2543de9611ccae06cd2fbf1a7f8d5297ad931ffd18b25dd11f8cec9852",
+    "block_num": 26341271,
+    "ts": "2026-10-29T13:14:59Z",
+    "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "value_eth": "0",
+    "method": "transfer",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "to": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
+          "value": "70000000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0x05320dd888b1da6f0de8cbf6e50cf39572ef9678ffca974b5372c3dcbe5b6716",
+    "block_num": 26341325,
+    "ts": "2026-10-29T13:25:47Z",
+    "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "to": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+    "value_eth": "0",
+    "method": "execute",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xae7ab96520de3a18e5e111b4eaab095312d7fe84",
+        "args": {
+          "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "to": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "value": "40000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xc02aaa39b223fe8d0a0e5c47f27ead083c756cc2",
+        "args": {
+          "from": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "to": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "value": "39880"
+        }
+      },
+      {
+        "name": "Swap",
+        "contract": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+        "args": {
+          "sender": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "recipient": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "amountIn": "40000",
+          "amountOut": "39880"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0x33a823447396bf2531d530f9478174194bdd0ace46d417cccefed7fc798b7bcd",
+    "block_num": 26341447,
+    "ts": "2026-10-29T13:50:11Z",
+    "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "to": "0xc02aaa39b223fe8d0a0e5c47f27ead083c756cc2",
+    "value_eth": "0",
+    "method": "transfer",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xc02aaa39b223fe8d0a0e5c47f27ead083c756cc2",
+        "args": {
+          "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "to": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+          "value": "48380"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0x1684297ae612416c19f3e86ebc48de53cb016a6eacfa8f2400bf108a4dd71a3e",
+    "block_num": 26341451,
+    "ts": "2026-10-29T13:50:59Z",
+    "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "to": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+    "value_eth": "10200",
+    "method": "",
+    "events": []
+  },
+  {
+    "hash": "0x580cdc2653fc59876961bb39292d5a80e3c470a8eebddb340e8a487ccbc3daeb",
+    "block_num": 26341507,
+    "ts": "2026-10-29T14:02:11Z",
+    "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+    "to": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "value_eth": "0",
+    "method": "transfer",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "args": {
+          "from": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "to": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+          "value": "95000000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0xfab2f5a389ed60fd654935fcd8fa098ce3815ba66f48c9e6b74335eb0c758eba",
+    "block_num": 26341617,
+    "ts": "2026-10-29T14:24:11Z",
+    "from": "0xc3e896d7d94c522a984301707fd324997282ac79",
+    "to": "0xf0774ab01f816a368397434fd8a48038a358c52d",
+    "value_eth": "6000",
+    "method": "disperseEther",
+    "events": []
+  },
+  {
+    "hash": "0x5d6bf33e51a1e7f1a6bc2c66badb446e3a0b74772c92721c02d0112d369c61d1",
+    "block_num": 26341637,
+    "ts": "2026-10-29T14:28:11Z",
+    "from": "0xc3e896d7d94c522a984301707fd324997282ac79",
+    "to": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+    "value_eth": "0",
+    "method": "multicall",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0xc3e896d7d94c522a984301707fd324997282ac79",
+          "to": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "value": "20000000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xc02aaa39b223fe8d0a0e5c47f27ead083c756cc2",
+        "args": {
+          "from": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "to": "0xc3e896d7d94c522a984301707fd324997282ac79",
+          "value": "6650"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "args": {
+          "from": "0xc3e896d7d94c522a984301707fd324997282ac79",
+          "to": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "value": "5000000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xc02aaa39b223fe8d0a0e5c47f27ead083c756cc2",
+        "args": {
+          "from": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "to": "0xc3e896d7d94c522a984301707fd324997282ac79",
+          "value": "1660"
+        }
+      },
+      {
+        "name": "Swap",
+        "contract": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+        "args": {
+          "sender": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "recipient": "0xc3e896d7d94c522a984301707fd324997282ac79",
+          "amountIn": "20000000",
+          "amountOut": "6650"
+        }
+      },
+      {
+        "name": "Swap",
+        "contract": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+        "args": {
+          "sender": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "recipient": "0xc3e896d7d94c522a984301707fd324997282ac79",
+          "amountIn": "5000000",
+          "amountOut": "1660"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0xaed44aa45aa68cf51dbd4e319a0dfd62b51d533dbae8404b35c85f52436769e0",
+    "block_num": 26343107,
+    "ts": "2026-10-29T19:22:11Z",
+    "from": "0xfc7d641059cff8b904b339c6a0f84f22281bdaef",
+    "to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "value_eth": "0",
+    "method": "transfer",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0xfc7d641059cff8b904b339c6a0f84f22281bdaef",
+          "to": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+          "value": "30000000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0xeb6142a63cec25237fb684ae1519830811eed751e6e01378c84d3485ff72c6dc",
+    "block_num": 26343257,
+    "ts": "2026-10-29T19:52:11Z",
+    "from": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
+    "to": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+    "value_eth": "0",
+    "method": "execute",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
+          "to": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "value": "45000000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0x6b175474e89094c44da98b954eedeac495271d0f",
+        "args": {
+          "from": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "to": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
+          "value": "44970000"
+        }
+      },
+      {
+        "name": "Swap",
+        "contract": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+        "args": {
+          "sender": "0x645f80989f00ea44337456a19daa7851d63d9e76",
+          "recipient": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
+          "amountIn": "45000000",
+          "amountOut": "44970000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0x6a68e94cc8c7efdfc8f66170cf0de3257988c9e104595efdb2448891379f2c67",
+    "block_num": 26343317,
+    "ts": "2026-10-29T20:04:11Z",
+    "from": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
+    "to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "value_eth": "0",
+    "method": "transfer",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
+          "to": "0xecdedaf0cd583d321937580d2b083ec1b1650f00",
+          "value": "25000000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0x8ed5b22e01e6e2d7bd996f0b92e42d5e5872fdea3d9cebb4c34025e22c9206db",
+    "block_num": 26343807,
+    "ts": "2026-10-29T21:42:11Z",
+    "from": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+    "to": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+    "value_eth": "10200",
+    "method": "multicall",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "args": {
+          "from": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+          "to": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+          "value": "95000000"
+        }
+      },
+      {
+        "name": "Transfer",
+        "contract": "0xc02aaa39b223fe8d0a0e5c47f27ead083c756cc2",
+        "args": {
+          "from": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+          "to": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+          "value": "48380"
+        }
+      },
+      {
+        "name": "ERC20BridgeInitiated",
+        "contract": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+        "args": {
+          "localToken": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "from": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+          "amount": "95000000"
+        }
+      },
+      {
+        "name": "ETHBridgeInitiated",
+        "contract": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+        "args": {
+          "from": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+          "amount": "10200"
+        }
+      },
+      {
+        "name": "ERC20BridgeInitiated",
+        "contract": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+        "args": {
+          "localToken": "0xc02aaa39b223fe8d0a0e5c47f27ead083c756cc2",
+          "from": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
+          "amount": "48380"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0xd2e1ae97b92f28113c71d63ea2250041330628ed1c2abec23e99c8e44e4b6664",
+    "block_num": 26348687,
+    "ts": "2026-10-30T13:58:11Z",
+    "from": "0x86c795e65c14cc61c6462b6347c545ab33beb2d9",
+    "to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "value_eth": "0",
+    "method": "addBlackList",
+    "events": [
+      {
+        "name": "AddedBlackList",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "_user": "0xf35c524ea1e47316495f1cbe62d005422661ce5b"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0xcdd58a7a41f1e274c9c2334dd9ade485f6026ad01bc32d2ff9092a63d49b9dc6",
+    "block_num": 26348687,
+    "ts": "2026-10-30T13:58:11Z",
+    "from": "0x86c795e65c14cc61c6462b6347c545ab33beb2d9",
+    "to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "value_eth": "0",
+    "method": "addBlackList",
+    "events": [
+      {
+        "name": "AddedBlackList",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "_user": "0xfc7d641059cff8b904b339c6a0f84f22281bdaef"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0xf326ccf5f6c6b55742c6d9eea7d25fbe41be14e5cb73ef382e771805801237f7",
+    "block_num": 26348719,
+    "ts": "2026-10-30T14:04:35Z",
+    "from": "0x86c795e65c14cc61c6462b6347c545ab33beb2d9",
+    "to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "value_eth": "0",
+    "method": "destroyBlackFunds",
+    "events": [
+      {
+        "name": "DestroyedBlackFunds",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "_blackListedUser": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
+          "_balance": "50000000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0x11c54b38895f17826d84796566462155ed5da86e378ccb697f6721c0fbdd4bfa",
+    "block_num": 26350307,
+    "ts": "2026-10-30T19:22:11Z",
+    "from": "0x6e2587166324a311b59173c0bf29e882415d84e6",
+    "to": "0xecdedaf0cd583d321937580d2b083ec1b1650f00",
+    "value_eth": "1490",
+    "method": "",
+    "events": []
+  },
+  {
+    "hash": "0xf1c1db8aac9d60b15158ba0f54337f61fe38a3e67ac92fa1361fc10c9365a182",
+    "block_num": 26350347,
+    "ts": "2026-10-30T19:30:11Z",
+    "from": "0xbd1e94e83d815a2a2245b817b5f1d2831b9ea098",
+    "to": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+    "value_eth": "1495",
+    "method": "",
+    "events": []
+  },
+  {
+    "hash": "0x9f124644d760af65a561a1e2cac0d050f473bace1b0640ff2528d4f3b85f2c6e",
+    "block_num": 26350807,
+    "ts": "2026-10-30T21:02:11Z",
+    "from": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+    "to": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+    "value_eth": "1490",
+    "method": "bridgeETHTo",
+    "events": [
+      {
+        "name": "ETHBridgeInitiated",
+        "contract": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+        "args": {
+          "from": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+          "amount": "1490"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0x63c4b7e1837664fbc867287bc991a1eef6dc0604e1c260b33899df763b879059",
+    "block_num": 26350817,
+    "ts": "2026-10-30T21:04:11Z",
+    "from": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+    "to": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "value_eth": "0",
+    "method": "transfer",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+          "to": "0xecdedaf0cd583d321937580d2b083ec1b1650f00",
+          "value": "12000000"
+        }
+      }
+    ]
+  },
+  {
+    "hash": "0xfb868c3ba12aab039c9a102146aa52f8b1239efbb0d53f2610ba34e49b23838d",
+    "block_num": 26350907,
+    "ts": "2026-10-30T21:22:11Z",
+    "from": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+    "to": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+    "value_eth": "0",
+    "method": "bridgeERC20To",
+    "events": [
+      {
+        "name": "Transfer",
+        "contract": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+        "args": {
+          "from": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+          "to": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+          "value": "18000000"
+        }
+      },
+      {
+        "name": "ERC20BridgeInitiated",
+        "contract": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
+        "args": {
+          "localToken": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+          "from": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
+          "amount": "18000000"
+        }
+      }
+    ]
+  }
+]

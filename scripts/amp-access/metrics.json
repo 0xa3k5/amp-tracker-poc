@@ -1,0 +1,8 @@
+[
+  { "query": "blocks_per_day", "ms": 1273, "rows": 8, "blocks": 50001 },
+  { "query": "usdt_blacklist_events", "ms": 9878, "rows": 13, "blocks": 28685 },
+  { "query": "erc20_transfers_for_address", "ms": 40792, "rows": 26829, "blocks": 28685 },
+  { "query": "erc20_transfers_for_address_324_blocks", "ms": 2250, "rows": 252, "blocks": 324 },
+  { "query": "eth_transactions_for_address", "ms": 24141, "rows": 14140, "blocks": 28685 },
+  { "query": "stablecoins_transfer_count", "ms": 4095, "rows": 1, "blocks": 28685 }
+]

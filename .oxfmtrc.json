@@ -1,0 +1,45 @@
+{
+  "singleQuote": false,
+  "printWidth": 120,
+  "semi": false,
+  "sortPackageJson": false,
+  "sortTailwindcss": {
+    "functions": ["classNames"],
+    "preserveWhitespace": true
+  },
+  "sortImports": {
+    "customGroups": [
+      { "groupName": "react", "elementNamePattern": ["react", "react/**"] },
+      { "groupName": "edgeandnode", "elementNamePattern": ["@edgeandnode/**"] }
+    ],
+    "groups": [
+      "builtin",
+      "react",
+      { "newlinesBetween": false },
+      "external",
+      ["parent", "sibling", "index"],
+      ["style", "side_effect_style"],
+      "unknown"
+    ]
+  },
+  "jsdoc": {
+    "capitalizeDescriptions": false,
+    "descriptionWithDot": true
+  },
+  "ignorePatterns": [
+    "dist/",
+    ".next/",
+    "coverage/",
+    "pnpm-lock.yaml",
+    "CHANGELOG.md",
+    "*.generated.*",
+    "*.typegen.*",
+    "**/routeTree.gen.ts",
+    "*.tsbuildinfo",
+    "next-env.d.ts",
+    "*dist/",
+    "**/target/",
+    "*.toml",
+    ".claude/skills/"
+  ]
+}

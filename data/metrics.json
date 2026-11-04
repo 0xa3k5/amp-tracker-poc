@@ -1,0 +1,5 @@
+[
+  { "query": "fund_flow", "ms": 0, "rows": 36, "blocks": 21600 },
+  { "query": "timeline", "ms": 0, "rows": 24, "blocks": 21600 },
+  { "query": "freeze_events", "ms": 0, "rows": 3, "blocks": 21600 }
+]

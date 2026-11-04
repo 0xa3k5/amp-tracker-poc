@@ -1,0 +1,15 @@
+import { StrictMode } from "react"
+import { EDSProvider } from "@edgeandnode/eds-react"
+import { createRoot } from "react-dom/client"
+
+import { App } from "./App.tsx"
+
+import "./index.css"
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <EDSProvider persistTheme="localStorage">
+      <App />
+    </EDSProvider>
+  </StrictMode>,
+)
