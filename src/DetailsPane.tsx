@@ -103,7 +103,7 @@ function title(details: Details) {
 
 export function DetailsPane({ details, onClose }: { details: Details | null; onClose: () => void }) {
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex shrink-0 flex-col gap-6 p-6">
       <div className="flex items-start justify-between gap-3">
         <h2 className="text-20 font-medium break-words">{details ? title(details) : null}</h2>
         <Button variant="tertiary" size="small" addonBefore={XIcon} hideLabel onClick={onClose}>

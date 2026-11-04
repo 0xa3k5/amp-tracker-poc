@@ -11,7 +11,7 @@ type Node = SankeyNode<FlowNodeSpec, FlowLinkSpec>
 type Link = SankeyLink<FlowNodeSpec, FlowLinkSpec>
 
 const HEIGHT = 520
-const LABEL_SPACE = 240
+const LABEL_SPACE = 300
 
 const COLUMNS = ["Binance wallets", "Attacker", "Hop wallets", "Where it is now"]
 

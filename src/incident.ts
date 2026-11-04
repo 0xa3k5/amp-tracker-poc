@@ -62,7 +62,7 @@ const SINKS = {
   frozen: { id: "frozen", label: "Frozen by Tether", column: 3, kind: "frozen" },
   held: { id: "held", label: "Still in traced wallets", column: 3, kind: "held" },
   unlabelled: { id: "unlabelled", label: "Sent to unlabelled addresses", column: 3, kind: "unlabelled" },
-  defi: { id: "defi", label: "Swapped or deposited (DEXs, Aave)", column: 3, kind: "defi" },
+  defi: { id: "defi", label: "Swapped or deposited at DEXs and Aave", column: 3, kind: "defi" },
 } satisfies Record<string, FlowNodeSpec>
 
 const roleOf = (address: string) => addressBook.get(address)?.role
