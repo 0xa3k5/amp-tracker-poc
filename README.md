@@ -14,6 +14,7 @@ Checks: `pnpm typecheck`, `pnpm lint`, `pnpm build`.
 ## Layout
 
 - `src/`: the React app (EDS, React Flow).
-- `server/amp-query.ts`: Vite middleware for live Amp queries. Needs `AMP_QUERY_URL` and a token in the environment, never in files.
+- `server/amp-query.ts`: Vite middleware for live Amp queries.
+- `.env` (copy `.env.example`): `AMP_QUERY_URL` and `AMP_CONTROLLER_JWT`. Gitignored. Scripts and the live route read it.
 - `data/`: fixtures in the project's data contract, plus `queries/*.sql` shown in the SQL panel.
 - `scripts/amp-access/`: the Amp staging recipe from AMPD-19. `query.mjs` runs a `.sql` file and prints `{ms, rows}`. It needs `@edgeandnode/amp` and `effect`, which are not installed yet.
