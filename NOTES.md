@@ -1,41 +1,36 @@
-# Binance hack tracer: build notes
+# Amp notes from the Binance hack tracer
 
-Running notes for the Friday team share. Newest at the bottom of each section.
+What we ran into with Amp while building the tracer (Lab Week, 4 to 6 Nov 2026). Ethereum mainnet, blocks 26300743 to 26322290.
 
-## Decisions
+## Data
 
-- 4 Nov. Ethereum mainnet only, blocks 26300743 to 26322290 (29 Oct to 1 Nov, 21,548 blocks).
-- 4 Nov. Code lives in the standalone repo `amp-poc`, pushed to private `0xa3k5/amp-tracker-poc`. Started as an `amp-web` worktree, moved out the same day.
-- 4 Nov. The app ships fixtures captured from Amp, so the demo works offline. "Run live" sends the same SQL to Amp.
-- 4 Nov. Sankey view added to the plan (AMPD-24) as the fund-flow overview, next to the node graph.
-- 4 Nov. UI rethink with the Design Engineer: built around an incident responder's questions (how much, where is it now, what to act on next), not raw transactions.
+- Staging has `edgeandnode/ethereum_mainnet@0.0.2`, synced with no gaps in our window. Development has no Ethereum dataset.
+- EVM datasets have only `blocks`, `transactions` and `logs`. No traces, so ETH moved inside contract calls is invisible. We miss a 167,464 ETH sweep because of it.
+- Adding traces is a provider change, not SQL. `evm-rpc` declares three tables. `phaser` has `enable_traces` but is still in development and needs an Erigon bridge. A static CSV dataset is the only quick workaround.
+- No USD prices. 56 tokens in our trace have no price, so value totals undercount.
+- No token metadata or verification. Lookalike tokens named "USDT" and "ETH" look the same as the real ones in `logs`. We filtered 114 by hand.
+- `edgeandnode/ethereum_stablecoins@0.1.0` has pre-decoded stablecoin transfers: 5.4M rows in our window, counted in 4.1 s.
 
-- 4 Nov. ak approved the responder layout: incident preloaded, address input secondary, Sankey as the main visual, node graph can go. AMPD-24 builds it.
-- 4 Nov. ak has a personal staging JWT. It goes in the gitignored `amp-poc/.env`, never in the repo or issues.
+## SQL
 
-## What worked
+- Query-time decoding with `evm_decode_log` and `evm_topic` worked for ERC-20 `Transfer` and USDT `AddedBlackList`. No pre-built dataset needed.
+- Parameter names in event signatures must be lowercase, because the decoded struct fields are case-sensitive.
+- Binary columns need `evm_encode_hex` and `evm_decode_hex` to compare or display.
 
-- Amp staging had `edgeandnode/ethereum_mainnet@0.0.2` synced through the window. No local `ampd` needed.
-- Query-time ABI decoding (`evm_decode_log`, `evm_topic`) decoded Transfer and USDT `AddedBlackList` with no pre-built dataset.
-- Totals matched public reporting: 9 USDT freezes, 971M USDT frozen at 0x5227, 197,460 ETH to Exploiter 8.
-- Query times on staging: 7.4 s transactions, 22.7 s decoded events, 40.0 s transfers plus one hop, 12.6 s freezes.
+## Performance (staging)
 
-## Friction
+- The block range decides the time. ERC-20 transfers for one busy address: 40.8 s over 4 days, 2.3 s over 324 blocks.
+- 100-block count: 2.0 s. USDT blacklist events over 4 days: 9.9 s for 13 rows.
+- Our four demo queries: 7.4 s transactions, 22.7 s decoded events, 40.0 s transfers plus one hop, 12.6 s freezes.
 
-- No traces table. `evm-rpc` datasets only have blocks, transactions and logs, so ETH moved inside contract calls is invisible. Binance 14's 167,464 ETH sweep is missing. The fix is a provider change (Phaser with traces, or traces in `evm-rpc`), not SQL.
-- Lookalike spam: 114 fake tokens (some named "USDT" and "ETH") and 1,554 on-chain messages had to be filtered by hand.
-- Prices: 56 altcoins have no USD price in Amp, so value totals undercount.
-- Broad scans are slow: transfers for one busy address over 4 days took 40.8 s. Scoping by address and short block ranges helps.
-- `ampdb-docs` has two pages. Answers came from the engine docs in `amp/docs/feat`.
-- The SDK (`@edgeandnode/amp`) is installed from a pkg.pr.new URL, not npm.
+## Tooling and docs
 
-## Help needed from other teams
+- The TypeScript SDK `@edgeandnode/amp` only installs from a pkg.pr.new URL, not npm. It needs `effect` 4 and connectrpc. We copied the setup from `ampdb-app`.
+- `ampsql` and `ampctl` were not installed. The SDK covered what we needed.
+- `ampdb-docs` has two pages. Every answer came from the engine docs in `amp/docs/feat`.
 
-- Amp core or data: does the hosted Ethereum dataset have traces? If not, what would it take (Phaser with an Erigon bridge, or a `traces` table in `evm-rpc`)? Ask in #amp-hackathon.
-- Amp infra: hosted instance access for ak. Staging access arrived 4 Nov; still waiting on the hackathon instance.
-- Amp data: USD prices for long-tail ERC-20s, or a recommended price dataset.
+## Asks for other teams
 
-## Open
-
-- Archive RPC with `debug_traceTransaction` if we load traces ourselves as a static dataset.
-- Whether to stop the trace at `0xbeef…c555`, which fans out to 778 transfers.
+- Amp core or data: traces for Ethereum on the hosted instance, or a plan for them.
+- Amp data: a price dataset, or guidance on pricing long-tail ERC-20s.
+- Amp data: token metadata with a verified flag, to filter lookalike spam.
