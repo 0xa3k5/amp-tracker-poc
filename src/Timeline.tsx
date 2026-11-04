@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Address, CodeInline, CopyButton, DescriptionList, Status } from "@edgeandnode/eds-react"
+import { Address, CodeInline, CopyButton, DescriptionList, Link, Status } from "@edgeandnode/eds-react"
 import { CaretDownInteractiveIcon } from "@edgeandnode/eds-react/icons"
 
 import { FREEZE_EVENTS, tokenBook } from "./data.ts"
+import { txUrl } from "./explorer.ts"
 import { formatBlock, formatInteger, formatTime, formatUnits, shortHash } from "./format.ts"
 import { fullLabel, knownLabel, labelFor } from "./roles.ts"
 import { TokenAmount, TokenMark } from "./TokenAmount.tsx"
@@ -87,7 +88,12 @@ export function TimelineDetails({ tx }: { tx: Transaction }) {
     <div className="flex flex-col gap-4 px-4 pt-1 pb-4">
       <DescriptionList size="small">
         <DescriptionList.Item label="Transaction" action={<CopyButton value={tx.hash} />}>
-          <CodeInline>{shortHash(tx.hash)}</CodeInline>
+          <span className="flex flex-wrap items-center gap-2">
+            <CodeInline>{shortHash(tx.hash)}</CodeInline>
+            <Link href={txUrl(tx.hash)} target="_blank" variant="secondary" className="text-12">
+              Etherscan
+            </Link>
+          </span>
         </DescriptionList.Item>
         <DescriptionList.Item label="Block">{formatBlock(tx.block_num)}</DescriptionList.Item>
         <DescriptionList.Item label="From">

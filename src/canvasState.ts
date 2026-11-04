@@ -15,3 +15,11 @@ export function useCanvasState() {
 export function isVisible(firstTs: string, time: string) {
   return !firstTs || firstTs <= time
 }
+
+const RECENT_MS = 15 * 60 * 1000
+
+export function isRecent(firstTs: string, time: string) {
+  if (!firstTs) return false
+  const age = Date.parse(time) - Date.parse(firstTs)
+  return age >= 0 && age < RECENT_MS
+}

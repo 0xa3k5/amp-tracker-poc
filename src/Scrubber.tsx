@@ -51,42 +51,54 @@ export function Scrubber({ scale, step, moments, onStepChange }: ScrubberProps) 
       >
         {playing ? "Pause" : "Replay"}
       </Button>
-      <div className="relative flex min-w-0 flex-1 flex-col gap-1 pt-4">
-        {moments.map((moment) => (
-          <button
-            key={moment.hash + moment.title}
-            type="button"
-            title={`${formatTime(moment.ts)}: ${moment.title}`}
-            aria-label={moment.title}
-            data-freeze={moment.freeze || undefined}
-            onClick={() => {
-              setPlaying(false)
-              onStepChange(scale.toStep(moment.ts))
-              open({ kind: "tx", hash: moment.hash })
-            }}
-            className="bg-strong data-freeze:bg-status-info-default absolute top-0 size-2.5 -translate-x-1/2 rounded-full hover:scale-150"
-            style={{ left: `${(scale.toStep(moment.ts) / STEPS) * 100}%` }}
-          />
-        ))}
+      <div className="relative flex min-w-0 flex-1 flex-col gap-1 pt-7">
+        <span
+          className="rounded-4 bg-elevated text-12 pointer-events-none absolute top-0 -translate-x-1/2 px-1.5 py-0.5 font-medium whitespace-nowrap"
+          style={{ left: `calc(${(step / STEPS) * 100}% + ${(0.5 - step / STEPS) * 16}px)` }}
+        >
+          {formatTime(scale.toTime(step))}
+        </span>
         <input
           type="range"
           min={0}
           max={STEPS}
           value={step}
           aria-label="Time"
+          aria-valuetext={formatTime(scale.toTime(step))}
           onChange={(event) => {
             setPlaying(false)
             onStepChange(Number(event.currentTarget.value))
           }}
           className="w-full accent-(--background-color-brand-default)"
         />
-        <div className="text-10 text-muted flex justify-between">
-          <span>Drain starts</span>
-          <span style={{ marginInlineStart: `${(KNEE / STEPS) * 100 - 50}%` }}>{formatTime(scale.knee)}</span>
-          <span>End of window</span>
+        <div className="relative h-3">
+          {moments.map((moment) => (
+            <button
+              key={moment.hash + moment.title}
+              type="button"
+              title={`${formatTime(moment.ts)}: ${moment.title}`}
+              aria-label={moment.title}
+              data-freeze={moment.freeze || undefined}
+              onClick={() => {
+                setPlaying(false)
+                onStepChange(scale.toStep(moment.ts))
+                open({ kind: "tx", hash: moment.hash })
+              }}
+              className="bg-strong data-freeze:bg-status-info-default absolute top-0.5 size-2.5 -translate-x-1/2 rounded-full hover:scale-150"
+              style={{
+                left: `calc(${(scale.toStep(moment.ts) / STEPS) * 100}% + ${(0.5 - scale.toStep(moment.ts) / STEPS) * 16}px)`,
+              }}
+            />
+          ))}
+        </div>
+        <div className="text-10 text-muted relative h-3">
+          <span className="absolute start-0">Drain starts</span>
+          <span className="absolute -translate-x-1/2" style={{ left: `${(KNEE / STEPS) * 100}%` }}>
+            {formatTime(scale.knee)}
+          </span>
+          <span className="absolute end-0">End of window</span>
         </div>
       </div>
-      <span className="text-12 w-32 shrink-0 text-end font-medium">{formatTime(scale.toTime(step))}</span>
     </div>
   )
 }

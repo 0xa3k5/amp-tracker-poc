@@ -4,7 +4,6 @@ import {
   Background,
   BackgroundVariant,
   Controls,
-  MiniMap,
   Panel,
   ReactFlow,
   type EdgeTypes,
@@ -33,16 +32,8 @@ const FLOW_STYLE = {
   "--xy-controls-button-color": "var(--text-color-muted)",
   "--xy-controls-button-color-hover": "var(--text-color-default)",
   "--xy-controls-button-border-color": "var(--border-color-muted)",
-  "--xy-minimap-background-color": "var(--background-color-subtle)",
-  "--xy-minimap-mask-background-color": "var(--background-color-backdrop)",
   "--xy-node-border-radius": "8px",
 } as CSSProperties
-
-const MINIMAP_FILL: Record<string, string> = {
-  binance: "var(--color-status-warning-default)",
-  attacker: "var(--color-status-error-default)",
-  frozen: "var(--color-status-info-default)",
-}
 
 export function CanvasView({ incident }: { incident: Incident }) {
   const open = useOpenDetails()
@@ -103,14 +94,15 @@ export function CanvasView({ incident }: { incident: Incident }) {
         >
           <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="var(--border-color-default)" />
           <Controls showInteractive={false} position="bottom-right" />
-          <MiniMap
-            position="top-right"
-            pannable
-            zoomable
-            nodeColor={(node) => MINIMAP_FILL[String(node.data.kind)] ?? "var(--background-color-strong)"}
-          />
           <Panel position="top-left">
-            <CanvasSummary incident={incident} edges={edges} time={time} />
+            <CanvasSummary
+              incident={incident}
+              nodes={nodes}
+              edges={edges}
+              time={time}
+              selected={selected}
+              onSelect={setSelected}
+            />
           </Panel>
           <Panel position="bottom-center">
             <Scrubber scale={scale} step={step} moments={incident.moments} onStepChange={onStepChange} />

@@ -1,9 +1,10 @@
 import { useMemo } from "react"
-import { Button, CopyButton, DescriptionList, Status, Tag } from "@edgeandnode/eds-react"
+import { Button, CopyButton, DescriptionList, Link, Status, Tag } from "@edgeandnode/eds-react"
 import { XIcon } from "@edgeandnode/eds-react/icons"
 
 import { addressBook, transactions, transfers } from "./data.ts"
 import type { Details } from "./details.ts"
+import { addressUrl } from "./explorer.ts"
 import { formatUsd } from "./format.ts"
 import { fullLabel, labelFor, ROLES } from "./roles.ts"
 import { SqlPanel } from "./SqlPanel.tsx"
@@ -58,6 +59,9 @@ function AddressDetails({ address }: { address: string }) {
         <p className="text-12 text-muted flex items-center gap-1 font-mono break-all">
           {address}
           <CopyButton value={address} />
+          <Link href={addressUrl(address)} target="_blank" variant="secondary" className="font-sans">
+            Etherscan
+          </Link>
         </p>
         {info ? <p className="text-14 text-muted">{fullLabel(address)}</p> : null}
         {info ? <p className="text-12 text-muted">Label source: {info.source}</p> : null}
@@ -111,7 +115,7 @@ function title(details: Details) {
 export function DetailsPane({ details, onClose }: { details: Details | null; onClose: () => void }) {
   return (
     <div className="flex shrink-0 flex-col gap-6 p-6">
-      <div className="flex items-start justify-between gap-3">
+      <div className="border-subtle bg-subtle sticky top-0 z-10 -mx-6 -mt-6 flex items-start justify-between gap-3 border-b px-6 pt-6 pb-4">
         <h2 className="text-20 font-medium break-words">{details ? title(details) : null}</h2>
         <Button variant="tertiary" size="small" addonBefore={XIcon} hideLabel onClick={onClose}>
           Close

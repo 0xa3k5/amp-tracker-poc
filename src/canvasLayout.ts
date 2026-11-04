@@ -13,6 +13,7 @@ export interface CanvasNodeData {
   address: string | undefined
   value: number
   firstTs: string
+  minor: boolean
 }
 
 export interface CanvasEdgeData {
@@ -60,6 +61,7 @@ export function canvasLayout(incident: Incident) {
         address: node.address,
         value: value(node.id),
         firstTs: first.get(node.id) ?? "",
+        minor: node.kind !== "frozen" && node.kind !== "binance" && value(node.id) < incident.taken * 0.02,
       } satisfies CanvasNodeData,
     })),
     edges: links.map((link) => ({

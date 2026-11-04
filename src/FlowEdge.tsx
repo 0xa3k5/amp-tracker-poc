@@ -1,7 +1,7 @@
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, type Edge, type EdgeProps } from "@xyflow/react"
 
 import type { CanvasEdgeData } from "./canvasLayout.ts"
-import { isVisible, useCanvasState } from "./canvasState.ts"
+import { isRecent, isVisible, useCanvasState } from "./canvasState.ts"
 import { formatBlock, formatUsd } from "./format.ts"
 import { TokenMark } from "./TokenAmount.tsx"
 
@@ -24,15 +24,17 @@ function edgeTitle({ link }: CanvasEdgeData) {
 
 export function FlowEdge(props: EdgeProps<FlowCanvasEdge>) {
   const { id, data, source, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition } = props
-  const { time, focus } = useCanvasState()
+  const { time, focus, selected } = useCanvasState()
   const [path, labelX, labelY] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition })
   if (!data) return null
 
   const visible = isVisible(data.link.firstTs, time)
   const active = focus === null || (focus.has(source) && focus.has(target))
+  const touched = selected !== null && (source === selected || target === selected)
+  const moving = visible && (touched || isRecent(data.link.firstTs, time))
   const color = tokenColor(data.token)
-  const width = 2 + 26 * Math.sqrt(data.share)
-  const opacity = !visible ? 0.04 : active ? 0.45 : 0.08
+  const width = 1 + 7 * Math.sqrt(data.share)
+  const opacity = !visible ? 0.03 : touched ? 0.7 : active ? 0.3 : 0.06
 
   return (
     <>
@@ -41,18 +43,19 @@ export function FlowEdge(props: EdgeProps<FlowCanvasEdge>) {
         path={path}
         style={{ stroke: color, strokeWidth: width, strokeOpacity: opacity, transition: "stroke-opacity 300ms" }}
       />
-      {visible && active ? (
+      {moving ? (
         <path
           d={path}
           fill="none"
           stroke={color}
-          strokeWidth={Math.max(1.5, width / 5)}
-          strokeDasharray="6 18"
+          strokeWidth={1.5}
+          strokeOpacity={0.9}
+          strokeDasharray="2 22"
           strokeLinecap="round"
           className="pointer-events-none animate-[flow_1.4s_linear_infinite]"
         />
       ) : null}
-      {visible && active && (data.share > 0.04 || focus !== null) ? (
+      {visible && (touched || (focus === null && data.share > 0.15)) ? (
         <EdgeLabelRenderer>
           <div
             title={edgeTitle(data)}

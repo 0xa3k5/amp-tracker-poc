@@ -36,6 +36,28 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
   const visible = isVisible(data.firstTs, time)
   const frozenLive = data.kind === "frozen" && visible
 
+  if (data.minor) {
+    return (
+      <div
+        title={data.address ?? data.label}
+        data-hidden={!visible || undefined}
+        data-dimmed={(focus !== null && !focus.has(data.id)) || undefined}
+        className="flex h-23 w-62 items-center transition-opacity duration-300 data-dimmed:opacity-25 data-hidden:opacity-10"
+      >
+        <Handle type="target" position={Position.Left} className={HANDLE} />
+        <span
+          data-selected={selected === data.id || undefined}
+          data-clickable={data.address !== undefined || undefined}
+          className="border-subtle bg-canvas text-12 text-muted data-clickable:hover:border-default data-selected:border-default data-selected:text-default flex w-full items-center justify-between gap-2 rounded-full border px-3 py-1.5 data-clickable:cursor-pointer"
+        >
+          <span className="truncate">{data.label}</span>
+          <span className="shrink-0">{formatUsd(data.value)}</span>
+        </span>
+        <Handle type="source" position={Position.Right} className={HANDLE} />
+      </div>
+    )
+  }
+
   return (
     <div
       title={data.address ?? data.label}
