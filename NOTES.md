@@ -11,7 +11,7 @@ Running notes for the Friday team share. Newest at the bottom of each section.
 - 4 Nov. UI rethink with the Design Engineer: built around an incident responder's questions (how much, where is it now, what to act on next), not raw transactions.
 
 - 4 Nov. ak approved the responder layout: incident preloaded, address input secondary, Sankey as the main visual, node graph can go. AMPD-24 builds it.
-- 4 Nov. ak has his own staging JWT. It goes in the gitignored `amp-poc/.env`, never in the repo or issues.
+- 4 Nov. ak has a personal staging JWT. It goes in the gitignored `amp-poc/.env`, never in the repo or issues.
 
 ## What worked
 
