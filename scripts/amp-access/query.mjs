@@ -2,6 +2,7 @@
 // Usage: node query.mjs <file.sql | "SQL"> [out.json]
 import "./env.mjs"
 import { readFileSync, writeFileSync, existsSync } from "node:fs"
+
 import { ArrowFlight } from "@edgeandnode/amp"
 import { layerTransportGrpc } from "@edgeandnode/amp/arrow-flight/node"
 import { Effect, Layer, Redacted } from "effect"
@@ -20,7 +21,14 @@ const program = Effect.gen(function* () {
   const rows = batches.flatMap((b) => b.data)
   return { ms, rows }
 })
-const { ms, rows } = await Effect.runPromise(program.pipe(Effect.provide(FlightLayer))).catch((e) => { console.error("query failed:", e?.cause?.rawMessage ?? e?.message ?? e); process.exit(1) })
+const { ms, rows } = await Effect.runPromise(program.pipe(Effect.provide(FlightLayer))).catch((e) => {
+  console.error(
+    "query failed:",
+    e?.cause?.rawMessage || e?.message || String(e),
+    JSON.stringify(e?.cause ?? e)?.slice(0, 1500),
+  )
+  process.exit(1)
+})
 const out = JSON.stringify(rows, (_, v) => (typeof v === "bigint" ? v.toString() : v), 2)
 if (process.argv[3]) writeFileSync(process.argv[3], out)
 else console.log(out.length > 6000 ? out.slice(0, 6000) + "\n…" : out)

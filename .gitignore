@@ -5,3 +5,4 @@ dist/
 !.env.example
 *.tsbuildinfo
 .DS_Store
+scripts/trace/raw-*.json

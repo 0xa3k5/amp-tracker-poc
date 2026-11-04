@@ -190,5 +190,17 @@
     "label": "Circle USDC token contract. Circle froze 823M USDC",
     "role": "issuer",
     "source": "https://www.trmlabs.com/resources/blog/north-korea-steals-usd-6-36-billion-from-binance-in-the-largest-hack-in-history"
+  },
+  {
+    "address": "0xbeef02961503351625926ea9a11ae13b29f5c555",
+    "label": "Hop 1. Received about $145.0M from 0x9749…c762 and sent 778 transfers on in the window. Counterparty only, no attribution",
+    "role": "intermediary",
+    "source": "Amp trace"
+  },
+  {
+    "address": "0xe7024ab80143b1ef843efe6a58368696cb87958d",
+    "label": "Hop 1. Received about $88.5M from 0x008f…7dcd, 0x5c23…a4fc, 0x5227…2f8c and sent 134 transfers on in the window. Counterparty only, no attribution",
+    "role": "intermediary",
+    "source": "Amp trace"
   }
 ]

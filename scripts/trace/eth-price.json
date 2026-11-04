@@ -1,0 +1,4 @@
+{
+  "eth_usd": 2657.18,
+  "how": "0x9749 sold 325,000,000 USDT to UniswapX and intent fillers and sent the 122,310 ETH it got to 0xc887 (token-transfers.sql). 325,000,000 / 122,310 = 2,657.18 USD per ETH. Used only to weight graph edges."
+}

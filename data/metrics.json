@@ -1,5 +1,26 @@
 [
-  { "query": "fund_flow", "ms": 0, "rows": 36, "blocks": 21600 },
-  { "query": "timeline", "ms": 0, "rows": 24, "blocks": 21600 },
-  { "query": "freeze_events", "ms": 0, "rows": 3, "blocks": 21600 }
+  {
+    "query": "attacker-transactions",
+    "ms": 7424,
+    "rows": 1215,
+    "blocks": 21548
+  },
+  {
+    "query": "decoded-events",
+    "ms": 22735,
+    "rows": 4718,
+    "blocks": 21548
+  },
+  {
+    "query": "token-transfers",
+    "ms": 40038,
+    "rows": 3674,
+    "blocks": 21548
+  },
+  {
+    "query": "usdt-freeze",
+    "ms": 12553,
+    "rows": 9,
+    "blocks": 21548
+  }
 ]
