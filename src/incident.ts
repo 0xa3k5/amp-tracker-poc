@@ -48,22 +48,16 @@ export interface Incident {
   frozenWallets: number
   unpricedTokens: number
   window: { fromTs: string; toTs: string } | null
-  flow: { nodes: Array<FlowNodeSpec>; links: Array<FlowLinkSpec> }
+  flow: { columns: Array<string>; nodes: Array<FlowNodeSpec>; links: Array<FlowLinkSpec> }
   unfrozen: Array<Balance>
   moments: Array<Moment>
 }
 
 const EXIT_ROLES = new Set<Role>(["exchange", "issuer", "bridge"])
 const HOP_ROLES = new Set<Role>(["attacker", "intermediary"])
-const MAX_HOPS = 6
+const MAX_HOP = 7
 const SIGNIFICANT = 1_000_000
-
-const SINKS = {
-  frozen: { id: "frozen", label: "Frozen by Tether", column: 3, kind: "frozen" },
-  held: { id: "held", label: "Still in traced wallets", column: 3, kind: "held" },
-  unlabelled: { id: "unlabelled", label: "Sent to unlabelled addresses", column: 3, kind: "unlabelled" },
-  defi: { id: "defi", label: "Swapped or deposited at DEXs and Aave", column: 3, kind: "defi" },
-} satisfies Record<string, FlowNodeSpec>
+const OWN_NODE = 5_000_000
 
 const roleOf = (address: string) => addressBook.get(address)?.role
 const isExit = (address: string) => EXIT_ROLES.has(roleOf(address)!)
@@ -89,6 +83,40 @@ function reachable() {
     }
   }
   return seen
+}
+
+function hopLevels(scope: Array<Transfer>) {
+  const isWallet = (address: string) => isBinance(address) || HOP_ROLES.has(roleOf(address)!)
+  const next = new Map<string, Set<string>>()
+  for (const t of scope) {
+    if (t.from === t.to || !isWallet(t.from) || !HOP_ROLES.has(roleOf(t.to)!)) continue
+    next.set(t.from, (next.get(t.from) ?? new Set()).add(t.to))
+  }
+  const state = new Map<string, "open" | "done">()
+  const order: Array<string> = []
+  const forward = new Map<string, Array<string>>()
+  const visit = (address: string) => {
+    state.set(address, "open")
+    const kept: Array<string> = []
+    for (const target of next.get(address) ?? []) {
+      if (state.get(target) === "open") continue
+      kept.push(target)
+      if (!state.has(target)) visit(target)
+    }
+    forward.set(address, kept)
+    state.set(address, "done")
+    order.push(address)
+  }
+  const roots = [...addressBook.values()].filter((a) => a.role === "binance").map((a) => a.address)
+  for (const root of roots) if (!state.has(root)) visit(root)
+  const level = new Map(roots.map((root) => [root, 0]))
+  for (const address of order.reverse()) {
+    const from = level.get(address) ?? 0
+    for (const target of forward.get(address) ?? []) {
+      level.set(target, Math.min(MAX_HOP, Math.max(level.get(target) ?? 0, from + 1)))
+    }
+  }
+  return level
 }
 
 function balances(scope: Array<Transfer>) {
@@ -139,26 +167,41 @@ export function buildIncident(): Incident {
     .sort((a, b) => b.usd - a.usd)
     .slice(0, 6)
 
-  const firstHop = new Set(outOfBinance.map((t) => t.to).filter((address) => !isExit(address)))
-  const hops = [...reach].filter((address) => !firstHop.has(address) && HOP_ROLES.has(roleOf(address)!))
-  const throughput = new Map<string, number>()
+  const levels = hopLevels(scope)
+  const wallets = [...reach].filter((address) => HOP_ROLES.has(roleOf(address)!) && levels.has(address))
+  const lastHop = Math.max(1, ...wallets.map((address) => levels.get(address)!))
+  const sinkColumn = lastHop + 1
+  const sink = (id: string, label: string, kind: FlowKind, address?: string): FlowNodeSpec =>
+    address ? { id, label, column: sinkColumn, kind, address } : { id, label, column: sinkColumn, kind }
+  const SINKS = {
+    frozen: sink("frozen", "Frozen by Tether", "frozen"),
+    held: sink("held", "Still in the attacker's wallets", "held"),
+  }
+
+  const unlabelledInflow = new Map<string, number>()
   for (const t of scope) {
-    if (hops.includes(t.to)) throughput.set(t.to, (throughput.get(t.to) ?? 0) + usdOf(t))
+    if (addressBook.has(t.to) || !levels.has(t.from)) continue
+    unlabelledInflow.set(t.to, (unlabelledInflow.get(t.to) ?? 0) + usdOf(t))
   }
-  for (const address of hops) {
-    throughput.set(address, (throughput.get(address) ?? 0) + frozenUsdt(address))
-  }
-  const namedHops = new Set(hops.sort((a, b) => (throughput.get(b) ?? 0) - (throughput.get(a) ?? 0)).slice(0, MAX_HOPS))
+  const smallUnlabelled = [...unlabelledInflow].filter(([, usd]) => usd < OWN_NODE).length
+  const restSink = sink(
+    "unlabelled",
+    `${smallUnlabelled} unlabelled addresses under ${formatUsd(OWN_NODE)}`,
+    "unlabelled",
+  )
 
   const nodes = new Map<string, FlowNodeSpec>()
   const nodeFor = (address: string): FlowNodeSpec | null => {
-    if (isBinance(address)) return { id: address, label: labelFor(address), column: 0, kind: "binance", address }
-    if (firstHop.has(address)) return { id: address, label: labelFor(address), column: 1, kind: "attacker", address }
-    if (namedHops.has(address)) return { id: address, label: labelFor(address), column: 2, kind: "hop", address }
-    if (hops.includes(address))
-      return { id: "other-hops", label: `${hops.length - namedHops.size} other hop wallets`, column: 2, kind: "hop" }
-    if (isExit(address)) return SINKS.defi
-    if (!addressBook.has(address)) return SINKS.unlabelled
+    const label = labelFor(address)
+    if (isBinance(address)) return { id: address, label, column: 0, kind: "binance", address }
+    if (levels.has(address) && HOP_ROLES.has(roleOf(address)!)) {
+      const kind = roleOf(address) === "attacker" ? "attacker" : "hop"
+      return { id: address, label, column: levels.get(address)!, kind, address }
+    }
+    if (isExit(address)) return sink(address, label, "defi", address)
+    if (!addressBook.has(address)) {
+      return (unlabelledInflow.get(address) ?? 0) >= OWN_NODE ? sink(address, label, "unlabelled", address) : restSink
+    }
     return null
   }
 
@@ -181,7 +224,7 @@ export function buildIncident(): Incident {
     links.set(key, current)
   }
 
-  const isSink = (node: FlowNodeSpec | null) => node === SINKS.unlabelled || node === SINKS.defi
+  const isSink = (node: FlowNodeSpec | null) => node?.kind === "unlabelled" || node?.kind === "defi"
   const swapReturn = new Map<string, number>()
   for (const t of scope) {
     if (!isSink(nodeFor(t.from))) continue
@@ -203,7 +246,7 @@ export function buildIncident(): Incident {
     }
     link(source, target, value, t.token, 1)
   }
-  for (const address of [...firstHop, ...hops]) {
+  for (const address of wallets) {
     const source = nodeFor(address)!
     link(source, SINKS.frozen, frozenUsdt(address), "USDT", 0)
     const net = [...(held.get(address)?.values() ?? [])].reduce((sum, h) => sum + h.usd, 0) - frozenUsdt(address)
@@ -213,7 +256,7 @@ export function buildIncident(): Incident {
     for (const holding of holdings) link(source, SINKS.held, (holding.usd / positive) * net, holding.token, 0)
   }
 
-  for (const column of [1, 2]) {
+  for (let column = 1; column < sinkColumn; column += 1) {
     for (const node of nodes.values()) {
       if (node.column !== column) continue
       const into = [...links.values()].filter((l) => l.target === node.id).reduce((sum, l) => sum + l.value, 0)
@@ -252,11 +295,17 @@ export function buildIncident(): Incident {
       freeze: false,
     })
   }
-  const split = scope.find((t) => firstHop.has(t.from) && hops.includes(t.to) && usdOf(t) >= SIGNIFICANT)
+  const split = scope.find(
+    (t) =>
+      levels.get(t.from) === 1 &&
+      (levels.get(t.to) ?? 0) >= 2 &&
+      HOP_ROLES.has(roleOf(t.to)!) &&
+      usdOf(t) >= SIGNIFICANT,
+  )
   if (split) {
     moments.push({
       ts: split.ts,
-      title: "Funds split into hop wallets",
+      title: "Funds split into intermediary wallets",
       detail: describe(split),
       hash: split.tx_hash,
       freeze: false,
@@ -303,7 +352,13 @@ export function buildIncident(): Incident {
     frozenWallets: frozenSet.size,
     unpricedTokens,
     window: drain && last ? { fromTs: drain.ts, toTs: last.ts } : null,
-    flow: { nodes: [...nodes.values()].filter((n) => used.has(n.id)), links: keptLinks },
+    flow: {
+      columns: Array.from({ length: sinkColumn + 1 }, (_, column) =>
+        column === 0 ? "Binance wallets" : column === sinkColumn ? "Where it is now" : `Hop ${column}`,
+      ),
+      nodes: [...nodes.values()].filter((n) => used.has(n.id)),
+      links: keptLinks,
+    },
     unfrozen,
     moments,
   }

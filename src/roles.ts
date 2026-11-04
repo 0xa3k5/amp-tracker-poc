@@ -19,7 +19,7 @@ function shorten(address: string, label: string) {
     .replace(/^Etherscan label:\s*/, "")
     .replace(/\.$/, "")
     .replace(/\s*\([^)]*\)$/, "")
-  if (/^Received\b/.test(first)) return `Hop wallet ${formatAddress(address)}`
+  if (/^(Received\b|Hop \d+$|First hop$|Hop chain$)/.test(first)) return `Intermediary ${formatAddress(address)}`
   return first.length < 16 ? `${first} ${formatAddress(address)}` : first
 }
 

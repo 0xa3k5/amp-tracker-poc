@@ -10,15 +10,15 @@ import { SqlButton } from "./SqlButton.tsx"
 type Node = SankeyNode<FlowNodeSpec, FlowLinkSpec>
 type Link = SankeyLink<FlowNodeSpec, FlowLinkSpec>
 
-const HEIGHT = 520
+const HEIGHT = 640
 const LABEL_SPACE = 300
 
-const COLUMNS = ["Binance wallets", "Attacker", "Hop wallets", "Where it is now"]
+const COLUMN_WIDTH = 200
 
 const NODE_FILL: Record<FlowKind, string> = {
   binance: "var(--color-status-warning-default)",
   attacker: "var(--color-status-error-default)",
-  hop: "var(--background-color-strong)",
+  hop: "var(--text-color-subtle)",
   frozen: "var(--color-status-info-default)",
   held: "var(--color-status-error-default)",
   unlabelled: "var(--background-color-strong)",
@@ -39,6 +39,7 @@ function useWidth() {
 }
 
 function layout(flow: Incident["flow"], width: number) {
+  const right = Math.max(width, (flow.columns.length - 1) * COLUMN_WIDTH + LABEL_SPACE) - LABEL_SPACE
   return sankey<FlowNodeSpec, FlowLinkSpec>()
     .nodeId((node) => node.id)
     .nodeAlign((node) => node.column)
@@ -47,7 +48,7 @@ function layout(flow: Incident["flow"], width: number) {
     .nodePadding(18)
     .extent([
       [0, 28],
-      [Math.max(320, width - LABEL_SPACE), HEIGHT - 8],
+      [right, HEIGHT - 8],
     ])({
     nodes: flow.nodes.map((node) => ({ ...node })),
     links: flow.links.map((link) => ({ ...link })),
@@ -71,6 +72,8 @@ export function FundFlow({ incident }: { incident: Incident }) {
   const [ref, width] = useWidth()
   const [hovered, setHovered] = useState<string | null>(null)
   const graph = useMemo(() => (width > 0 ? layout(incident.flow, width) : null), [incident, width])
+  const columns = incident.flow.columns
+  const svgWidth = Math.max(width, (columns.length - 1) * COLUMN_WIDTH + LABEL_SPACE)
 
   const active = (link: Link) => {
     if (!hovered) return true
@@ -88,22 +91,22 @@ export function FundFlow({ incident }: { incident: Incident }) {
               Where the money went
             </h2>
             <p className="text-14 text-muted">
-              Width is USD value. Click a wallet to see its balance and transactions. Swap proceeds arrive as internal
-              ETH transfers that the data lacks, so a wallet that sent more than it received is scaled to what it
-              received.
+              Width is USD value. A hop is one transfer from one wallet to the next. Click a wallet to see its balance
+              and transactions. Swap proceeds arrive as internal ETH transfers that the data lacks, so a wallet that
+              sent more than it received is scaled to what it received.
             </p>
           </div>
           <SqlButton query="fund-flow" />
         </div>
-        <div ref={ref} className="w-full">
+        <div ref={ref} className="w-full overflow-x-auto">
           {graph ? (
             <svg
-              width={width}
+              width={svgWidth}
               height={HEIGHT}
               role="img"
               aria-label="Fund flow from Binance wallets to where the money is now"
             >
-              {COLUMNS.map((name, column) => {
+              {columns.map((name, column) => {
                 const x = columnX(graph.nodes, column)
                 return x === undefined ? null : (
                   <text key={name} x={x} y={12} className="text-12 fill-(--text-color-muted)">
@@ -134,7 +137,7 @@ export function FundFlow({ incident }: { incident: Incident }) {
                 const x1 = node.x1 ?? 0
                 const y0 = node.y0 ?? 0
                 const y1 = node.y1 ?? 0
-                const sink = node.column === COLUMNS.length - 1
+                const sink = node.column === columns.length - 1
                 const clickable = node.address !== undefined
                 return (
                   <g
