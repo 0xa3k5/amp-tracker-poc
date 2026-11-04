@@ -38,3 +38,18 @@ export function formatInteger(raw: string) {
 export function formatSeconds(ms: number) {
   return `${(ms / 1000).toFixed(1)} s`
 }
+
+const usd = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 2,
+})
+
+export function formatUsd(value: number) {
+  return usd.format(value)
+}
+
+export function formatPercent(value: number) {
+  return `${Math.round(value * 100)}%`
+}

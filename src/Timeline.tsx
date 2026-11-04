@@ -1,30 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Address, Card, Chip, CodeInline, CopyButton, DescriptionList, Status } from "@edgeandnode/eds-react"
-import { CaretDownInteractiveIcon, XIcon } from "@edgeandnode/eds-react/icons"
-import { cn } from "@edgeandnode/eds-react/utils"
+import { Address, CodeInline, CopyButton, DescriptionList, Status } from "@edgeandnode/eds-react"
+import { CaretDownInteractiveIcon } from "@edgeandnode/eds-react/icons"
 
 import { FREEZE_EVENTS, tokenBook } from "./data.ts"
 import { formatAmount, formatBlock, formatInteger, formatTime, formatUnits, shortHash } from "./format.ts"
 import { fullLabel, knownLabel, labelFor } from "./roles.ts"
-import { isAddress, isFreeze, touches, type Trace } from "./trace.ts"
+import { isAddress, isFreeze } from "./trace.ts"
 import type { DecodedEvent, Transaction, Transfer } from "./types.ts"
 
-export interface TimelineFilter {
-  label: string
-  members: Set<string>
-}
-
-export interface TimelineFocus {
-  hash: string
-  nonce: number
-}
-
 interface TimelineProps {
-  trace: Trace
-  filter: TimelineFilter | null
-  focus: TimelineFocus | null
-  onClear: () => void
-  className?: string
+  transactions: Array<Transaction>
+  transfers: Array<Transfer>
+  focus?: string | null | undefined
 }
 
 const AMOUNT_ARGS = new Set(["value", "wad", "amount", "_balance"])
@@ -79,7 +66,7 @@ function EventItem({ event }: { event: DecodedEvent }) {
   )
 }
 
-function TimelineDetails({ tx }: { tx: Transaction }) {
+export function TimelineDetails({ tx }: { tx: Transaction }) {
   return (
     <div className="flex flex-col gap-4 px-4 pt-1 pb-4">
       <DescriptionList size="small">
@@ -149,53 +136,30 @@ function TimelineItem({
   )
 }
 
-export function Timeline({ trace, filter, focus, onClear, className }: TimelineProps) {
+export function Timeline({ transactions, transfers, focus }: TimelineProps) {
   const listRef = useRef<HTMLOListElement>(null)
-  const transfersByTx = useMemo(() => Map.groupBy(trace.transfers, (t) => t.tx_hash), [trace])
-  const visible = useMemo(
-    () =>
-      filter
-        ? trace.transactions.filter((tx) => touches(tx, transfersByTx.get(tx.hash) ?? [], filter.members))
-        : trace.transactions,
-    [trace, filter, transfersByTx],
-  )
+  const transfersByTx = useMemo(() => Map.groupBy(transfers, (t) => t.tx_hash), [transfers])
 
   useEffect(() => {
     if (!focus) return
-    const item = listRef.current?.querySelector(`[id="tx-${focus.hash}"]`)
+    const item = listRef.current?.querySelector(`[id="tx-${focus}"]`)
     const details = item?.querySelector("details")
     if (details) details.open = true
-    item?.scrollIntoView({ block: "start", behavior: "smooth" })
+    item?.scrollIntoView({ block: "start" })
   }, [focus])
 
+  if (transactions.length === 0) return <p className="text-14 text-muted">No transactions in the window.</p>
+
   return (
-    <Card variant="tertiary" as="section" className={cn("var-[padding=0] lg:h-200", className)}>
-      <div className="flex h-full flex-col">
-        <div className="flex flex-wrap items-center justify-between gap-3 p-4">
-          <h2 className="text-18 font-medium">
-            Timeline <span className="text-14 text-muted">{formatBlock(visible.length)} transactions</span>
-          </h2>
-          {filter ? (
-            <Chip size="small" addonAfter={XIcon} onClick={onClear}>
-              {filter.label}
-            </Chip>
-          ) : null}
-        </div>
-        {visible.length > 0 ? (
-          <ol ref={listRef} className="border-subtle flex-1 overflow-y-auto border-t">
-            {visible.map((tx) => (
-              <TimelineItem
-                key={tx.hash}
-                tx={tx}
-                txTransfers={transfersByTx.get(tx.hash) ?? []}
-                focused={focus?.hash === tx.hash}
-              />
-            ))}
-          </ol>
-        ) : (
-          <p className="border-subtle text-14 text-muted border-t p-4">No transactions touch this address.</p>
-        )}
-      </div>
-    </Card>
+    <ol ref={listRef} className="border-subtle rounded-8 border">
+      {transactions.map((tx) => (
+        <TimelineItem
+          key={tx.hash}
+          tx={tx}
+          txTransfers={transfersByTx.get(tx.hash) ?? []}
+          focused={focus === tx.hash}
+        />
+      ))}
+    </ol>
   )
 }

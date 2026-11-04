@@ -1,4 +1,4 @@
-// Runs the four trace queries in data/queries/ against Amp one after another, saves each
+// Runs the trace queries in data/queries/ against Amp one after another, saves each
 // result to raw-<name>.json here, and writes data/metrics.json with wall-clock ms,
 // rows returned and blocks in range. Credentials and AMP_DATASET come from scripts/amp-access/env.mjs.
 // Run: node scripts/trace/run-queries.mjs
@@ -11,7 +11,7 @@ import { Effect, Layer, Redacted } from "effect"
 
 import { DEFAULT_DATASET, withDataset } from "../../src/dataset.ts"
 
-const QUERIES = ["attacker-transactions", "decoded-events", "token-transfers", "usdt-freeze"]
+const QUERIES = ["attacker-transactions", "decoded-events", "fund-flow", "token-transfers", "usdt-freeze"]
 const BLOCKS = 26322290 - 26300743 + 1
 
 const FlightLayer = ArrowFlight.layer.pipe(

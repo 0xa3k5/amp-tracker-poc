@@ -1,87 +1,62 @@
-import { useMemo, useState } from "react"
-import { Button } from "@edgeandnode/eds-react"
+import { useCallback, useState } from "react"
+import { Pane, usePane } from "@edgeandnode/eds-react"
 
-import { addresses, transfers } from "./data.ts"
-import { FlowGraph } from "./FlowGraph.tsx"
+import { OpenDetails, type Details } from "./details.ts"
+import { DetailsPane } from "./DetailsPane.tsx"
 import { Footer } from "./Footer.tsx"
+import { FundFlow } from "./FundFlow.tsx"
 import { Header } from "./Header.tsx"
-import { labelFor } from "./roles.ts"
-import { SqlPanel } from "./SqlPanel.tsx"
-import { Timeline, type TimelineFilter, type TimelineFocus } from "./Timeline.tsx"
-import { buildTrace } from "./trace.ts"
-
-const senders = new Set(transfers.map((t) => t.from))
-const SUGGESTED = addresses.filter((a) => a.role === "attacker" && senders.has(a.address))
-const DEFAULT_ROOT = SUGGESTED.find((a) => a.label.startsWith("Main receiving"))?.address ?? SUGGESTED[0]?.address ?? ""
+import { incident } from "./incident.ts"
+import { KeyMoments } from "./KeyMoments.tsx"
+import { NotFrozen } from "./NotFrozen.tsx"
+import { Summary } from "./Summary.tsx"
 
 export function App() {
-  const [root, setRoot] = useState(DEFAULT_ROOT)
-  const [selected, setSelected] = useState<string | null>(null)
-  const [focus, setFocus] = useState<TimelineFocus | null>(null)
-  const trace = useMemo(() => buildTrace(root), [root])
+  const [details, setDetails] = useState<Details | null>(null)
+  const pane = usePane("details", { defaultCollapsed: true })
+  const { layout, setCollapsed, setOverlayOpen } = pane
 
-  const filter = useMemo<TimelineFilter | null>(() => {
-    const node = selected ? trace.nodes.find((n) => n.id === selected) : undefined
-    if (!node) return null
-    const label = node.group ? `${node.members.length} unlabelled addresses` : labelFor(node.members[0]!)
-    return { label, members: new Set(node.members) }
-  }, [trace, selected])
+  const openDetails = useCallback(
+    (next: Details) => {
+      setDetails(next)
+      if (layout === "overlay") setOverlayOpen(true)
+      else setCollapsed(false)
+    },
+    [layout, setCollapsed, setOverlayOpen],
+  )
 
-  const startTrace = (address: string) => {
-    setRoot(address)
-    setSelected(null)
-    setFocus(null)
+  const close = () => {
+    if (layout === "overlay") setOverlayOpen(false)
+    else setCollapsed(true)
   }
 
-  const freezeIndex = focus ? trace.freezes.findIndex((tx) => tx.hash === focus.hash) : -1
-
   return (
-    <div className="flex min-h-screen flex-col gap-8 p-4 sm:p-6 lg:p-8">
-      <Header
-        key={root}
-        root={root}
-        trace={trace}
-        freezeIndex={freezeIndex}
-        onTrace={startTrace}
-        onJumpToFreeze={() => {
-          const next = trace.freezes[(freezeIndex + 1) % trace.freezes.length]
-          if (!next) return
-          setSelected(null)
-          setFocus((current) => ({ hash: next.hash, nonce: (current?.nonce ?? 0) + 1 }))
-        }}
-      />
-      {trace.transfers.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <p className="text-14 text-muted">
-            No token or ETH transfers from this address in the block range. Try one of these:
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {SUGGESTED.map((a) => (
-              <Button key={a.address} size="small" variant="secondary" onClick={() => startTrace(a.address)}>
-                {labelFor(a.address)}
-              </Button>
-            ))}
+    <OpenDetails value={openDetails}>
+      <Pane.Container className="flex h-dvh">
+        <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+          <div className="mx-auto flex w-full max-w-360 flex-1 flex-col gap-10 p-4 sm:p-6 lg:p-8">
+            <Header />
+            <Summary incident={incident} />
+            <FundFlow incident={incident} />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              <div className="lg:col-span-7">
+                <KeyMoments incident={incident} />
+              </div>
+              <div className="lg:col-span-5">
+                <NotFrozen incident={incident} />
+              </div>
+            </div>
+            <Footer />
           </div>
         </div>
-      ) : (
-        <main className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-12">
-          <Timeline
-            trace={trace}
-            filter={filter}
-            focus={focus}
-            onClear={() => setSelected(null)}
-            className="xl:col-span-4"
-          />
-          <FlowGraph
-            trace={trace}
-            selected={selected}
-            onSelect={setSelected}
-            className="max-lg:h-140 lg:h-200 xl:col-span-5"
-          />
-          <SqlPanel className="lg:col-span-2 xl:col-span-3" />
-        </main>
-      )}
-      <Footer />
-    </div>
+        <Pane
+          name="details"
+          side="end"
+          className="border-muted bg-subtle max-xl:prop-layout-overlay w-140 max-w-[calc(100vw-(--spacing(8)))] overflow-y-auto border-s"
+        >
+          <DetailsPane details={details} onClose={close} />
+        </Pane>
+      </Pane.Container>
+    </OpenDetails>
   )
 }

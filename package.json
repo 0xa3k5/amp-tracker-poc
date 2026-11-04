@@ -14,10 +14,9 @@
     "typecheck": "tsc -p tsconfig.check.json"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^1.1.4",
     "@edgeandnode/eds-react": "1.2.0",
     "@edgeandnode/eds-utils": "1.0.2",
-    "@xyflow/react": "^12.12.0",
+    "d3-sankey": "0.12.3",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
@@ -27,6 +26,7 @@
     "@connectrpc/connect-node": "^2.3.0",
     "@edgeandnode/amp": "https://pkg.pr.new/edgeandnode/amp-typescript/@edgeandnode/amp@1b8cf83",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/d3-sankey": "^0.12.5",
     "@types/node": "^26.6.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

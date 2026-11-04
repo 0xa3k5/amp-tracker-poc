@@ -19,6 +19,7 @@ function shorten(address: string, label: string) {
     .replace(/^Etherscan label:\s*/, "")
     .replace(/\.$/, "")
     .replace(/\s*\([^)]*\)$/, "")
+  if (/^Received\b/.test(first)) return `Hop wallet ${formatAddress(address)}`
   return first.length < 16 ? `${first} ${formatAddress(address)}` : first
 }
 

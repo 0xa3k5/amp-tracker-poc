@@ -1,84 +1,57 @@
 import { useState } from "react"
-import { Button, DescriptionList, Input, Tag } from "@edgeandnode/eds-react"
-import { SnowflakeIcon } from "@edgeandnode/eds-react/icons"
+import { Button, Input, Tag } from "@edgeandnode/eds-react"
+import { TerminalWindowIcon } from "@edgeandnode/eds-react/icons"
 
-import { isMock } from "./data.ts"
-import { formatAmount, formatBlock, formatTime } from "./format.ts"
-import { isAddress, normalizeAddress, type Trace } from "./trace.ts"
+import { isMock, queries } from "./data.ts"
+import { useOpenDetails } from "./details.ts"
+import { isAddress, normalizeAddress } from "./trace.ts"
 
-interface HeaderProps {
-  root: string
-  trace: Trace
-  freezeIndex: number
-  onTrace: (address: string) => void
-  onJumpToFreeze: () => void
-}
-
-export function Header({ root, trace, freezeIndex, onTrace, onJumpToFreeze }: HeaderProps) {
-  const [value, setValue] = useState(root)
+export function Header() {
+  const open = useOpenDetails()
+  const [value, setValue] = useState("")
   const [invalid, setInvalid] = useState(false)
-  const range = trace.blockRange
 
   return (
-    <header className="flex flex-col gap-6">
+    <header className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-24 font-medium">Binance hot wallet hack, 29 October 2026</h1>
+        <h1 className="text-16 font-medium">Binance hot wallet hack · 29 October 2026</h1>
         {isMock ? <Tag variant="solar">Mock data</Tag> : null}
       </div>
-      <form
-        className="flex max-w-240 flex-wrap items-end gap-3"
-        onSubmit={(event) => {
-          event.preventDefault()
-          const address = normalizeAddress(value)
-          setInvalid(!isAddress(address))
-          if (isAddress(address)) onTrace(address)
-        }}
-      >
-        <Input
-          label="Attacker address"
-          placeholder="0x…"
-          value={value}
-          onValueChange={setValue}
-          status={invalid ? "error" : undefined}
-          message={invalid ? "Paste a full Ethereum address: 0x followed by 40 hex characters." : undefined}
-          spellCheck={false}
-          autoComplete="off"
-        />
-        <Button type="submit" variant="primary" className="shrink-0">
-          Trace
-        </Button>
-        {trace.freezes.length > 0 ? (
-          <Button
-            type="button"
-            variant="secondary"
-            addonBefore={SnowflakeIcon}
-            className="shrink-0"
-            onClick={onJumpToFreeze}
-          >
-            {freezeIndex < 0
-              ? `Jump to USDT freeze (${trace.freezes.length})`
-              : `Freeze ${freezeIndex + 1} of ${trace.freezes.length}`}
-          </Button>
-        ) : null}
-      </form>
-      <DescriptionList orientation="horizontal">
-        <DescriptionList.Item
-          label="Block range"
-          description={range ? `${formatTime(range.fromTs)} to ${formatTime(range.toTs)}` : undefined}
+      <div className="flex flex-wrap items-start gap-2">
+        <form
+          className="flex items-start gap-2"
+          onSubmit={(event) => {
+            event.preventDefault()
+            const address = normalizeAddress(value)
+            setInvalid(!isAddress(address))
+            if (isAddress(address)) open({ kind: "address", address })
+          }}
         >
-          {range ? `${formatBlock(range.from)} to ${formatBlock(range.to)}` : "None"}
-        </DescriptionList.Item>
-        <DescriptionList.Item label="ETH moved" description="ETH and WETH out of Binance wallets">
-          {formatAmount(trace.ethMoved)}
-        </DescriptionList.Item>
-        <DescriptionList.Item label="USDT moved" description="Out of Binance wallets">
-          {formatAmount(trace.usdtMoved)}
-        </DescriptionList.Item>
-        <DescriptionList.Item label="Hops" description="To the furthest address reached">
-          {trace.hops}
-        </DescriptionList.Item>
-        <DescriptionList.Item label="Addresses touched">{trace.addresses.length}</DescriptionList.Item>
-      </DescriptionList>
+          <Input
+            size="small"
+            aria-label="Look up an address"
+            placeholder="Look up an address, 0x…"
+            value={value}
+            onValueChange={setValue}
+            status={invalid ? "error" : undefined}
+            message={invalid ? "Paste a full address: 0x and 40 hex characters." : undefined}
+            spellCheck={false}
+            autoComplete="off"
+            className="w-80"
+          />
+          <Button type="submit" variant="secondary" size="small" className="shrink-0">
+            Look up
+          </Button>
+        </form>
+        <Button
+          variant="tertiary"
+          size="small"
+          addonBefore={TerminalWindowIcon}
+          onClick={() => open({ kind: "sql", query: queries[0]?.name ?? "" })}
+        >
+          How Amp got this
+        </Button>
+      </div>
     </header>
   )
 }

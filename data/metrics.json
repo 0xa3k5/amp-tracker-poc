@@ -22,5 +22,11 @@
     "ms": 12553,
     "rows": 9,
     "blocks": 21548
+  },
+  {
+    "query": "fund-flow",
+    "ms": 35926,
+    "rows": 1068,
+    "blocks": 21548
   }
 ]
