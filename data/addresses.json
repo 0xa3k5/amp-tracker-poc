@@ -1,110 +1,194 @@
 [
   {
-    "address": "0x4499f93345f9410e581ec24e7c0bb5ae3afb525a",
-    "label": "Binance hot wallet 1",
+    "address": "0x28c6c06298d514db089934071355e5743bf21d60",
+    "label": "Binance 14 hot wallet. Drained after an EIP-7702 delegation at 20:20:59 UTC",
     "role": "binance",
-    "source": "mock"
+    "source": "https://dev.to/ghost_wayne/was-binance-hacked-what-the-onchain-data-shows-october-29-2026-50kl"
   },
   {
-    "address": "0x291d649eb4ee360e6777a74b7708d7a5dc1fa51a",
-    "label": "Binance hot wallet 2",
+    "address": "0xdfd5293d8e347dfe59e90efd55b2956a1343963d",
+    "label": "Binance 16 hot wallet. Sent 55.7M USDT, 25.9M RLUSD and 28,005.6 ETH to 0x5227 at 20:24:47 UTC",
     "role": "binance",
-    "source": "mock"
+    "source": "https://dev.to/ghost_wayne/was-binance-hacked-what-the-onchain-data-shows-october-29-2026-50kl"
   },
   {
-    "address": "0xa5a15175bb0a40116e63af111ada8e7586817fef",
-    "label": "Binance batch sender",
+    "address": "0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055",
+    "label": "Binance Hot Wallet 34. Sent 823M USDC to 0x5227 at 20:41:23 UTC",
     "role": "binance",
-    "source": "mock"
+    "source": "https://dev.to/ghost_wayne/was-binance-hacked-what-the-onchain-data-shows-october-29-2026-50kl"
   },
   {
-    "address": "0xf35c524ea1e47316495f1cbe62d005422661ce5b",
-    "label": "Attacker 1",
+    "address": "0x7c8601d4645b93cea45f71e118a729332e6b5ca0",
+    "label": "Operator wallet (Etherscan label: Binance Hot Wallet Exploiter). Funded through Tornado Cash, signed the 7702 delegation and every sweep call",
     "role": "attacker",
-    "source": "mock"
+    "source": "https://amlcrypto.io/blog/binance-hack-2026"
   },
   {
-    "address": "0xc3e896d7d94c522a984301707fd324997282ac79",
-    "label": "Attacker 2",
+    "address": "0x63e842b054bd624a465454d533c33f573e9c6fae",
+    "label": "Sweeper contract deployed by the operator at 15:59:11 UTC. Delegation target for Binance 14",
     "role": "attacker",
-    "source": "mock"
+    "source": "https://amlcrypto.io/blog/binance-hack-2026"
   },
   {
-    "address": "0xfc7d641059cff8b904b339c6a0f84f22281bdaef",
-    "label": "Intermediary A",
+    "address": "0x5227f603c1ee34ce3c06efe6477003bdfccb2f8c",
+    "label": "Main receiving wallet (Etherscan label: Binance Hot Wallet Exploiter 2). Tether blacklisted it at 21:01:35 UTC holding 971.1M USDT",
+    "role": "attacker",
+    "source": "https://dev.to/ghost_wayne/was-binance-hacked-what-the-onchain-data-shows-october-29-2026-50kl"
+  },
+  {
+    "address": "0x8532fa14acaf483729c449b8458aeddb900543d4",
+    "label": "Etherscan label: Binance Hot Wallet Exploiter 8. Received 197,460 ETH from 0x5227 and had not moved it by drain start plus 72h",
+    "role": "attacker",
+    "source": "https://dev.to/ghost_wayne/was-binance-hacked-what-the-onchain-data-shows-october-29-2026-50kl"
+  },
+  {
+    "address": "0x8d53903625b8e839b9df4bd28b0efb1cd6b8639a",
+    "label": "Etherscan label: Binance Hot Wallet Exploiter 3. Received 190M USDT, supplied 60M USDT to Aave v3 and borrowed 19,762 ETH. Tether blacklist at 21:02:47 UTC came after it moved the rest",
+    "role": "attacker",
+    "source": "https://dev.to/ghost_wayne/was-binance-hacked-what-the-onchain-data-shows-october-29-2026-50kl"
+  },
+  {
+    "address": "0x9749292d74fd460982d0912ea9515ea24736c762",
+    "label": "First hop. Received 500M USDT from 0x5227 and sold it through UniswapX and intent settlement contracts for about 122,300 ETH. Empty when Tether blacklisted it at 21:01:35 UTC",
     "role": "intermediary",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x68d7d69deaeb9750c38020b4f8d3728146ca8d2267eba1e38cf9b56722ad659a"
   },
   {
-    "address": "0x02119d5f17cc0c2a909341b25107a71bc88be75c",
-    "label": "Intermediary B",
+    "address": "0x0ddf0480016e6bcb2c1f5d190d221fba1320697e",
+    "label": "First hop. Received 200M USDT from 0x5227, swapped about 10M on Uniswap, passed 190M to 0x8d53. Start of the hop chain",
     "role": "intermediary",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x1fc0ef33a767132edad434834a5555b30fcb5a171206c03b86175ef6dafac81c"
   },
   {
-    "address": "0xe33b61fbb583af5d7e686b8df7d48d148c79087d",
-    "label": "Intermediary C",
+    "address": "0x811f15855476156ebf86ba3b84fafb8ceaa4e84c",
+    "label": "Relay. Received 175M USDT from 0x9749 and passed it to 0xaa24",
     "role": "intermediary",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x1fb992f92a45afec23d7d5740c7958a644fb90ef0cba19ca39bd2c6534fb670b"
   },
   {
-    "address": "0x6e2587166324a311b59173c0bf29e882415d84e6",
-    "label": "Intermediary D",
+    "address": "0xaa246bf639586a6ba46762d378ce50ca4fc654a0",
+    "label": "Received 175M USDT at 21:08:23 UTC. Tether blacklisted it at 21:14:59 UTC holding 175M USDT",
     "role": "intermediary",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x0c07a5e428ce233a3bcb40f257ad899594421341d63ce94016822063362707bf"
   },
   {
-    "address": "0xbd1e94e83d815a2a2245b817b5f1d2831b9ea098",
-    "label": "Intermediary E",
+    "address": "0x77edef23fbd05921c26fe29fcc3a65e14d2ac3eb",
+    "label": "Hop chain. Received 130M USDT and 23,314.5 ETH from 0x8d53, swapped about 50M USDT on Uniswap",
     "role": "intermediary",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0xd2e7e5e6ee32a3552de469d97e90d83b707d314ffe7b8747786de92daa3fc3d8"
   },
   {
-    "address": "0xc2335b998385da4da1ebc77d28b3a71affbc7f9e",
-    "label": "Intermediary F",
+    "address": "0x7aa4d3029e4c6a8e916300014ad95b6d6c03bfd1",
+    "label": "Hop chain. Received 80M USDT and 41,397.8 ETH, swapped about 50M USDT on Uniswap. Tether blacklisted it at 21:12:35 UTC",
     "role": "intermediary",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x279d12e9a7f594eeaf0eb83fe649f7f2cdf82ced156a82f85014dc56369b36d8"
   },
   {
-    "address": "0x0faabb6455f6792e9c03ce24a24431186a739d27",
-    "label": "Intermediary G",
+    "address": "0xccbef95633adb5cd2b5038db5a38d77e726ca263",
+    "label": "Hop chain. Received 30M USDT and 57,891.85 ETH from 0x7aa4 and passed both to 0xb171",
     "role": "intermediary",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x9a7645882a20445c5a731a15f34e1757f0b6c52e8f51a4ddb8c09cdc424295ce"
   },
   {
-    "address": "0x808701d41eb4d7e22db6b43a8f20b96c80f3b80d",
-    "label": "Intermediary H",
+    "address": "0xb171ca86f82070282138352ff7111b494060c8c3",
+    "label": "End of the hop chain. Tether blacklisted it at 21:18:59 UTC holding 30M USDT. Sent 57,891.77 ETH to 0x897c",
     "role": "intermediary",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x3445389c8aceb50fe1c155a1208f7289cc8f7f5950139e21dc405333d1aedc93"
   },
   {
-    "address": "0x645f80989f00ea44337456a19daa7851d63d9e76",
-    "label": "DEX router",
+    "address": "0x897c80d1a9729e94460e2bd93178bd5215158df3",
+    "label": "Received 57,891.77 ETH from 0xb171 at 21:35:59 UTC",
+    "role": "intermediary",
+    "source": "https://eth.blockscout.com/tx/0x2552fea8c4e4e9e9251ef4ec82ea8cfc214feda8c21e77f4ce07779b1d561fb1"
+  },
+  {
+    "address": "0xc887af690e0301cd4edbbce8f8d31b4ec65b286a",
+    "label": "ETH collector. Received 122,310 ETH from 0x9749 and 15,292 ETH from 0x7f9d",
+    "role": "intermediary",
+    "source": "https://eth.blockscout.com/tx/0xbd7822f7ee21e577a1ada80f881791071677a6797c4c1d5fa49ac1cfaf8bfa66"
+  },
+  {
+    "address": "0x7f9dc988b46336ad536828fad50fa8fa1e5415e3",
+    "label": "Received WBETH and ENA from 0x5227. Sent 15,292 ETH to 0xc887",
+    "role": "intermediary",
+    "source": "https://eth.blockscout.com/tx/0xc19a2dcc7508e45f2743558cebefa50140fe68d9450ab18d14fd34039eb4bce2"
+  },
+  {
+    "address": "0x42cdf00c85005630cc8605731b9364f712077810",
+    "label": "Received UNI and ONDO from 0x5227",
+    "role": "intermediary",
+    "source": "https://eth.blockscout.com/tx/0x028bdd8b5f0bda6503a760b734090f1cdbc213e90b71394b8a089b3d66eada74"
+  },
+  {
+    "address": "0xb3ddec0ccc5c3ba733fcdf5a15f98c95ec5a5fdb",
+    "label": "Received WBTC and USDe from 0x5227",
+    "role": "intermediary",
+    "source": "https://eth.blockscout.com/tx/0x314928ff5fb72f708f77093c166dbb26a04709ac9c43ef19d2ed603d5543df66"
+  },
+  {
+    "address": "0x5c23023ca6633f91ded909b4a753a3ca00fea4fc",
+    "label": "Received 88.54M RLUSD from 0x5227 at 21:22:59 UTC",
+    "role": "intermediary",
+    "source": "https://dev.to/ghost_wayne/was-binance-hacked-what-the-onchain-data-shows-october-29-2026-50kl"
+  },
+  {
+    "address": "0x008f06f04b72da2621a4f37f5531cc7352187dcd",
+    "label": "Received 88.54M RLUSD from 0x5c23 at 21:25:59 UTC",
+    "role": "intermediary",
+    "source": "https://eth.blockscout.com/tx/0x12605d85b6b213a1a6b792a1f288cf6721a9b756b9db5c6102e2e60fae353bc8"
+  },
+  {
+    "address": "0x00000011f84b9aa48e5f8aa8b9897600006289be",
+    "label": "UniswapX V2DutchOrderReactor. Settled 0x9749's USDT sales for 105,592.87 ETH",
     "role": "exchange",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x290e94a9d14294b1c22bbc5d167343fd91fe91233e89434f20532fe5fe7e8668"
   },
   {
-    "address": "0xecdedaf0cd583d321937580d2b083ec1b1650f00",
-    "label": "Exchange deposit",
+    "address": "0x399740157391a9f1bf4e9921a8834f9bc8f2678e",
+    "label": "Intent settlement contract (verified name SimpleSettlement). Paid 0x9749 16,723.45 ETH for USDT",
     "role": "exchange",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0xe5ccc3a8b32f7c52683390fa75f57cec53394421bd05132400806533e661843a"
   },
   {
-    "address": "0xfbd72913cc1b017a699763b8d7bfe73d4a8a05fd",
-    "label": "Bridge router",
-    "role": "bridge",
-    "source": "mock"
+    "address": "0x000000000004444c5dc75cb358380d2e3de08a90",
+    "label": "Uniswap v4 PoolManager. Took hop-chain USDT in swaps",
+    "role": "exchange",
+    "source": "https://eth.blockscout.com/tx/0x152e005f6dcccd941e0a2c7156b955c6baad08a347685bcf5518776dab04f8cc"
+  },
+  {
+    "address": "0x23617e59a5925b2a4bf75d73ff6711cd0b29de85",
+    "label": "Uniswap UniversalRouter (verified contract name). Router for the hop-chain swaps",
+    "role": "exchange",
+    "source": "https://eth.blockscout.com/tx/0x152e005f6dcccd941e0a2c7156b955c6baad08a347685bcf5518776dab04f8cc"
+  },
+  {
+    "address": "0x23878914efe38d27c4d67ab83ed1b93a74d4086a",
+    "label": "Aave v3 aUSDT. 0x8d53 supplied 60M USDT here",
+    "role": "exchange",
+    "source": "https://eth.blockscout.com/tx/0x420e74015336a44f3056c00bf5a1313889a7f6ed30a053ad59832d4a4a1f14eb"
+  },
+  {
+    "address": "0xd01607c3c5ecaba394d8be377a08590149325722",
+    "label": "Aave v3 WrappedTokenGatewayV3. Paid out 19,762.41 ETH borrowed by 0x8d53",
+    "role": "exchange",
+    "source": "https://eth.blockscout.com/tx/0x01b3406c2bcf1b9206c38dce48a9a98f9fb988438cc971f374ea5ed982e2d870"
   },
   {
     "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
-    "label": "Tether: USDT",
+    "label": "Tether USDT token contract. Emits AddedBlackList for the freezes",
     "role": "issuer",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x7baba482077843514d9c72bac0110ba0916b0814288a72917e2c3bb27a9d8659"
   },
   {
-    "address": "0x86c795e65c14cc61c6462b6347c545ab33beb2d9",
-    "label": "Tether: owner",
+    "address": "0xc6cde7c39eb2f0f0095f41570af89efc2c1ea828",
+    "label": "Tether multisig that executed the USDT blacklist transactions",
     "role": "issuer",
-    "source": "mock"
+    "source": "https://eth.blockscout.com/tx/0x7baba482077843514d9c72bac0110ba0916b0814288a72917e2c3bb27a9d8659"
+  },
+  {
+    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "label": "Circle USDC token contract. Circle froze 823M USDC",
+    "role": "issuer",
+    "source": "https://www.trmlabs.com/resources/blog/north-korea-steals-usd-6-36-billion-from-binance-in-the-largest-hack-in-history"
   }
 ]
