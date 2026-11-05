@@ -64,14 +64,54 @@ From outside Amp:
 
 ## Building a derived dataset
 
-We built `a3k5/stablecoin_forensics` on staging as consumers, with an admin token (AMPD-27). It has two tables over `edgeandnode/ethereum_mainnet@0.0.2`: `stablecoin_freezes` (freeze, unfreeze and seizure events from eight issuers) and `erc20_balance_changes` (one row per `Transfer` leg for those tokens). Steps and commands are in `datasets/README.md`.
+We built `a3k5/stablecoin_forensics` on staging as consumers, with an admin token (AMPD-27). Steps and commands are in `datasets/README.md`.
+
+### What the dataset is
+
+Two tables that Amp stores as Parquet files on staging. Queries read those files and never touch raw logs.
+
+- `stablecoin_freezes`: one row per freeze, unfreeze or seizure event from eight issuers (USDT, USDC, RLUSD, XAUt, USD1, FDUSD, PAXG, PYUSD). Columns are block, time, transaction, token, event, account, and amount for seizures. 42 rows.
+- `erc20_balance_changes`: two rows per `Transfer` of those tokens, negative for the sender and positive for the receiver. Columns are block, time, transaction, token, address and signed amount. 7,656,728 rows.
+
+### Where the data comes from
+
+Only Ethereum event logs, read from Amp's raw dataset `edgeandnode/ethereum_mainnet@0.0.2`, which Amp extracts from an Ethereum node. We added the event signatures, taken from each token's verified ABI on Sourcify, and the token symbols and decimals, written into the manifest. No outside address lists or transaction hashes go in.
+
+### How it is populated
+
+The manifest holds one SQL query per table. A staging worker ran those queries block range by block range: it kept the logs from the eight token contracts with a matching event, decoded them and wrote the rows. Version 0.1.0 covers the hack window, blocks 26300743 to 26322290 (about 72 hours), and stopped there. It does not follow the chain. More blocks need a new version and a new deploy.
+
+### Why we built it
+
+- Speed. Every raw-logs query decodes millions of logs again. The derived tables answer the same questions 4 to 5 times faster (numbers below).
+- Amounts. A full-history balance for one address from raw logs hit staging's 10-minute query deadline (AMPD-26). A balance table computed once turns "balance at block X" into a sum.
+- Dogfooding. Building our own dataset shows the consumer experience. The friction is listed below.
+
+### What we can read from it
+
+- Which issuer froze, unfroze or seized which address, and when, across all eight tokens in one query.
+- Any address's net flow of these tokens between two blocks, including at its freeze block.
+- For addresses that held none of the token before the window, that net flow is the frozen balance: 971,149,299.48 USDT and 823,000,000 USDC at `0x5227…2f8c`, and 30,000,000 USDT at `0xb171…c8c3`.
+- Top receivers and flows over time, as plain `GROUP BY` queries.
+
+It cannot give absolute balances for addresses that held funds before the window, such as Binance 14. It also misses tokens outside the eight, ETH (no traces) and USD values. USDT `Issue`, `Redeem` and `DestroyedBlackFunds` change balances without a `Transfer` event, so the table misses them.
+
+### How we use it
+
+- Frozen amounts for `data/freezes.json`. AMPD-26 left amounts to this dataset.
+- The SQL behind the freeze moment in the demo. The query against the derived tables is short and runs in about 2 s. The app does not read the dataset yet.
+- The story for the Amp team: raw logs answer the question, and a derived dataset makes the answer fast and reusable.
+
+No full history for now (ak, 5 Nov). This is a proof of concept, and the hack window covers the demo. A version from token deployment would be up to about 200 GB at today's volume and would need the extra USDT events above.
+
+### Building it
 
 Results:
 
 - From the hack-window start (block 26300743) to block 26322290, the job took 4 min 41 s. It wrote 7,656,728 balance legs (181.5 MB) and 42 freeze events (13 KB).
 - The freeze table matches the raw-logs query row for row (42 events). Querying it takes 1.8 s, against 6.8 s for the same SQL on raw logs.
 - USDT net flow per frozen address at its freeze block takes 2.9 s from the derived tables and 13.6 s from raw logs, with identical results. Medians of three runs, in `datasets/metrics.json`.
-- The window-only start already gives 971,149,299.48 USDT at `0x5227…2f8c` and 30,000,000 at `0xb171…c8c3`, because neither held USDT before the window. `0xaa24…54a0` shows 174,999,872.33, not 175M. Binance 14 shows a negative net flow because it held USDT before the window. Absolute balances need the dataset to start at token deployment.
+- The window-only start already gives 971,149,299.48 USDT at `0x5227…2f8c` and 30,000,000 at `0xb171…c8c3`, because neither held USDT before the window. `0xaa24…54a0` shows 174,999,872.33, not 175M. Binance 14 shows a negative net flow because it held USDT before the window. Absolute balances need the dataset to start at token deployment, which we are not doing for the proof of concept.
 
 What the docs got right:
 

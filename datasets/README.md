@@ -63,6 +63,6 @@ node datasets/bench.mjs   # times raw-logs and derived queries, three runs each,
 
 ## Full history
 
-Version 0.1.0 starts at the hack window, so balances are net flow inside the window, not absolute balances. The window holds 7.66M legs in 181.5 MB, about 2.5M legs and 60 MB per day. Starting at token deployment (USDT, block 4634748, November 2017) would cost at most about 200 GB at today's rate, and likely much less. ak decides before we run it.
+Version 0.1.0 starts at the hack window, so balances are net flow inside the window, not absolute balances. The window holds 7.66M legs in 181.5 MB, about 2.5M legs and 60 MB per day. Starting at token deployment (USDT, block 4634748, November 2017) would cost at most about 200 GB at today's rate, and likely much less. Not planned: ak decided on 5 Nov that the hack window is enough for the proof of concept.
 
 USDT `Issue` and `Redeem`, and the `DestroyedBlackFunds` seizure, change balances without a `Transfer` event. A full-history balance must add those legs too.
