@@ -1,3 +1,4 @@
+import { Tag } from "@edgeandnode/eds-react"
 import { useReactFlow, type Edge, type Node } from "@xyflow/react"
 
 import type { CanvasEdgeData, CanvasNodeData } from "./canvasLayout.ts"
@@ -6,6 +7,8 @@ import { tokenColor } from "./FlowEdge.tsx"
 import { formatUsd } from "./format.ts"
 import { DATASET_NAME, freezeTotals } from "./freezes.ts"
 import type { Incident } from "./incident.ts"
+import type { LiveFrozen } from "./liveGraph.ts"
+import { LIVE_DATASET } from "./liveStream.ts"
 import { SourceLabel } from "./SourceLabel.tsx"
 import { TokenMark } from "./TokenAmount.tsx"
 
@@ -18,9 +21,10 @@ interface CanvasSummaryProps {
   time: string
   selected: string | null
   onSelect: (id: string | null) => void
+  liveFrozen: LiveFrozen | null
 }
 
-export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect }: CanvasSummaryProps) {
+export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect, liveFrozen }: CanvasSummaryProps) {
   const flow = useReactFlow()
   const kindOf = new Map(incident.flow.nodes.map((node) => [node.id, node.kind]))
   let taken = 0
@@ -30,6 +34,8 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
     if (kindOf.get(link.source) === "binance") taken += link.value
     if (kindOf.get(link.target) === "frozen") frozen += link.value
   }
+  const newFrozen = liveFrozen && liveFrozen.events.length > 0 ? liveFrozen : null
+  frozen += newFrozen?.usd ?? 0
   const share = incident.taken > 0 ? frozen / incident.taken : 0
 
   const largest = (kind: string) =>
@@ -74,6 +80,17 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
           <SourceLabel source="amp" detail="Transfers out of the Binance wallets" />
           <SourceLabel source="dataset" detail={`Freeze events and amounts from ${DATASET_NAME}`} />
         </p>
+        {newFrozen ? (
+          <p className="text-12 text-muted flex flex-wrap items-center gap-2">
+            <Tag size="xsmall" variant="brand">
+              New
+            </Tag>
+            {newFrozen.usd > 0
+              ? `${formatUsd(newFrozen.usd)} frozen after the hack window`
+              : `${newFrozen.events.length} new ${newFrozen.events.length === 1 ? "freeze" : "freezes"} on watched wallets`}
+            <SourceLabel source="dataset" detail={`Freeze events streamed from ${LIVE_DATASET}`} />
+          </p>
+        ) : null}
         <div role="img" aria-label="Share frozen" className="bg-strong flex h-2 overflow-clip rounded-full">
           <div className="bg-status-info-default h-full transition-[width]" style={{ width: `${share * 100}%` }} />
         </div>

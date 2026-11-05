@@ -11,6 +11,7 @@ import {
   useEdgesState,
   useNodesState,
   useReactFlow,
+  ViewportPortal,
   type EdgeTypes,
   type NodeTypes,
 } from "@xyflow/react"
@@ -20,7 +21,12 @@ import { CanvasStateContext } from "./canvasState.ts"
 import { CanvasSummary } from "./CanvasSummary.tsx"
 import { useOpenDetails } from "./details.ts"
 import { FlowEdge, type FlowCanvasEdge } from "./FlowEdge.tsx"
+import { formatBlock } from "./format.ts"
+import { FreezeNotice } from "./FreezeNotice.tsx"
 import type { Incident } from "./incident.ts"
+import { LiveFeed } from "./LiveFeed.tsx"
+import { liveGraph } from "./liveGraph.ts"
+import { eventTx, HACK_END_BLOCK, useLive, type LiveEvent } from "./liveStream.ts"
 import { Scrubber } from "./Scrubber.tsx"
 import { storySteps, unlitSteps } from "./story.ts"
 import { StoryPlayer } from "./StoryPlayer.tsx"
@@ -67,6 +73,19 @@ function Canvas({ incident }: { incident: Incident }) {
     return () => clearTimeout(timer)
   }, [layout, setNodes, setEdges, flow])
 
+  const { events } = useLive()
+  const liveLayer = useMemo(() => liveGraph(incident, layout.nodes, events), [incident, layout, events])
+  useEffect(() => {
+    setNodes((current) => [
+      ...current.filter((node) => !node.data.live),
+      ...liveLayer.nodes.map((node) => ({ ...node, type: "wallet" as const })),
+    ])
+    setEdges((current) => [
+      ...current.filter((edge) => !edge.data?.live),
+      ...liveLayer.edges.map((edge) => ({ ...edge, type: "flow" as const })),
+    ])
+  }, [liveLayer, setNodes, setEdges])
+
   const [step, setStep] = useState(STEPS)
   const onStepChange = useCallback((next: number) => setStep(next), [])
   const time = scale.toTime(step)
@@ -82,9 +101,13 @@ function Canvas({ incident }: { incident: Incident }) {
   const playing = storyIndex !== null && !paused
   const lit = useMemo(() => (storyIndex === null ? null : new Set(steps[storyIndex]?.nodeIds)), [steps, storyIndex])
 
+  const showLive = storyIndex === null && step >= STEPS
+
   const [selected, setSelected] = useState<string | null>(null)
+  const [liveFocus, setLiveFocus] = useState<Set<string> | null>(null)
   const focus = useMemo(() => {
     if (lit) return lit
+    if (liveFocus && showLive) return liveFocus
     if (!selected) return null
     const set = new Set([selected])
     for (const edge of layout.edges) {
@@ -92,11 +115,28 @@ function Canvas({ incident }: { incident: Incident }) {
       if (edge.target === selected) set.add(edge.source)
     }
     return set
-  }, [layout, selected, lit])
+  }, [layout, selected, lit, liveFocus, showLive])
 
-  const state = useMemo(() => ({ time, focus, selected, lit }), [time, focus, selected, lit])
+  const state = useMemo(
+    () => ({ time, focus, selected, lit, live: showLive, touched: liveLayer.touched }),
+    [time, focus, selected, lit, showLive, liveLayer],
+  )
+
+  const pickLive = (event: LiveEvent) => {
+    const addresses = event.kind === "transfer" ? [event.from, event.to] : [event.address]
+    const ids = addresses.map(liveLayer.idFor).filter((id) => id !== null)
+    setStoryIndex(null)
+    setPaused(false)
+    setStep(STEPS)
+    setSelected(null)
+    setLiveFocus(ids.length > 0 ? new Set(ids) : null)
+    if (ids.length > 0)
+      void flow.fitView({ nodes: ids.map((id) => ({ id })), duration: 600, padding: 0.35, maxZoom: 1 })
+    open({ kind: "live", hash: eventTx(event) })
+  }
 
   const togglePlay = () => {
+    setLiveFocus(null)
     if (storyIndex === null) {
       setStep(0)
       setPaused(false)
@@ -122,11 +162,15 @@ function Canvas({ incident }: { incident: Incident }) {
         nodesConnectable={false}
         edgesFocusable={false}
         onNodeClick={(_event, node) => {
+          setLiveFocus(null)
           setSelected(node.id === selected ? null : node.id)
           if (node.data.address) open({ kind: "address", address: node.data.address })
           else if (node.data.kind === "frozen") open({ kind: "frozen" })
         }}
-        onPaneClick={() => setSelected(null)}
+        onPaneClick={() => {
+          setSelected(null)
+          setLiveFocus(null)
+        }}
         proOptions={{ hideAttribution: true }}
         style={FLOW_STYLE}
       >
@@ -135,7 +179,7 @@ function Canvas({ incident }: { incident: Incident }) {
         <Panel position="top-left">
           <div
             data-hidden={playing || undefined}
-            className="transition-opacity duration-300 data-hidden:pointer-events-none data-hidden:opacity-0"
+            className="flex flex-col gap-3 transition-opacity duration-300 data-hidden:pointer-events-none data-hidden:opacity-0"
             aria-hidden={playing || undefined}
           >
             <CanvasSummary
@@ -145,7 +189,9 @@ function Canvas({ incident }: { incident: Incident }) {
               time={time}
               selected={selected}
               onSelect={setSelected}
+              liveFrozen={showLive ? liveLayer.frozen : null}
             />
+            <LiveFeed onPick={pickLive} />
           </div>
         </Panel>
         <Panel position="top-right">
@@ -159,8 +205,22 @@ function Canvas({ incident }: { incident: Incident }) {
               <SegmentedControl.Option value="hops">By hop</SegmentedControl.Option>
               <SegmentedControl.Option value="time">By time</SegmentedControl.Option>
             </SegmentedControl>
+            {showLive ? <FreezeNotice onPick={pickLive} /> : null}
           </div>
         </Panel>
+        {showLive && liveLayer.column ? (
+          <ViewportPortal>
+            <div
+              className="text-14 text-default absolute flex flex-col"
+              style={{ transform: `translate(${liveLayer.column.x}px, ${liveLayer.column.y - 56}px)` }}
+            >
+              <span className="font-medium">New</span>
+              <span className="text-12 text-muted">
+                Wallets that enter the flow after block {formatBlock(HACK_END_BLOCK)}
+              </span>
+            </div>
+          </ViewportPortal>
+        ) : null}
         {storyIndex !== null ? (
           <StoryPlayer
             steps={steps}

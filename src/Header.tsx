@@ -4,6 +4,7 @@ import { TerminalWindowIcon } from "@edgeandnode/eds-react/icons"
 
 import { isMock, queries } from "./data.ts"
 import { useOpenDetails } from "./details.ts"
+import { LiveIndicator } from "./LiveIndicator.tsx"
 import { EthereumMark } from "./TokenAmount.tsx"
 import { isAddress, normalizeAddress } from "./trace.ts"
 
@@ -22,6 +23,7 @@ export function Header({ view, onViewChange }: { view: View; onViewChange: (view
           Binance hot wallet hack · 29 October 2026
         </h1>
         {isMock ? <Tag variant="solar">Mock data</Tag> : null}
+        <LiveIndicator />
       </div>
       <div className="flex flex-wrap items-start gap-2">
         <SegmentedControl

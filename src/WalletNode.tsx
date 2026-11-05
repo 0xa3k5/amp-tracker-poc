@@ -31,9 +31,10 @@ function Logo({ data }: { data: CanvasNodeData }) {
 }
 
 export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
-  const { time, focus, selected, lit } = useCanvasState()
+  const { time, focus, selected, lit, live, touched } = useCanvasState()
   const kind = KIND[data.kind]
-  const visible = isVisible(data.firstTs, time) || (lit?.has(data.id) ?? false)
+  const visible = data.live ? live : isVisible(data.firstTs, time) || (lit?.has(data.id) ?? false)
+  const fresh = live && touched.has(data.id)
   const frozenLive = data.kind === "frozen" && visible
 
   if (data.minor) {
@@ -41,14 +42,16 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
       <div
         title={data.address ?? data.label}
         data-hidden={!visible || undefined}
+        data-gone={(data.live && !live) || undefined}
         data-dimmed={(focus !== null && !focus.has(data.id)) || undefined}
-        className="flex h-23 w-62 items-center transition-opacity duration-300 data-dimmed:opacity-25 data-hidden:opacity-10"
+        className="flex h-23 w-62 items-center transition-opacity duration-300 data-dimmed:opacity-25 data-gone:invisible data-hidden:opacity-10"
       >
         <Handle type="target" position={Position.Left} className={HANDLE} />
         <span
           data-selected={selected === data.id || undefined}
           data-clickable={data.address !== undefined || undefined}
-          className="border-subtle bg-canvas text-12 text-muted data-clickable:hover:border-default data-selected:border-default data-selected:text-default flex w-full items-center justify-between gap-2 rounded-full border px-3 py-1.5 data-clickable:cursor-pointer"
+          data-new={fresh || undefined}
+          className="border-subtle bg-canvas text-12 text-muted data-clickable:hover:border-default data-selected:border-default data-selected:text-default data-new:border-brand-default data-new:text-default flex w-full items-center justify-between gap-2 rounded-full border px-3 py-1.5 data-clickable:cursor-pointer"
         >
           <span className="truncate">{data.label}</span>
           <span className="shrink-0">{formatUsd(data.value)}</span>
@@ -63,17 +66,26 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
       title={data.address ?? data.label}
       data-kind={data.kind}
       data-hidden={!visible || undefined}
+      data-gone={(data.live && !live) || undefined}
       data-dimmed={(focus !== null && !focus.has(data.id)) || undefined}
       data-selected={selected === data.id || undefined}
       data-clickable={data.address !== undefined || undefined}
-      className="rounded-8 border-muted bg-subtle data-[kind=attacker]:border-status-error-default data-[kind=binance]:border-status-warning-default data-[kind=frozen]:border-status-info-default data-[kind=held]:border-status-error-muted data-selected:bg-elevated data-clickable:hover:border-default flex h-23 w-62 flex-col justify-between gap-1 border px-3 py-2.5 transition-[opacity,background-color] duration-300 data-clickable:cursor-pointer data-dimmed:opacity-25 data-hidden:opacity-10 data-selected:border-2"
+      data-new={fresh || undefined}
+      className="rounded-8 border-muted bg-subtle data-[kind=attacker]:border-status-error-default data-[kind=binance]:border-status-warning-default data-[kind=frozen]:border-status-info-default data-[kind=held]:border-status-error-muted data-selected:bg-elevated data-clickable:hover:border-default data-new:border-brand-default flex h-23 w-62 flex-col justify-between gap-1 border px-3 py-2.5 transition-[opacity,background-color] duration-300 data-clickable:cursor-pointer data-dimmed:opacity-25 data-gone:invisible data-hidden:opacity-10 data-new:border-2 data-selected:border-2"
     >
       <Handle type="target" position={Position.Left} className={HANDLE} />
       <span className="flex items-center gap-2">
         <Logo data={data} />
-        <Tag size="xsmall" variant={kind.tag}>
-          {kind.name}
-        </Tag>
+        {data.live ? null : (
+          <Tag size="xsmall" variant={kind.tag}>
+            {kind.name}
+          </Tag>
+        )}
+        {fresh ? (
+          <Tag size="xsmall" variant="brand">
+            {data.live ? "New" : "New activity"}
+          </Tag>
+        ) : null}
         {frozenLive ? <Status variant="info">Locked</Status> : null}
         {data.address && frozenByAddress.get(data.address)?.foundByAmp ? (
           <Tag size="xsmall" variant="galactic">

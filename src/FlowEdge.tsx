@@ -24,9 +24,10 @@ function edgeTitle({ link }: CanvasEdgeData) {
 
 export function FlowEdge(props: EdgeProps<FlowCanvasEdge>) {
   const { id, data, source, target, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition } = props
-  const { time, focus, selected } = useCanvasState()
+  const { time, focus, selected, live } = useCanvasState()
   const [path, labelX, labelY] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition })
   if (!data) return null
+  if (data.live) return live ? <LiveEdge id={id} path={path} data={data} x={labelX} y={labelY} /> : null
 
   const visible = isVisible(data.link.firstTs, time)
   const active = focus === null || (focus.has(source) && focus.has(target))
@@ -64,6 +65,50 @@ export function FlowEdge(props: EdgeProps<FlowCanvasEdge>) {
           >
             <TokenMark symbol={data.token} size={14} />
             {formatUsd(data.link.value)}
+          </div>
+        </EdgeLabelRenderer>
+      ) : null}
+    </>
+  )
+}
+
+function LiveEdge({ id, path, data, x, y }: { id: string; path: string; data: CanvasEdgeData; x: number; y: number }) {
+  const { focus } = useCanvasState()
+  const active = focus === null || (focus.has(data.link.source) && focus.has(data.link.target))
+  const color = "var(--border-color-brand-default)"
+  return (
+    <>
+      <BaseEdge
+        id={id}
+        path={path}
+        style={{
+          stroke: color,
+          strokeWidth: 1.5 + 4 * Math.sqrt(data.share),
+          strokeOpacity: active ? 0.6 : 0.08,
+          transition: "stroke-opacity 300ms",
+        }}
+      />
+      {active ? (
+        <path
+          d={path}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeOpacity={0.9}
+          strokeDasharray="2 22"
+          strokeLinecap="round"
+          className="pointer-events-none animate-[flow_1.4s_linear_infinite]"
+        />
+      ) : null}
+      {active ? (
+        <EdgeLabelRenderer>
+          <div
+            title={edgeTitle(data)}
+            className="rounded-6 border-brand-default bg-subtle text-12 nodrag nopan pointer-events-auto absolute flex items-center gap-1 border px-1.5 py-0.5 whitespace-nowrap"
+            style={{ transform: `translate(-50%, -50%) translate(${x}px, ${y}px)` }}
+          >
+            <TokenMark symbol={data.token} size={14} />
+            New · {data.link.value > 0 ? formatUsd(data.link.value) : data.token}
           </div>
         </EdgeLabelRenderer>
       ) : null}

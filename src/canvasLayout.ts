@@ -3,8 +3,8 @@ import { STEPS, type TimeScale } from "./timeScale.ts"
 
 export const CARD_WIDTH = 248
 export const CARD_HEIGHT = 92
-const COLUMN_GAP = 160
-const ROW_GAP = 28
+export const COLUMN_GAP = 160
+export const ROW_GAP = 28
 const TIME_WIDTH = 3600
 
 export type LayoutMode = "hops" | "time"
@@ -18,6 +18,7 @@ export interface CanvasNodeData {
   value: number
   firstTs: string
   minor: boolean
+  live: boolean
 }
 
 export interface CanvasEdgeData {
@@ -25,6 +26,7 @@ export interface CanvasEdgeData {
   link: FlowLinkSpec
   token: string
   share: number
+  live: boolean
 }
 
 interface LayoutOptions {
@@ -99,6 +101,7 @@ export function canvasLayout(incident: Incident, { mode, scale }: LayoutOptions)
         value: value(node.id),
         firstTs: first.get(node.id) ?? "",
         minor: isMinor(node.kind, node.id),
+        live: false,
       } satisfies CanvasNodeData,
     })),
     edges: links.map((link) => ({
@@ -109,6 +112,7 @@ export function canvasLayout(incident: Incident, { mode, scale }: LayoutOptions)
         link,
         token: [...link.tokens].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "",
         share: link.value / total,
+        live: false,
       } satisfies CanvasEdgeData,
     })),
   }

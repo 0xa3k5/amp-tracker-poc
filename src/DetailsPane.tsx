@@ -11,6 +11,7 @@ import { formatUsd } from "./format.ts"
 import { frozenByAddress } from "./freezes.ts"
 import { FreezeTags, FrozenList, FrozenNote } from "./Frozen.tsx"
 import { FrozenDetails } from "./FrozenDetails.tsx"
+import { LiveActivity, LiveTransaction } from "./LiveDetails.tsx"
 import { fullLabel, labelFor, ROLES } from "./roles.ts"
 import { SourceLabel } from "./SourceLabel.tsx"
 import { SqlPanel } from "./SqlPanel.tsx"
@@ -81,6 +82,7 @@ function AddressDetails({ address }: { address: string }) {
         ) : null}
       </div>
       {frozen ? <FrozenDetails frozen={frozen} /> : null}
+      <LiveActivity address={address} />
       <DescriptionList size="small">
         <DescriptionList.Item label="Received">{formatUsd(summary.received)}</DescriptionList.Item>
         <DescriptionList.Item label="Sent">{formatUsd(summary.sent)}</DescriptionList.Item>
@@ -120,6 +122,8 @@ function title(details: Details) {
       return labelFor(details.address)
     case "tx":
       return "Transaction"
+    case "live":
+      return "New transaction"
     case "sql":
       return "How Amp got this"
     case "transactions":
@@ -144,6 +148,7 @@ export function DetailsPane({ details, onClose }: { details: Details | null; onC
       </div>
       {details?.kind === "address" ? <AddressDetails key={details.address} address={details.address} /> : null}
       {details?.kind === "tx" ? <TransactionDetails hash={details.hash} /> : null}
+      {details?.kind === "live" ? <LiveTransaction hash={details.hash} /> : null}
       {details?.kind === "sql" ? <SqlPanel key={details.query} initial={details.query} /> : null}
       {details?.kind === "transactions" ? <Timeline transactions={transactions} transfers={transfers} /> : null}
       {details?.kind === "frozen" ? (

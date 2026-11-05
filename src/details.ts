@@ -3,6 +3,7 @@ import { createContext, useContext } from "react"
 export type Details =
   | { kind: "address"; address: string }
   | { kind: "tx"; hash: string }
+  | { kind: "live"; hash: string }
   | { kind: "sql"; query: string }
   | { kind: "transactions" }
   | { kind: "frozen" }
