@@ -4,9 +4,10 @@ export interface CanvasState {
   time: string
   focus: Set<string> | null
   selected: string | null
+  lit: Set<string> | null
 }
 
-export const CanvasStateContext = createContext<CanvasState>({ time: "", focus: null, selected: null })
+export const CanvasStateContext = createContext<CanvasState>({ time: "", focus: null, selected: null, lit: null })
 
 export function useCanvasState() {
   return useContext(CanvasStateContext)

@@ -31,9 +31,9 @@ function Logo({ data }: { data: CanvasNodeData }) {
 }
 
 export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
-  const { time, focus, selected } = useCanvasState()
+  const { time, focus, selected, lit } = useCanvasState()
   const kind = KIND[data.kind]
-  const visible = isVisible(data.firstTs, time)
+  const visible = isVisible(data.firstTs, time) || (lit?.has(data.id) ?? false)
   const frozenLive = data.kind === "frozen" && visible
 
   if (data.minor) {

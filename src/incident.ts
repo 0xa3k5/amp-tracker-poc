@@ -64,6 +64,7 @@ export interface Incident {
   flow: { columns: Array<string>; nodes: Array<FlowNodeSpec>; links: Array<FlowLinkSpec> }
   unfrozen: Array<Balance>
   moments: Array<Moment>
+  nodeIdFor: (address: string) => string | null
 }
 
 const EXIT_ROLES = new Set<Role>(["exchange", "issuer", "bridge"])
@@ -320,7 +321,7 @@ export function buildIncident(): Incident {
     extra: Partial<Pick<Moment, "freeze" | "addresses" | "focus">> = {},
   ) => moments.push({ ts, title, detail, hash, open, freeze: false, addresses: [], focus: null, ...extra })
   const onCanvas = (address: string) => {
-    const id = nodeFor(address)?.id
+    const id = used.has(address) ? address : nodeFor(address.toLowerCase())?.id
     return id && used.has(id) ? id : null
   }
   const txMoment = (title: string, detail: string, t: Transfer) => {
@@ -439,6 +440,7 @@ export function buildIncident(): Incident {
     },
     unfrozen,
     moments,
+    nodeIdFor: onCanvas,
   }
 }
 

@@ -66,7 +66,8 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
     <div className="rounded-8 border-muted bg-subtle flex w-88 flex-col gap-4 border p-4">
       <div className="flex flex-col gap-2">
         <p className="text-20 font-medium text-balance">
-          {formatUsd(taken)} left Binance. Issuers froze {formatUsd(frozen)}.
+          {taken > 0 ? `${formatUsd(taken)} left Binance.` : "Nothing has left Binance yet."}{" "}
+          {frozen > 0 ? `Issuers froze ${formatUsd(frozen)}.` : taken > 0 ? "No freezes yet." : null}
         </p>
         <p className="text-12 text-muted flex flex-wrap items-center gap-2">
           Ethereum, hack window

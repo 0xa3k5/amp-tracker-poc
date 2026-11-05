@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 3010",
-    "build": "vite build",
+    "build": "node scripts/check/story.mjs && vite build",
     "preview": "vite preview --host 127.0.0.1 --port 3010",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt . --write",
     "format:check": "oxfmt . --check",
-    "typecheck": "tsc -p tsconfig.check.json"
+    "typecheck": "tsc -p tsconfig.check.json",
+    "check:story": "node scripts/check/story.mjs"
   },
   "dependencies": {
     "@edgeandnode/eds-react": "1.2.0",

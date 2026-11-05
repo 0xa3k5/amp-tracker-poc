@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { Button } from "@edgeandnode/eds-react"
-import { CaretLeftIcon, CaretRightIcon, PauseIcon, PlayIcon, XIcon } from "@edgeandnode/eds-react/icons"
+import { CaretLeftIcon, CaretRightIcon, XIcon } from "@edgeandnode/eds-react/icons"
 import { Panel, useReactFlow } from "@xyflow/react"
 
 import { formatTime } from "./format.ts"
@@ -13,6 +13,7 @@ const MOVE_MS = 1200
 interface StoryPlayerProps {
   steps: Array<StoryStep>
   index: number
+  paused: boolean
   scale: TimeScale
   step: number
   onIndexChange: (index: number | null) => void
@@ -20,9 +21,17 @@ interface StoryPlayerProps {
   onSelect: (id: string | null) => void
 }
 
-export function StoryPlayer({ steps, index, scale, step, onIndexChange, onStepChange, onSelect }: StoryPlayerProps) {
+export function StoryPlayer({
+  steps,
+  index,
+  paused,
+  scale,
+  step,
+  onIndexChange,
+  onStepChange,
+  onSelect,
+}: StoryPlayerProps) {
   const flow = useReactFlow()
-  const [paused, setPaused] = useState(false)
   const stepRef = useRef(step)
   stepRef.current = step
   const current = steps[index]!
@@ -90,14 +99,6 @@ export function StoryPlayer({ steps, index, scale, step, onIndexChange, onStepCh
             onClick={() => onIndexChange(index - 1)}
           >
             Previous
-          </Button>
-          <Button
-            variant="secondary"
-            size="small"
-            addonBefore={paused ? PlayIcon : PauseIcon}
-            onClick={() => setPaused(!paused)}
-          >
-            {paused ? "Resume" : "Pause"}
           </Button>
           <Button
             variant="secondary"

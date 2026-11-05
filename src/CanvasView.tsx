@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react"
-import { Button, SegmentedControl } from "@edgeandnode/eds-react"
+import { SegmentedControl } from "@edgeandnode/eds-react"
 import { useEDS } from "@edgeandnode/eds-react/hooks"
-import { PlayIcon } from "@edgeandnode/eds-react/icons"
 import {
   Background,
   BackgroundVariant,
@@ -23,7 +22,7 @@ import { useOpenDetails } from "./details.ts"
 import { FlowEdge, type FlowCanvasEdge } from "./FlowEdge.tsx"
 import type { Incident } from "./incident.ts"
 import { Scrubber } from "./Scrubber.tsx"
-import { storySteps } from "./story.ts"
+import { storySteps, unlitSteps } from "./story.ts"
 import { StoryPlayer } from "./StoryPlayer.tsx"
 import { STEPS, timeScale } from "./timeScale.ts"
 import { WalletNode, type WalletCanvasNode } from "./WalletNode.tsx"
@@ -72,8 +71,20 @@ function Canvas({ incident }: { incident: Incident }) {
   const onStepChange = useCallback((next: number) => setStep(next), [])
   const time = scale.toTime(step)
 
+  const steps = useMemo(() => {
+    const built = storySteps(incident)
+    const unlit = unlitSteps(incident, built)
+    if (unlit.length > 0) console.error(`Story steps that light no card: ${unlit.join("; ")}`)
+    return built
+  }, [incident])
+  const [storyIndex, setStoryIndex] = useState<number | null>(null)
+  const [paused, setPaused] = useState(false)
+  const playing = storyIndex !== null && !paused
+  const lit = useMemo(() => (storyIndex === null ? null : new Set(steps[storyIndex]?.nodeIds)), [steps, storyIndex])
+
   const [selected, setSelected] = useState<string | null>(null)
   const focus = useMemo(() => {
+    if (lit) return lit
     if (!selected) return null
     const set = new Set([selected])
     for (const edge of layout.edges) {
@@ -81,12 +92,21 @@ function Canvas({ incident }: { incident: Incident }) {
       if (edge.target === selected) set.add(edge.source)
     }
     return set
-  }, [layout, selected])
+  }, [layout, selected, lit])
 
-  const steps = useMemo(() => storySteps(incident), [incident])
-  const [storyIndex, setStoryIndex] = useState<number | null>(null)
+  const state = useMemo(() => ({ time, focus, selected, lit }), [time, focus, selected, lit])
 
-  const state = useMemo(() => ({ time, focus, selected }), [time, focus, selected])
+  const togglePlay = () => {
+    if (storyIndex === null) {
+      setStep(0)
+      setPaused(false)
+      setStoryIndex(0)
+    } else setPaused(!paused)
+  }
+  const changeIndex = useCallback((index: number | null) => {
+    setStoryIndex(index)
+    if (index === null) setPaused(false)
+  }, [])
 
   return (
     <CanvasStateContext value={state}>
@@ -113,29 +133,23 @@ function Canvas({ incident }: { incident: Incident }) {
         <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="var(--border-color-default)" />
         <Controls showInteractive={false} position="bottom-right" />
         <Panel position="top-left">
-          <CanvasSummary
-            incident={incident}
-            nodes={nodes}
-            edges={edges}
-            time={time}
-            selected={selected}
-            onSelect={setSelected}
-          />
+          <div
+            data-hidden={playing || undefined}
+            className="transition-opacity duration-300 data-hidden:pointer-events-none data-hidden:opacity-0"
+            aria-hidden={playing || undefined}
+          >
+            <CanvasSummary
+              incident={incident}
+              nodes={nodes}
+              edges={edges}
+              time={time}
+              selected={selected}
+              onSelect={setSelected}
+            />
+          </div>
         </Panel>
         <Panel position="top-right">
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button
-              variant="primary"
-              size="small"
-              addonBefore={PlayIcon}
-              disabled={storyIndex !== null}
-              onClick={() => {
-                setStep(0)
-                setStoryIndex(0)
-              }}
-            >
-              Play story
-            </Button>
             <SegmentedControl
               size="small"
               aria-label="Layout"
@@ -151,15 +165,25 @@ function Canvas({ incident }: { incident: Incident }) {
           <StoryPlayer
             steps={steps}
             index={storyIndex}
+            paused={paused}
             scale={scale}
             step={step}
-            onIndexChange={setStoryIndex}
+            onIndexChange={changeIndex}
             onStepChange={onStepChange}
             onSelect={setSelected}
           />
         ) : null}
         <Panel position="bottom-center">
-          <Scrubber scale={scale} step={step} moments={incident.moments} onStepChange={onStepChange} />
+          <Scrubber
+            scale={scale}
+            step={step}
+            moments={incident.moments}
+            playing={playing}
+            started={storyIndex !== null}
+            onPlayToggle={togglePlay}
+            onStepChange={onStepChange}
+            onPause={() => setPaused(true)}
+          />
         </Panel>
       </ReactFlow>
     </CanvasStateContext>
