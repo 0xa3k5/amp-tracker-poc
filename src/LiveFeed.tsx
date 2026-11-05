@@ -32,7 +32,7 @@ export function LiveFeed({ onPick }: { onPick: (event: LiveEvent) => void }) {
       {shown.length > 0 ? (
         <ol className="-mx-2 flex max-h-80 flex-col overflow-y-auto">
           {shown.slice(0, SHOWN).map((event) => (
-            <li key={eventKey(event)}>
+            <li key={eventKey(event)} className="shrink-0">
               <button
                 type="button"
                 onClick={() => onPick(event)}
