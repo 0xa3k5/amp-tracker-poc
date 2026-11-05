@@ -8,7 +8,8 @@
 // Usage:
 //   node scripts/amp-admin/admin.mjs schema   <manifest.json> [--write]  # dry run on staging; --write fills schemas into the file
 //   node scripts/amp-admin/admin.mjs register <manifest.json> <version>  # POST /datasets
-//   node scripts/amp-admin/admin.mjs deploy   <version> <end_block>      # POST /materialized-datasets/...
+//   node scripts/amp-admin/admin.mjs deploy   <version> <end_block|head> # POST /materialized-datasets/...
+//                                         `head` deploys with no end block: the job follows the chain head
 //   node scripts/amp-admin/admin.mjs status   <version>
 //   node scripts/amp-admin/admin.mjs events   <version>
 //   node scripts/amp-admin/admin.mjs stop     <version>
@@ -92,8 +93,10 @@ switch (cmd) {
     await call("POST", "/datasets", { namespace: NS, name: NAME, version: b, manifest: manifest() })
     break
   case "deploy":
-    if (!a || !b) throw new Error("deploy needs <version> <end_block>: every job is bounded")
-    await call("POST", `${ours}${a}`, { end_block: String(b) })
+    // The end block must be explicit: a number, or the word `head` for a continuous job.
+    if (!a || !b) throw new Error("deploy needs <version> <end_block|head>")
+    if (b !== "head" && !/^\d+$/.test(b)) throw new Error("end_block must be a block number or `head`")
+    await call("POST", `${ours}${a}`, b === "head" ? {} : { end_block: String(b) })
     break
   case "status":
     await call("GET", `${ours}${a}`)

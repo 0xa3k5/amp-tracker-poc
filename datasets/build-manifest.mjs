@@ -2,12 +2,19 @@
 // Schemas are filled in afterwards by `node scripts/amp-admin/admin.mjs schema <file> --write`,
 // which asks the controller's POST /schema to infer them (it writes nothing on staging).
 //
-// Usage: node datasets/build-manifest.mjs [start_block]
+// Usage: node datasets/build-manifest.mjs [start_block] [version]
 //   start_block defaults to 26300743, the start of the hack window (AMPD-18).
+//   version is optional. Without it the script writes stablecoin-forensics.json, the 0.1.0
+//   manifest. With it (for example 0.2.0) it writes stablecoin-forensics-<version>.json and
+//   starts each table's SQL with a /* stablecoin_forensics <version> */ comment.
+//   The comment is there to change the manifest hash. Amp keys a materialization by manifest
+//   hash, so a byte-identical 0.2.0 would be the same revision as 0.1.0, and deploying it to the
+//   chain head would extend 0.1.0 instead of creating a separate job.
 import { writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
 const START = Number(process.argv[2] ?? 26300743)
+const VERSION = process.argv[3]
 
 // Issuer tokens and decimals. Event signatures come from each contract's verified ABI on
 // Sourcify (sourcify.dev/server/v2/contract/1/<address>), read 5 Nov 2026. For proxies we
@@ -118,7 +125,8 @@ FROM (
     AND ${tokenIn(TOKENS.map(([s]) => s))}
 ) t`
 
-const clean = (sql) => sql.replace(/\n\s*/g, " ").trim()
+const marker = VERSION ? `/* stablecoin_forensics ${VERSION} */ ` : ""
+const clean = (sql) => marker + sql.replace(/\n\s*/g, " ").trim()
 
 const manifest = {
   kind: "manifest",
@@ -132,6 +140,7 @@ const manifest = {
   functions: {},
 }
 
-const out = fileURLToPath(new URL("./stablecoin-forensics.json", import.meta.url))
+const file = VERSION ? `./stablecoin-forensics-${VERSION}.json` : "./stablecoin-forensics.json"
+const out = fileURLToPath(new URL(file, import.meta.url))
 writeFileSync(out, JSON.stringify(manifest, null, 2) + "\n")
 console.error(`wrote ${out} (start block ${START}); now run: node scripts/amp-admin/admin.mjs schema ${out} --write`)

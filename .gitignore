@@ -7,3 +7,5 @@ dist/
 .DS_Store
 scripts/trace/raw-*.json
 scripts/freeze/out/
+.amp-stream/
+scripts/stream/out/*.cursor.json

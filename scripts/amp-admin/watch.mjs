@@ -20,7 +20,7 @@ while (true) {
     .map(([k, t]) => {
       const n = t.networks?.[0]
       const at = n ? `${n.current_block ?? n.end_block ?? JSON.stringify(n)}` : "-"
-      return `${k}: block ${at} files ${t.files_count} bytes ${t.total_size_bytes} wm ${t.watermark_timestamp}`
+      return `${k}: block ${at} files ${t.files_count} bytes ${t.total_size_bytes} wm ${t.watermark_timestamp} lag ${t.delay_seconds ?? "-"}s`
     })
     .join(" | ")
   const line = `${new Date().toISOString()} ${s.status}/${m.status} ${tables}`

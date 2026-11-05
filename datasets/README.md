@@ -16,6 +16,13 @@ The issue asked for `stablecoin-forensics`. Dataset names must match `^[a-z_][a-
 - Job 2257 (materialization child 2258) ran from 11:06:02 to 11:10:44 UTC on 5 Nov 2026, 4 min 41 s.
 - `erc20_balance_changes`: 7,656,728 rows, 181.5 MB in 4 files. `stablecoin_freezes`: 42 rows, 13 KB.
 
+## Version 0.2.0
+
+- Same tables, schemas and start block (26300743) as 0.1.0, with no end block, so the job follows the chain head. 0.1.0 is unchanged.
+- Manifest `stablecoin-forensics-0.2.0.json`, hash `231f7626d34d3371213b23806a5ca365fde0f8477193b32c3172ab7f6aa945c9`. Each table's SQL starts with the comment `/* stablecoin_forensics 0.2.0 */`. Amp keys a materialization by manifest hash, so a byte-identical manifest would be the 0.1.0 revision under a second tag, and a deploy without an end block would extend 0.1.0.
+- Job 2260 (materialization child 2261), deployed 14:14:39 UTC on 5 Nov 2026. It reached the head at about 14:20, under 6 minutes for 48,500 blocks. Since then `delay_seconds` has been 4 to 27 s, median 10 s, over 65 polls 20 s apart. Polls land at random points in the 12 s block interval.
+- While the job catches up, `watermark_timestamp` starts at 2015 and `delay_seconds` reads 11 years. The job walks the dependency from block 0 and the SQL filter skips the prefix. The register response also says `start_block: 0`.
+
 ## Commands
 
 Run from the repo root. `AMP_CONTROLLER_BASE_URL` and `AMP_ADMIN_JWT` come from `.env`. The scripts read it in code and never print the token. `scripts/amp-admin/admin.mjs` only allows calls on this dataset and blocks every provider endpoint.
@@ -30,8 +37,10 @@ node scripts/amp-admin/admin.mjs schema datasets/stablecoin-forensics.json --wri
 # 3. Register (creates the a3k5 namespace on first use) and tag a version
 node scripts/amp-admin/admin.mjs register datasets/stablecoin-forensics.json 0.1.0
 
-# 4. Deploy, bounded by an end block
+# 4. Deploy, bounded by an end block, or with `head` to follow the chain (0.2.0)
 node scripts/amp-admin/admin.mjs deploy 0.1.0 26322290
+node datasets/build-manifest.mjs 26300743 0.2.0   # writes stablecoin-forensics-0.2.0.json
+node scripts/amp-admin/admin.mjs deploy 0.2.0 head
 
 # 5. Follow it, and stop it if it runs too long
 node scripts/amp-admin/watch.mjs 0.1.0 10
