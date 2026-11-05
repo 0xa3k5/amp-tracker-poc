@@ -52,4 +52,18 @@ From outside: seed addresses and labels (cited per address in `data/addresses.js
 
 ## Streaming
 
-Findings to follow from the streaming issue.
+The app shows new developments live. `a3k5/stablecoin_forensics@0.2.0` has no end block, so Amp keeps it at the chain head. Two queries with `SETTINGS stream = true` feed `GET /api/stream`: transfers to or from 27 incident wallets, and new freeze events. Measured on 5 Nov 2026:
+
+- **Latency.** At the head, an event reaches the client a median of 4.0 s after its block timestamp (p90 5.8 s, 30 blocks). The freeze stream reads the derived dataset and arrives 0.4 s after the raw stream for the same block.
+- **Derived dataset at the head.** 0.2.0 reached the head under 6 minutes after deploy and has stayed 4 to 27 s behind it since.
+- **Catch-up.** The transfer stream read 27,000 blocks in 52 s. Amp doubled the microbatch from 1 block to 11,305.
+- **Resume.** A saved cursor resumes at the next block, with no gap and no repeat, including after an app server restart.
+- **Reorgs.** None happened. A cursor with a wrong hash made Amp resend that block, and the client caught it.
+
+Problems we hit:
+
+- The TypeScript SDK crashes on Amp's keep-alive, an empty Flight frame sent every 30 s on an idle stream (`Offset is outside the bounds of the DataView`). Every stream died after 30 s until we filtered those frames out.
+- A `_block_num >= N` filter skips the block prefix for a single-table stream but not for a `UNION ALL`. Our transfer stream started at block 0 and scanned 24.7M blocks before we stopped it. We now start fresh streams from a resume cursor built from block N-1's hash.
+- A `UNION` mixing `UInt32` and `Int64` runs as a batch query and fails in streaming mode with a planner error. Explicit casts fix it.
+- The end block is a deploy setting, not part of the manifest, and Amp keys a materialization by manifest hash. Tagging the 0.1.0 manifest as 0.2.0 and deploying it without an end block would have extended 0.1.0. We added a comment to the SQL to get a new hash.
+- While a derived job catches up, status reports `delay_seconds` of 11 years, and the register response says `start_block: 0` even when the SQL filters from a later block.
