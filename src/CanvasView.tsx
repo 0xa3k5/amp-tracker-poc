@@ -57,8 +57,7 @@ function Canvas({ incident }: { incident: Incident }) {
   }, [incident])
 
   const [mode, setMode] = useState<LayoutMode>("hops")
-  const [expanded, setExpanded] = useState(false)
-  const layout = useMemo(() => canvasLayout(incident, { mode, expanded, scale }), [incident, mode, expanded, scale])
+  const layout = useMemo(() => canvasLayout(incident, { mode, scale }), [incident, mode, scale])
 
   const [nodes, setNodes, onNodesChange] = useNodesState<WalletCanvasNode>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<FlowCanvasEdge>([])
@@ -146,9 +145,6 @@ function Canvas({ incident }: { incident: Incident }) {
               <SegmentedControl.Option value="hops">By hop</SegmentedControl.Option>
               <SegmentedControl.Option value="time">By time</SegmentedControl.Option>
             </SegmentedControl>
-            <Button variant="secondary" size="small" onClick={() => setExpanded(!expanded)}>
-              {expanded ? "Hide smaller wallets" : `Show ${layout.minorCount} smaller wallets`}
-            </Button>
           </div>
         </Panel>
         {storyIndex !== null ? (

@@ -18,7 +18,6 @@ export interface CanvasNodeData {
   value: number
   firstTs: string
   minor: boolean
-  hiddenCount: number
 }
 
 export interface CanvasEdgeData {
@@ -30,7 +29,6 @@ export interface CanvasEdgeData {
 
 interface LayoutOptions {
   mode: LayoutMode
-  expanded: boolean
   scale: TimeScale
 }
 
@@ -44,7 +42,7 @@ function stack<T extends { id: string }>(
   items.forEach((item, index) => into.set(item.id, { x, y: offset + index * (CARD_HEIGHT + ROW_GAP) }))
 }
 
-export function canvasLayout(incident: Incident, { mode, expanded, scale }: LayoutOptions) {
+export function canvasLayout(incident: Incident, { mode, scale }: LayoutOptions) {
   const { links } = incident.flow
   const into = new Map<string, number>()
   const out = new Map<string, number>()
@@ -61,15 +59,7 @@ export function canvasLayout(incident: Incident, { mode, expanded, scale }: Layo
   const isMinor = (kind: FlowKind, id: string) =>
     kind !== "frozen" && kind !== "binance" && value(id) < incident.taken * 0.02
 
-  const nodes = incident.flow.nodes.filter((node) => expanded || !isMinor(node.kind, node.id))
-  const shown = new Set(nodes.map((node) => node.id))
-  const visibleLinks = links.filter((link) => shown.has(link.source) && shown.has(link.target))
-  const hiddenCount = new Map<string, number>()
-  for (const link of links) {
-    if (shown.has(link.source) && !shown.has(link.target)) {
-      hiddenCount.set(link.source, (hiddenCount.get(link.source) ?? 0) + 1)
-    }
-  }
+  const nodes = incident.flow.nodes
 
   const sinkColumn = Math.max(...nodes.map((node) => node.column))
   const byValue = (a: { id: string }, b: { id: string }) => value(b.id) - value(a.id)
@@ -98,7 +88,6 @@ export function canvasLayout(incident: Incident, { mode, expanded, scale }: Layo
 
   const total = Math.max(1, ...links.map((link) => link.value))
   return {
-    minorCount: incident.flow.nodes.filter((node) => isMinor(node.kind, node.id)).length,
     nodes: nodes.map((node) => ({
       id: node.id,
       position: positions.get(node.id) ?? { x: 0, y: 0 },
@@ -110,10 +99,9 @@ export function canvasLayout(incident: Incident, { mode, expanded, scale }: Layo
         value: value(node.id),
         firstTs: first.get(node.id) ?? "",
         minor: isMinor(node.kind, node.id),
-        hiddenCount: hiddenCount.get(node.id) ?? 0,
       } satisfies CanvasNodeData,
     })),
-    edges: visibleLinks.map((link) => ({
+    edges: links.map((link) => ({
       id: `${link.source}>${link.target}`,
       source: link.source,
       target: link.target,

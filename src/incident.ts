@@ -319,8 +319,16 @@ export function buildIncident(): Incident {
     open: Details,
     extra: Partial<Pick<Moment, "freeze" | "addresses" | "focus">> = {},
   ) => moments.push({ ts, title, detail, hash, open, freeze: false, addresses: [], focus: null, ...extra })
-  const txMoment = (title: string, detail: string, t: Transfer) =>
-    moment(t.ts, title, detail, t.tx_hash, { kind: "tx", hash: t.tx_hash })
+  const onCanvas = (address: string) => {
+    const id = nodeFor(address)?.id
+    return id && used.has(id) ? id : null
+  }
+  const txMoment = (title: string, detail: string, t: Transfer) => {
+    const from = onCanvas(t.from)
+    const to = onCanvas(t.to)
+    const addresses = [from, to].filter((id) => id !== null)
+    moment(t.ts, title, detail, t.tx_hash, { kind: "tx", hash: t.tx_hash }, { addresses, focus: to ?? from })
+  }
 
   if (takeover) {
     const { grant, revoke } = takeover
