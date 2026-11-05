@@ -1,6 +1,7 @@
 // Runs each query three times against Amp staging and records wall-clock ms (median, min, max)
 // and rows in datasets/metrics.json. Usage: node datasets/bench.mjs
 import { readFileSync, writeFileSync } from "node:fs"
+
 import { runSql } from "./run.mjs"
 
 const Q = [

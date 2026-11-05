@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Input, SegmentedControl, Tag } from "@edgeandnode/eds-react"
+import { Button, Input, SegmentedControl, Tag, ThemeSwitcher } from "@edgeandnode/eds-react"
 import { TerminalWindowIcon } from "@edgeandnode/eds-react/icons"
 
 import { isMock, queries } from "./data.ts"
@@ -66,6 +66,7 @@ export function Header({ view, onViewChange }: { view: View; onViewChange: (view
         >
           How Amp got this
         </Button>
+        <ThemeSwitcher size="small" />
       </div>
     </header>
   )

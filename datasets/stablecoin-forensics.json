@@ -19,10 +19,7 @@
             {
               "name": "_ts",
               "type": {
-                "Timestamp": [
-                  "Nanosecond",
-                  "+00:00"
-                ]
+                "Timestamp": ["Nanosecond", "+00:00"]
               },
               "nullable": false
             },
@@ -34,10 +31,7 @@
             {
               "name": "timestamp",
               "type": {
-                "Timestamp": [
-                  "Nanosecond",
-                  "+00:00"
-                ]
+                "Timestamp": ["Nanosecond", "+00:00"]
               },
               "nullable": false
             },
@@ -85,10 +79,7 @@
             {
               "name": "amount_raw",
               "type": {
-                "Decimal256": [
-                  76,
-                  0
-                ]
+                "Decimal256": [76, 0]
               },
               "nullable": true
             },
@@ -116,10 +107,7 @@
             {
               "name": "_ts",
               "type": {
-                "Timestamp": [
-                  "Nanosecond",
-                  "+00:00"
-                ]
+                "Timestamp": ["Nanosecond", "+00:00"]
               },
               "nullable": false
             },
@@ -131,10 +119,7 @@
             {
               "name": "timestamp",
               "type": {
-                "Timestamp": [
-                  "Nanosecond",
-                  "+00:00"
-                ]
+                "Timestamp": ["Nanosecond", "+00:00"]
               },
               "nullable": false
             },
@@ -172,10 +157,7 @@
             {
               "name": "delta_raw",
               "type": {
-                "Decimal256": [
-                  76,
-                  0
-                ]
+                "Decimal256": [76, 0]
               },
               "nullable": true
             },

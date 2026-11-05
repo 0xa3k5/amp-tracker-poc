@@ -35,11 +35,39 @@ const EVENTS = [
   ["AccountUnpaused", "AccountUnpaused(address account)", "unfreeze", "account", null, ["RLUSD"]],
   ["BlockPlaced", "BlockPlaced(address indexed user)", "freeze", "user", null, ["XAUt"]],
   ["BlockReleased", "BlockReleased(address indexed user)", "unfreeze", "user", null, ["XAUt"]],
-  ["DestroyedBlockedFunds", "DestroyedBlockedFunds(address indexed user, uint256 balance)", "seize", "user", "balance", ["XAUt"]],
+  [
+    "DestroyedBlockedFunds",
+    "DestroyedBlockedFunds(address indexed user, uint256 balance)",
+    "seize",
+    "user",
+    "balance",
+    ["XAUt"],
+  ],
   ["Freeze", "Freeze(address indexed caller, address indexed account)", "freeze", "account", null, ["USD1", "FDUSD"]],
-  ["Unfreeze", "Unfreeze(address indexed caller, address indexed account)", "unfreeze", "account", null, ["USD1", "FDUSD"]],
-  ["FrozenAccountDrained", "FrozenAccountDrained(address indexed caller, address indexed account, uint256 amount)", "seize", "account", "amount", ["USD1"]],
-  ["FrozenFundsReallocated", "FrozenFundsReallocated(address indexed caller, address indexed from, address indexed to, uint256 amount)", "seize", "from", "amount", ["USD1"]],
+  [
+    "Unfreeze",
+    "Unfreeze(address indexed caller, address indexed account)",
+    "unfreeze",
+    "account",
+    null,
+    ["USD1", "FDUSD"],
+  ],
+  [
+    "FrozenAccountDrained",
+    "FrozenAccountDrained(address indexed caller, address indexed account, uint256 amount)",
+    "seize",
+    "account",
+    "amount",
+    ["USD1"],
+  ],
+  [
+    "FrozenFundsReallocated",
+    "FrozenFundsReallocated(address indexed caller, address indexed from, address indexed to, uint256 amount)",
+    "seize",
+    "from",
+    "amount",
+    ["USD1"],
+  ],
   ["FreezeAddress", "FreezeAddress(address indexed addr)", "freeze", "addr", null, ["PAXG", "PYUSD"]],
   ["UnfreezeAddress", "UnfreezeAddress(address indexed addr)", "unfreeze", "addr", null, ["PAXG", "PYUSD"]],
   ["FrozenAddressWiped", "FrozenAddressWiped(address indexed addr)", "seize", "addr", null, ["PAXG", "PYUSD"]],
@@ -48,7 +76,9 @@ const EVENTS = [
 const TRANSFER = "Transfer(address indexed from, address indexed to, uint256 value)"
 const addr = (a) => `evm_encode_hex('${a}')`
 const tokenIn = (syms) =>
-  `address IN (${TOKENS.filter(([s]) => syms.includes(s)).map(([, a]) => addr(a)).join(", ")})`
+  `address IN (${TOKENS.filter(([s]) => syms.includes(s))
+    .map(([, a]) => addr(a))
+    .join(", ")})`
 // symbol is computed in the inner query and decimals from symbol in the outer one. Two CASEs over
 // the same `token = ...` tests in one projection hit the same planner error as two decodes.
 const symbolCase = `CASE ${TOKENS.map(([s, a]) => `WHEN address = ${addr(a)} THEN '${s}'`).join(" ")} END`
@@ -95,7 +125,9 @@ const manifest = {
   dependencies: { eth: "edgeandnode/ethereum_mainnet@0.0.2" },
   tables: {
     stablecoin_freezes: { input: { sql: clean(EVENTS.map(freezeBranch).join(" UNION ALL ")) } },
-    erc20_balance_changes: { input: { sql: clean([legBranch("from", "-"), legBranch("to", "+")].join(" UNION ALL ")) } },
+    erc20_balance_changes: {
+      input: { sql: clean([legBranch("from", "-"), legBranch("to", "+")].join(" UNION ALL ")) },
+    },
   },
   functions: {},
 }
