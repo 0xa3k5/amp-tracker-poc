@@ -97,6 +97,42 @@ What surprised us:
 - The build was fast. Five minutes for 7.66M rows, then our queries on the result ran 4 to 5 times faster than on raw logs.
 - USDT `Issue`, `Redeem` and `DestroyedBlackFunds` change balances without a `Transfer` event. A balance table built from `Transfer` alone is wrong for Tether's treasury and for seized addresses. The full-history version needs those legs.
 
+## Freeze detection with Amp alone
+
+We started from the three Binance hot wallets and nothing else, and used outside lists only to compare at the end (AMPD-26). Queries are in `data/queries/freeze-*.sql`, results in `data/freezes.json`, scripts in `scripts/freeze/`.
+
+What worked:
+
+- **Every freeze event, in one query.** 42 freeze and blacklist events from 8 issuers (USDT, USDC, RLUSD, XAUt, USD1, FDUSD, PAXG, PYUSD) in 9.1 s. That is 29 frozen addresses. Each issuer names its event differently (`AddedBlackList`, `Blacklisted`, `AccountPaused`, `BlockPlaced`, `Freeze`, `FreezeAddress`), and some put the address in the data instead of a topic. We read the signatures from the verified ABIs on Sourcify. For proxies that means the implementation contract.
+- **Linking freezes to the hack.** A hop-by-hop trace over issuer-token transfers of at least $10,000 reached 99 addresses in 7 hops, using 20 queries in 144 s. A second trace over every token stopped at hop 3 with 5,330 addresses after 929 s. Together they link 16 of the 29 frozen addresses to the Binance wallets, each with its path.
+- **Every frozen address the outside sources name was found and linked.** Amp also found 4 they don't name: `0xe702…958d` (RLUSD paused, FDUSD frozen, 40.5M RLUSD), `0xa97b…8d10` (PYUSD, PAXG and USDC), `0xcf4c…23e0` (FDUSD) and `0x8c1c…e58c` (USDC). The last one is a weak link: it has 81 senders and is reached through a RAD transfer.
+- **Five issuers froze the main wallet in seven tokens.** `0x5227…2f8c` was frozen in USDT, USDC, XAUt, USD1, PYUSD, PAXG and FDUSD. The sources mention only USDT and USDC. Binance 14 itself was frozen in five tokens.
+- **Frozen amounts match the sources.** We summed `Transfer` in minus out inside the window, up to the freeze log. That gives 971,149,299.48 USDT at `0x5227`, 823,000,000 USDC at `0x5227` (Circle's freeze, which our fixtures were missing), 30,000,000 USDT at `0xb171` and 174,999,872.33 USDT at `0xaa24`. The last is 127.67 under the 175M the sources give. 30 rows in 5.1 s.
+- **The EIP-7702 takeover is directly visible.** `transactions.authorization_list` shows it. At 20:20:59 UTC, `0x7c86…5ca0` sent Binance 14 a type-4 transaction with 50 authorizations. All 50 delegate to `0x63e8…6fae`, with consecutive nonces 18914775 to 18914824. Binance 14's own transaction in that block used nonce 18914808, inside the range. At 00:10:35 UTC, Binance 14 sent itself an authorization to `0x0`, which cleared the delegation. 51 rows in 7.9 s (`data/queries/binance14-eip7702.sql`).
+
+What didn't work:
+
+- **Full-history balances.** The USDT balance for one address from the token's deployment (21.7M blocks) hit staging's 10-minute query deadline (`query execution deadline exceeded`). A 1M-block slice took 117 s, so a full scan takes about 40 minutes per address and token. The window-only sum is right only for wallets that held nothing before the window. The derived dataset (above) is the way to get absolute balances.
+- **The 12 unlinked frozen addresses.** None appears in the outside sources. We can't rule out a link through ETH, swaps or contract calls, because the trace follows ERC-20 transfers only and Amp has no traces.
+- **Counting counterparties to spot hubs.** Our first rule treated any address with more than 50 counterparties as a router or pool. It cut the trace at `0x5227`, because spam and address-poisoning transfers gave it 167. Counting only senders of tokens that at least 50 addresses sent in the window fixed it. 1,075 tokens pass that test. Listing them takes one 11 s query.
+- **SQL limits.** `CROSS JOIN LATERAL unnest(...)` fails with `Physical plan does not support logical expression OuterReferenceColumn`, so we unnest in a subquery. One query with 16 `CASE` branches over `evm_topic` failed twice with a connection reset. Splitting it into a `UNION ALL` ran in 9.1 s.
+
+## What a forensics tool would need
+
+Each item is checked against the `evm-rpc` table schema in `amp/docs/schemas/tables/evm-rpc.md` and the feature docs in `amp/docs/feat`.
+
+| Need | Today | Why |
+|---|---|---|
+| Traces, full call trees | Feature request | `evm-rpc` writes only `blocks`, `transactions` and `logs`. `phaser` has `enable_traces` but its status is development. |
+| Decoded function calls | Derived dataset | `evm_decode_params` (stable) decodes `transactions.input` from a function signature. It returns NULL when the selector doesn't match, so one table per ABI works. |
+| EIP-7702 delegations | Works today, small feature request | `transactions` has `type` and `authorization_list` (chain id, delegate, nonce, signature), and we found the Binance 14 takeover with it. The signer is not stored. Recovering it needs `ecrecover`, which has no built-in function. A JS UDF could do it, but JS UDFs are experimental. |
+| Contract deployments and bytecode | Partly derived, partly feature request | Direct deploys have `to IS NULL`, but the new contract's address is not stored. Computing it needs keccak over arbitrary bytes, and the only built-in keccak is `evm_topic` for signatures. Factory deploys need traces. Bytecode needs `eth_getCode`, and `eth_call` is the only RPC function. |
+| Funding history before the window | Possible, too slow raw | The data goes back to genesis on staging, but one address over USDT history takes about 40 minutes. A derived per-address table, maybe with bloom filters on the address columns (experimental), would make it a lookup. |
+| Gas and nonce patterns | Derived dataset | `transactions` has `nonce`, `gas_price`, `gas_limit`, `gas_used`, `max_fee_per_gas`, `max_priority_fee_per_gas` and `type`. |
+| Cross-chain bridge events | Derived dataset, plus datasets for other chains | Decoding bridge events on Ethereum is a derived dataset. Following funds to BSC needs a BSC raw dataset on the hosted instance. `evm-rpc` can serve any EVM chain, so this is a deployment request, not an engine change. |
+| ETH balances | Feature request | ETH moved inside contract calls needs traces. `blocks` has `withdrawals_root` but no withdrawal list. Fees are derivable from `gas_used`, `gas_price` and `base_fee_per_gas`. A Multicall3 `getEthBalance` through `eth_call` would work, but only on an Amp with an `eth_call` provider, which staging lacks. |
+| ERC-20 balances | Derived dataset | Window-only sums from `Transfer` matched the published freeze amounts, the largest gap being 127.67 USDT. Full history needs the derived table, plus the USDT `Issue`, `Redeem` and `DestroyedBlackFunds` events, which move balances without a `Transfer`. |
+
 ## What would remove the outside sources
 
 Ranked by how much of the tracer they would move into Amp.
@@ -119,3 +155,5 @@ Ranked by how much of the tracer they would move into Amp.
 - Amp core: static datasets out of development, so labels can ship as versioned datasets.
 - Amp core: indexed tables (PRD-0007) for address lookups in about 1 s.
 - Staging operators: an `evm-rpc` provider for `mainnet` backed by an archive node, so `eth_call` works on staging.
+- Amp core: built-in `ecrecover` and keccak functions, so 7702 signers and deployed contract addresses come out of SQL.
+- Amp core: an `eth_getCode` function next to `eth_call`, for contract bytecode at a block.

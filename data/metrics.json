@@ -28,5 +28,33 @@
     "ms": 35926,
     "rows": 1068,
     "blocks": 21548
+  },
+  {
+    "query": "freeze-events",
+    "ms": 9056,
+    "rows": 42,
+    "blocks": 21548
+  },
+  {
+    "query": "freeze-trace-issuer-tokens",
+    "ms": 152568,
+    "rows": 99,
+    "blocks": 21548,
+    "queries": 20,
+    "hops": 8
+  },
+  {
+    "query": "freeze-trace-all-tokens",
+    "ms": 938946,
+    "rows": 5330,
+    "blocks": 21548,
+    "queries": 72,
+    "hops": 3
+  },
+  {
+    "query": "freeze-window-balances",
+    "ms": 5140,
+    "rows": 30,
+    "blocks": 2392
   }
 ]

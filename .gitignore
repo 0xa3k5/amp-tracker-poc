@@ -6,3 +6,4 @@ dist/
 *.tsbuildinfo
 .DS_Store
 scripts/trace/raw-*.json
+scripts/freeze/out/
