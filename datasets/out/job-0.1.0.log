@@ -1,0 +1,15 @@
+2026-11-05T11:06:14.243Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 13 bytes 22558 wm 1438313687 | stablecoin_freezes: block "ethereum-mainnet" files 9 bytes 17042 wm 1438271235
+2026-11-05T11:06:34.774Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 17 bytes 29809 wm 1479216844 | stablecoin_freezes: block "ethereum-mainnet" files 14 bytes 26781 wm 1466328853
+2026-11-05T11:06:55.616Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 16 bytes 28062 wm 1522163224 | stablecoin_freezes: block "ethereum-mainnet" files 13 bytes 24888 wm 1500237828
+2026-11-05T11:07:16.470Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 16 bytes 28053 wm 1561527117 | stablecoin_freezes: block "ethereum-mainnet" files 13 bytes 24889 wm 1536951869
+2026-11-05T11:07:37.317Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 15 bytes 26344 wm 1599711090 | stablecoin_freezes: block "ethereum-mainnet" files 13 bytes 24877 wm 1568248670
+2026-11-05T11:07:58.164Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 15 bytes 26357 wm 1638509571 | stablecoin_freezes: block "ethereum-mainnet" files 14 bytes 26798 wm 1599711090
+2026-11-05T11:08:18.981Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 15 bytes 26349 wm 1675228019 | stablecoin_freezes: block "ethereum-mainnet" files 13 bytes 24901 wm 1627713292
+2026-11-05T11:08:39.829Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 15 bytes 26329 wm 1705557035 | stablecoin_freezes: block "ethereum-mainnet" files 13 bytes 24913 wm 1659021905
+2026-11-05T11:09:00.674Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 15 bytes 26338 wm 1736966903 | stablecoin_freezes: block "ethereum-mainnet" files 12 bytes 22997 wm 1684964459
+2026-11-05T11:09:21.537Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 13 bytes 22845 wm 1765967771 | stablecoin_freezes: block "ethereum-mainnet" files 12 bytes 22996 wm 1711618763
+2026-11-05T11:09:31.238Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 12 bytes 21074 wm 1778019839 | stablecoin_freezes: block "ethereum-mainnet" files 10 bytes 19183 wm 1722492131
+2026-11-05T11:09:52.087Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 13 bytes 22824 wm 1792474955 | stablecoin_freezes: block "ethereum-mainnet" files 10 bytes 19172 wm 1746621083
+2026-11-05T11:10:13.011Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 13 bytes 22824 wm 1792474955 | stablecoin_freezes: block "ethereum-mainnet" files 10 bytes 19151 wm 1768379627
+2026-11-05T11:10:33.855Z RUNNING/RUNNING erc20_balance_changes: block "ethereum-mainnet" files 13 bytes 22824 wm 1792474955 | stablecoin_freezes: block "ethereum-mainnet" files 9 bytes 17255 wm 1788859967
+2026-11-05T11:10:54.684Z COMPLETED/COMPLETED erc20_balance_changes: block "ethereum-mainnet" files 4 bytes 181529086 wm 1793564663 | stablecoin_freezes: block "ethereum-mainnet" files 4 bytes 13234 wm 1793564663

@@ -1,0 +1,80 @@
+[
+  {
+    "freeze_block": "26300954",
+    "address": "0x5227f603c1ee34ce3c06efe6477003bdfccb2f8c",
+    "net_raw": "971149299483240",
+    "legs": "7"
+  },
+  {
+    "freeze_block": "26300954",
+    "address": "0x9749292d74fd460982d0912ea9515ea24736c762",
+    "net_raw": "0",
+    "legs": "12"
+  },
+  {
+    "freeze_block": "26300955",
+    "address": "0x0ddf0480016e6bcb2c1f5d190d221fba1320697e",
+    "net_raw": "0",
+    "legs": "10"
+  },
+  {
+    "freeze_block": "26300960",
+    "address": "0x8d53903625b8e839b9df4bd28b0efb1cd6b8639a",
+    "net_raw": "0",
+    "legs": "4"
+  },
+  {
+    "freeze_block": "26301009",
+    "address": "0x7aa4d3029e4c6a8e916300014ad95b6d6c03bfd1",
+    "net_raw": "0",
+    "legs": "21"
+  },
+  {
+    "freeze_block": "26301021",
+    "address": "0xaa246bf639586a6ba46762d378ce50ca4fc654a0",
+    "net_raw": "174999872327520",
+    "legs": "2"
+  },
+  {
+    "freeze_block": "26301030",
+    "address": "0xccbef95633adb5cd2b5038db5a38d77e726ca263",
+    "net_raw": "0",
+    "legs": "2"
+  },
+  {
+    "freeze_block": "26301041",
+    "address": "0xb171ca86f82070282138352ff7111b494060c8c3",
+    "net_raw": "30000000000000",
+    "legs": "1"
+  },
+  {
+    "freeze_block": "26301278",
+    "address": "0x28c6c06298d514db089934071355e5743bf21d60",
+    "net_raw": "-1608425491929932",
+    "legs": "495"
+  },
+  {
+    "freeze_block": "26305909",
+    "address": "0xed17ca397ac96f55ea8f2f626a5ff1af0086bd7a",
+    "net_raw": "0",
+    "legs": "1"
+  },
+  {
+    "freeze_block": "26305910",
+    "address": "0x47b4b212de6612d9c4f8ff48133fc9a90697f15f",
+    "net_raw": "-3235258702",
+    "legs": "4"
+  },
+  {
+    "freeze_block": "26319888",
+    "address": "0x111c09990a872946128a2acd26af398513d97ce5",
+    "net_raw": "0",
+    "legs": "1"
+  },
+  {
+    "freeze_block": "26319888",
+    "address": "0x1c59fed4188b8c1c11bd9aa0b3264e7c1648a528",
+    "net_raw": "0",
+    "legs": "1"
+  }
+]

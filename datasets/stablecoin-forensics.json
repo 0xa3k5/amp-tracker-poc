@@ -1,0 +1,193 @@
+{
+  "kind": "manifest",
+  "dependencies": {
+    "eth": "edgeandnode/ethereum_mainnet@0.0.2"
+  },
+  "tables": {
+    "stablecoin_freezes": {
+      "input": {
+        "sql": "SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'AddedBlackList' AS event, 'freeze' AS action, d['user'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'AddedBlackList(address user)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('AddedBlackList(address user)') AND address IN (evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'RemovedBlackList' AS event, 'unfreeze' AS action, d['user'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'RemovedBlackList(address user)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('RemovedBlackList(address user)') AND address IN (evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'DestroyedBlackFunds' AS event, 'seize' AS action, d['user'] AS account, arrow_cast(d['balance'], 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'DestroyedBlackFunds(address user, uint256 balance)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('DestroyedBlackFunds(address user, uint256 balance)') AND address IN (evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'Blacklisted' AS event, 'freeze' AS action, d['account'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'Blacklisted(address indexed account)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('Blacklisted(address indexed account)') AND address IN (evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'UnBlacklisted' AS event, 'unfreeze' AS action, d['account'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'UnBlacklisted(address indexed account)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('UnBlacklisted(address indexed account)') AND address IN (evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'AccountPaused' AS event, 'freeze' AS action, d['account'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'AccountPaused(address account)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('AccountPaused(address account)') AND address IN (evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'AccountUnpaused' AS event, 'unfreeze' AS action, d['account'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'AccountUnpaused(address account)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('AccountUnpaused(address account)') AND address IN (evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'BlockPlaced' AS event, 'freeze' AS action, d['user'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'BlockPlaced(address indexed user)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('BlockPlaced(address indexed user)') AND address IN (evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'BlockReleased' AS event, 'unfreeze' AS action, d['user'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'BlockReleased(address indexed user)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('BlockReleased(address indexed user)') AND address IN (evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'DestroyedBlockedFunds' AS event, 'seize' AS action, d['user'] AS account, arrow_cast(d['balance'], 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'DestroyedBlockedFunds(address indexed user, uint256 balance)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('DestroyedBlockedFunds(address indexed user, uint256 balance)') AND address IN (evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'Freeze' AS event, 'freeze' AS action, d['account'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'Freeze(address indexed caller, address indexed account)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('Freeze(address indexed caller, address indexed account)') AND address IN (evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d'), evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'Unfreeze' AS event, 'unfreeze' AS action, d['account'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'Unfreeze(address indexed caller, address indexed account)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('Unfreeze(address indexed caller, address indexed account)') AND address IN (evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d'), evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'FrozenAccountDrained' AS event, 'seize' AS action, d['account'] AS account, arrow_cast(d['amount'], 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'FrozenAccountDrained(address indexed caller, address indexed account, uint256 amount)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('FrozenAccountDrained(address indexed caller, address indexed account, uint256 amount)') AND address IN (evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'FrozenFundsReallocated' AS event, 'seize' AS action, d['from'] AS account, arrow_cast(d['amount'], 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'FrozenFundsReallocated(address indexed caller, address indexed from, address indexed to, uint256 amount)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('FrozenFundsReallocated(address indexed caller, address indexed from, address indexed to, uint256 amount)') AND address IN (evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'FreezeAddress' AS event, 'freeze' AS action, d['addr'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'FreezeAddress(address indexed addr)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('FreezeAddress(address indexed addr)') AND address IN (evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78'), evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'UnfreezeAddress' AS event, 'unfreeze' AS action, d['addr'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'UnfreezeAddress(address indexed addr)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('UnfreezeAddress(address indexed addr)') AND address IN (evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78'), evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8')) ) e UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, 'FrozenAddressWiped' AS event, 'seize' AS action, d['addr'] AS account, arrow_cast(NULL, 'Decimal256(76, 0)') AS amount_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'FrozenAddressWiped(address indexed addr)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('FrozenAddressWiped(address indexed addr)') AND address IN (evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78'), evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8')) ) e"
+      },
+      "schema": {
+        "arrow": {
+          "fields": [
+            {
+              "name": "_block_num",
+              "type": "UInt64",
+              "nullable": false
+            },
+            {
+              "name": "_ts",
+              "type": {
+                "Timestamp": [
+                  "Nanosecond",
+                  "+00:00"
+                ]
+              },
+              "nullable": false
+            },
+            {
+              "name": "block_num",
+              "type": "UInt64",
+              "nullable": false
+            },
+            {
+              "name": "timestamp",
+              "type": {
+                "Timestamp": [
+                  "Nanosecond",
+                  "+00:00"
+                ]
+              },
+              "nullable": false
+            },
+            {
+              "name": "tx_hash",
+              "type": {
+                "FixedSizeBinary": 32
+              },
+              "nullable": false
+            },
+            {
+              "name": "log_index",
+              "type": "UInt32",
+              "nullable": false
+            },
+            {
+              "name": "token",
+              "type": {
+                "FixedSizeBinary": 20
+              },
+              "nullable": false
+            },
+            {
+              "name": "symbol",
+              "type": "Utf8",
+              "nullable": true
+            },
+            {
+              "name": "event",
+              "type": "Utf8",
+              "nullable": false
+            },
+            {
+              "name": "action",
+              "type": "Utf8",
+              "nullable": false
+            },
+            {
+              "name": "account",
+              "type": {
+                "FixedSizeBinary": 20
+              },
+              "nullable": true
+            },
+            {
+              "name": "amount_raw",
+              "type": {
+                "Decimal256": [
+                  76,
+                  0
+                ]
+              },
+              "nullable": true
+            },
+            {
+              "name": "decimals",
+              "type": "Int64",
+              "nullable": true
+            }
+          ]
+        }
+      }
+    },
+    "erc20_balance_changes": {
+      "input": {
+        "sql": "SELECT block_num, timestamp, tx_hash, log_index, token, symbol, d['from'] AS address, -arrow_cast(d['value'], 'Decimal256(76, 0)') AS delta_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'Transfer(address indexed from, address indexed to, uint256 value)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('Transfer(address indexed from, address indexed to, uint256 value)') AND address IN (evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7'), evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'), evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed'), evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38'), evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d'), evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409'), evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78'), evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8')) ) t UNION ALL  SELECT block_num, timestamp, tx_hash, log_index, token, symbol, d['to'] AS address, arrow_cast(d['value'], 'Decimal256(76, 0)') AS delta_raw, CASE symbol WHEN 'USDT' THEN 6 WHEN 'USDC' THEN 6 WHEN 'RLUSD' THEN 18 WHEN 'XAUt' THEN 6 WHEN 'USD1' THEN 18 WHEN 'FDUSD' THEN 18 WHEN 'PAXG' THEN 18 WHEN 'PYUSD' THEN 6 END AS decimals FROM ( SELECT block_num, timestamp, tx_hash, log_index, address AS token, CASE WHEN address = evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7') THEN 'USDT' WHEN address = evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48') THEN 'USDC' WHEN address = evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed') THEN 'RLUSD' WHEN address = evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38') THEN 'XAUt' WHEN address = evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d') THEN 'USD1' WHEN address = evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409') THEN 'FDUSD' WHEN address = evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78') THEN 'PAXG' WHEN address = evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8') THEN 'PYUSD' END AS symbol, evm_decode_log(topic1, topic2, topic3, data, 'Transfer(address indexed from, address indexed to, uint256 value)') AS d FROM eth.logs WHERE _block_num >= 26300743 AND topic0 = evm_topic('Transfer(address indexed from, address indexed to, uint256 value)') AND address IN (evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7'), evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'), evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed'), evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38'), evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d'), evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409'), evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78'), evm_encode_hex('0x6c3ea9036406852006290770bedfcaba0e23a0e8')) ) t"
+      },
+      "schema": {
+        "arrow": {
+          "fields": [
+            {
+              "name": "_block_num",
+              "type": "UInt64",
+              "nullable": false
+            },
+            {
+              "name": "_ts",
+              "type": {
+                "Timestamp": [
+                  "Nanosecond",
+                  "+00:00"
+                ]
+              },
+              "nullable": false
+            },
+            {
+              "name": "block_num",
+              "type": "UInt64",
+              "nullable": false
+            },
+            {
+              "name": "timestamp",
+              "type": {
+                "Timestamp": [
+                  "Nanosecond",
+                  "+00:00"
+                ]
+              },
+              "nullable": false
+            },
+            {
+              "name": "tx_hash",
+              "type": {
+                "FixedSizeBinary": 32
+              },
+              "nullable": false
+            },
+            {
+              "name": "log_index",
+              "type": "UInt32",
+              "nullable": false
+            },
+            {
+              "name": "token",
+              "type": {
+                "FixedSizeBinary": 20
+              },
+              "nullable": false
+            },
+            {
+              "name": "symbol",
+              "type": "Utf8",
+              "nullable": true
+            },
+            {
+              "name": "address",
+              "type": {
+                "FixedSizeBinary": 20
+              },
+              "nullable": true
+            },
+            {
+              "name": "delta_raw",
+              "type": {
+                "Decimal256": [
+                  76,
+                  0
+                ]
+              },
+              "nullable": true
+            },
+            {
+              "name": "decimals",
+              "type": "Int64",
+              "nullable": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "functions": {}
+}

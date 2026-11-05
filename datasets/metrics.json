@@ -1,0 +1,47 @@
+[
+  {
+    "query": "raw: stablecoin_freezes SQL on raw logs",
+    "file": "datasets/queries/raw-freezes.sql",
+    "ms": 6823,
+    "ms_min": 6656,
+    "ms_max": 10918,
+    "rows": 42,
+    "blocks": 21548
+  },
+  {
+    "query": "derived: stablecoin_freezes",
+    "file": "datasets/queries/derived-freezes.sql",
+    "ms": 1781,
+    "ms_min": 1355,
+    "ms_max": 2024,
+    "rows": 42,
+    "blocks": 21548
+  },
+  {
+    "query": "raw: USDT net flow at freeze block",
+    "file": "datasets/queries/raw-usdt-balance-at-freeze.sql",
+    "ms": 13569,
+    "ms_min": 12921,
+    "ms_max": 17760,
+    "rows": 13,
+    "blocks": 21548
+  },
+  {
+    "query": "derived: USDT net flow at freeze block",
+    "file": "datasets/queries/derived-usdt-balance-at-freeze.sql",
+    "ms": 2870,
+    "ms_min": 2665,
+    "ms_max": 4501,
+    "rows": 13,
+    "blocks": 21548
+  },
+  {
+    "query": "derived: legs per token (7.66M rows)",
+    "file": "datasets/queries/derived-balance-changes-count.sql",
+    "ms": 1642,
+    "ms_min": 1259,
+    "ms_max": 1967,
+    "rows": 8,
+    "blocks": 21548
+  }
+]

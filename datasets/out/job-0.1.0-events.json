@@ -1,0 +1,89 @@
+{
+  "request": "GET /materialized-datasets/a3k5/stablecoin_forensics/versions/0.1.0/events",
+  "status": 200,
+  "ms": 880,
+  "body": {
+    "jobs": [
+      {
+        "job_id": 2257,
+        "kind": "composite",
+        "idempotency_key": "bd7e1980d2603899d7d91856f4120c658846b6f697e8f891421a4d25e7fc351e"
+      },
+      {
+        "job_id": 2258,
+        "kind": "materialize-derived",
+        "idempotency_key": "1225e0dc41000620bc84597b3ef8dc0f1ca3e94c8eb6b4ba245fa86a05f9e763"
+      },
+      {
+        "job_id": 2259,
+        "kind": "gc",
+        "idempotency_key": "8bc8f3362b4252a607bad4680b81e01e2d0e4f55eb42cffde2d4d0ab79992efa"
+      }
+    ],
+    "events": [
+      {
+        "id": 601199,
+        "job_id": 2257,
+        "created_at": "2026-11-05T11:06:02.430+00:00",
+        "node_id": "controller",
+        "event_type": "SCHEDULED"
+      },
+      {
+        "id": 601200,
+        "job_id": 2258,
+        "created_at": "2026-11-05T11:06:02.430+00:00",
+        "node_id": "worker-0",
+        "event_type": "SCHEDULED"
+      },
+      {
+        "id": 601201,
+        "job_id": 2259,
+        "created_at": "2026-11-05T11:06:02.430+00:00",
+        "node_id": "worker-0",
+        "event_type": "SCHEDULED"
+      },
+      {
+        "id": 601202,
+        "job_id": 2257,
+        "created_at": "2026-11-05T11:06:02.461796+00:00",
+        "node_id": "controller",
+        "event_type": "RUNNING"
+      },
+      {
+        "id": 601203,
+        "job_id": 2258,
+        "created_at": "2026-11-05T11:06:02.522360+00:00",
+        "node_id": "worker-0",
+        "event_type": "RUNNING"
+      },
+      {
+        "id": 601204,
+        "job_id": 2259,
+        "created_at": "2026-11-05T11:06:02.823205+00:00",
+        "node_id": "worker-0",
+        "event_type": "RUNNING"
+      },
+      {
+        "id": 601205,
+        "job_id": 2259,
+        "created_at": "2026-11-05T11:06:03.322558+00:00",
+        "node_id": "worker-0",
+        "event_type": "COMPLETED"
+      },
+      {
+        "id": 601215,
+        "job_id": 2258,
+        "created_at": "2026-11-05T11:10:44.020048+00:00",
+        "node_id": "worker-0",
+        "event_type": "COMPLETED"
+      },
+      {
+        "id": 601216,
+        "job_id": 2257,
+        "created_at": "2026-11-05T11:10:45.055331+00:00",
+        "node_id": "controller",
+        "event_type": "COMPLETED"
+      }
+    ]
+  }
+}
