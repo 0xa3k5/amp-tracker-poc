@@ -24,7 +24,7 @@ export function KeyMoments({ incident }: { incident: Incident }) {
               <button
                 type="button"
                 data-freeze={moment.freeze || undefined}
-                onClick={() => open({ kind: "tx", hash: moment.hash })}
+                onClick={() => open(moment.open)}
                 className="hover:bg-muted rounded-6 grid w-full grid-cols-[7rem_1fr] gap-x-4 gap-y-1 px-2 py-3 text-start"
               >
                 <span className="text-12 text-muted pt-0.5">{formatTime(moment.ts)}</span>

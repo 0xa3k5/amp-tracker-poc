@@ -1,11 +1,12 @@
 import { Status, Tag, type TagProps } from "@edgeandnode/eds-react"
 import { formatAddress } from "@edgeandnode/eds-utils"
-import { ExchangeBinance, ExchangeUniswap, TokenAAVE, TokenUSDT } from "@web3icons/react"
+import { ExchangeBinance, ExchangeUniswap, TokenAAVE } from "@web3icons/react"
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react"
 
 import type { CanvasNodeData } from "./canvasLayout.ts"
 import { isVisible, useCanvasState } from "./canvasState.ts"
 import { formatUsd } from "./format.ts"
+import { frozenByAddress } from "./freezes.ts"
 import type { FlowKind } from "./incident.ts"
 
 export type WalletCanvasNode = Node<CanvasNodeData, "wallet">
@@ -24,7 +25,6 @@ const HANDLE = "i:opacity-0 i:pointer-events-none"
 
 function Logo({ data }: { data: CanvasNodeData }) {
   if (data.kind === "binance") return <ExchangeBinance variant="branded" size={20} />
-  if (data.kind === "frozen") return <TokenUSDT variant="branded" size={20} />
   if (/uniswap/i.test(data.label)) return <ExchangeUniswap variant="branded" size={20} />
   if (/aave/i.test(data.label)) return <TokenAAVE variant="branded" size={20} />
   return null
@@ -75,6 +75,11 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
           {kind.name}
         </Tag>
         {frozenLive ? <Status variant="info">Locked</Status> : null}
+        {data.address && frozenByAddress.get(data.address)?.foundByAmp ? (
+          <Tag size="xsmall" variant="galactic">
+            Found by Amp
+          </Tag>
+        ) : null}
       </span>
       <span className="text-14 truncate">{data.label}</span>
       <span className="text-12 text-muted flex justify-between gap-2">

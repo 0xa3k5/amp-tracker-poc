@@ -105,6 +105,7 @@ function Canvas({ incident }: { incident: Incident }) {
         onNodeClick={(_event, node) => {
           setSelected(node.id === selected ? null : node.id)
           if (node.data.address) open({ kind: "address", address: node.data.address })
+          else if (node.data.kind === "frozen") open({ kind: "frozen" })
         }}
         onPaneClick={() => setSelected(null)}
         proOptions={{ hideAttribution: true }}

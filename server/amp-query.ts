@@ -8,6 +8,7 @@ import { DEFAULT_DATASET, withDataset } from "../src/dataset.ts"
 
 export interface QueryRequest {
   name: string
+  source?: "data" | "datasets"
 }
 
 export interface QueryResponse {
@@ -61,21 +62,23 @@ async function runQuery(sql: string, url: string, token: string): Promise<QueryR
 }
 
 async function handle(req: IncomingMessage, res: ServerResponse) {
-  let name: unknown
+  let body: Partial<QueryRequest>
   try {
-    name = ((await readJson(req)) as Partial<QueryRequest>).name
+    body = (await readJson(req)) as Partial<QueryRequest>
   } catch {
     return send(res, 400, { error: "Body must be JSON" })
   }
+  const { name } = body
+  const folder = body.source === "datasets" ? "datasets/queries" : "data/queries"
   if (typeof name !== "string" || !/^[a-z0-9-]+$/.test(name)) {
-    return send(res, 400, { error: "Body needs the `name` of a file in data/queries" })
+    return send(res, 400, { error: `Body needs the \`name\` of a file in ${folder}` })
   }
 
   let sql: string
   try {
-    sql = await readFile(new URL(`../data/queries/${name}.sql`, import.meta.url), "utf8")
+    sql = await readFile(new URL(`../${folder}/${name}.sql`, import.meta.url), "utf8")
   } catch {
-    return send(res, 404, { error: `No query named ${name} in data/queries` })
+    return send(res, 404, { error: `No query named ${name} in ${folder}` })
   }
 
   const url = process.env.AMP_QUERY_URL

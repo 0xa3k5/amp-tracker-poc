@@ -3,20 +3,26 @@ import { Button, CopyButton, DescriptionList, Link, Status, Tag } from "@edgeand
 import { XIcon } from "@edgeandnode/eds-react/icons"
 
 import { addressBook, transactions, transfers } from "./data.ts"
+import { DatasetCompare } from "./DatasetCompare.tsx"
+import { Delegation } from "./Delegation.tsx"
 import type { Details } from "./details.ts"
 import { addressUrl } from "./explorer.ts"
 import { formatUsd } from "./format.ts"
+import { frozenByAddress } from "./freezes.ts"
+import { FreezeTags, FrozenList, FrozenNote } from "./Frozen.tsx"
+import { FrozenDetails } from "./FrozenDetails.tsx"
 import { fullLabel, labelFor, ROLES } from "./roles.ts"
+import { SourceLabel } from "./SourceLabel.tsx"
 import { SqlPanel } from "./SqlPanel.tsx"
 import { Timeline, TimelineDetails } from "./Timeline.tsx"
 import { TokenAmount } from "./TokenAmount.tsx"
-import { freezeTargets, isFreeze, touches } from "./trace.ts"
+import { touches } from "./trace.ts"
 
 const transfersByTx = Map.groupBy(transfers, (t) => t.tx_hash)
-const frozen = new Set(transactions.filter(isFreeze).flatMap(freezeTargets))
 
 function AddressDetails({ address }: { address: string }) {
   const info = addressBook.get(address)
+  const frozen = frozenByAddress.get(address)
   const summary = useMemo(() => {
     const members = new Set([address])
     const txs = transactions.filter((tx) => touches(tx, transfersByTx.get(tx.hash) ?? [], members))
@@ -54,7 +60,10 @@ function AddressDetails({ address }: { address: string }) {
               Unlabelled
             </Tag>
           )}
-          {frozen.has(address) ? <Status variant="info">USDT frozen by Tether</Status> : null}
+          {frozen ? (
+            <Status variant="info">Frozen by {[...new Set(frozen.tokens.map((t) => t.issuer))].join(", ")}</Status>
+          ) : null}
+          {frozen ? <FreezeTags frozen={frozen} /> : null}
         </div>
         <p className="text-12 text-muted flex items-center gap-1 font-mono break-all">
           {address}
@@ -64,8 +73,14 @@ function AddressDetails({ address }: { address: string }) {
           </Link>
         </p>
         {info ? <p className="text-14 text-muted">{fullLabel(address)}</p> : null}
-        {info ? <p className="text-12 text-muted">Label source: {info.source}</p> : null}
+        {info ? (
+          <p className="text-12 text-muted flex flex-wrap items-center gap-2">
+            Label source: {info.source}
+            <SourceLabel source={info.source === "Amp trace" ? "amp" : "outside"} detail={info.source} />
+          </p>
+        ) : null}
       </div>
+      {frozen ? <FrozenDetails frozen={frozen} /> : null}
       <DescriptionList size="small">
         <DescriptionList.Item label="Received">{formatUsd(summary.received)}</DescriptionList.Item>
         <DescriptionList.Item label="Sent">{formatUsd(summary.sent)}</DescriptionList.Item>
@@ -109,6 +124,12 @@ function title(details: Details) {
       return "How Amp got this"
     case "transactions":
       return `All ${transactions.length} transactions`
+    case "frozen":
+      return "Frozen on chain"
+    case "delegation":
+      return "EIP-7702 takeover of Binance 14"
+    case "compare":
+      return "Freezes: raw logs vs our dataset"
   }
 }
 
@@ -125,6 +146,16 @@ export function DetailsPane({ details, onClose }: { details: Details | null; onC
       {details?.kind === "tx" ? <TransactionDetails hash={details.hash} /> : null}
       {details?.kind === "sql" ? <SqlPanel key={details.query} initial={details.query} /> : null}
       {details?.kind === "transactions" ? <Timeline transactions={transactions} transfers={transfers} /> : null}
+      {details?.kind === "frozen" ? (
+        <div className="flex flex-col gap-3">
+          <FrozenNote />
+          <div className="-mx-2">
+            <FrozenList />
+          </div>
+        </div>
+      ) : null}
+      {details?.kind === "delegation" ? <Delegation /> : null}
+      {details?.kind === "compare" ? <DatasetCompare /> : null}
     </div>
   )
 }

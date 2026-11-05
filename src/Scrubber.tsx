@@ -82,7 +82,7 @@ export function Scrubber({ scale, step, moments, onStepChange }: ScrubberProps) 
               onClick={() => {
                 setPlaying(false)
                 onStepChange(scale.toStep(moment.ts))
-                open({ kind: "tx", hash: moment.hash })
+                open(moment.open)
               }}
               className="bg-strong data-freeze:bg-status-info-default absolute top-0.5 size-2.5 -translate-x-1/2 rounded-full hover:scale-150"
               style={{

@@ -1,7 +1,15 @@
-import { addressBook, transactions, transfers } from "./data.ts"
+import { addressBook, transfers } from "./data.ts"
+import type { Details } from "./details.ts"
 import { formatAmount, formatUsd } from "./format.ts"
+import {
+  freezeTotals,
+  frozenAddresses,
+  frozenByAddress,
+  frozenTokensAt,
+  frozenUsdByToken,
+  takeover,
+} from "./freezes.ts"
 import { labelFor } from "./roles.ts"
-import { freezeTargets, isFreeze } from "./trace.ts"
 import type { Role, Transfer } from "./types.ts"
 
 export type FlowKind = "binance" | "attacker" | "hop" | "frozen" | "held" | "unlabelled" | "defi"
@@ -41,12 +49,16 @@ export interface Moment {
   detail: string
   hash: string
   freeze: boolean
+  addresses: Array<string>
+  focus: string | null
+  open: Details
 }
 
 export interface Incident {
   taken: number
   frozen: number
   frozenWallets: number
+  frozenOnCanvas: number
   unpricedTokens: number
   window: { fromTs: string; toTs: string } | null
   flow: { columns: Array<string>; nodes: Array<FlowNodeSpec>; links: Array<FlowLinkSpec> }
@@ -144,19 +156,17 @@ export function buildIncident(): Incident {
   const taken = outOfBinance.reduce((sum, t) => sum + usdOf(t), 0)
   const unpricedTokens = new Set(outOfBinance.filter((t) => !t.amount_usd).map((t) => t.token)).size
 
-  const freezes = transactions.filter(isFreeze).sort((a, b) => a.block_num - b.block_num)
-  const frozenSet = new Set(freezes.flatMap(freezeTargets).filter((address) => !isBinance(address)))
-
+  const attackerFrozen = frozenAddresses.filter((f) => !f.binance)
   const held = balances(scope)
-  const frozenUsdt = (address: string) =>
-    frozenSet.has(address) ? Math.max(0, held.get(address)?.get("USDT")?.usd ?? 0) : 0
-  const openHoldings = (address: string) =>
-    [...(held.get(address)?.values() ?? [])]
-      .filter((h) => h.usd > 0 && !(h.token === "USDT" && frozenSet.has(address)))
+  const frozenUsd = (address: string) => (isBinance(address) ? 0 : (frozenByAddress.get(address)?.usd ?? 0))
+  const openHoldings = (address: string) => {
+    const frozenTokens = frozenTokensAt(address)
+    return [...(held.get(address)?.values() ?? [])]
+      .filter((h) => h.usd > 0 && !frozenTokens.has(h.token))
       .sort((a, b) => b.usd - a.usd)
+  }
 
-  let frozen = 0
-  for (const address of frozenSet) frozen += frozenUsdt(address)
+  const frozen = freezeTotals.usd
 
   const unfrozen = [...reach]
     .filter((address) => HOP_ROLES.has(roleOf(address)!))
@@ -175,7 +185,7 @@ export function buildIncident(): Incident {
   const sink = (id: string, label: string, kind: FlowKind, address?: string): FlowNodeSpec =>
     address ? { id, label, column: sinkColumn, kind, address } : { id, label, column: sinkColumn, kind }
   const SINKS = {
-    frozen: sink("frozen", "Frozen by Tether", "frozen"),
+    frozen: sink("frozen", "Frozen by issuers", "frozen"),
     held: sink("held", "Still in the attacker's wallets", "held"),
   }
 
@@ -256,20 +266,27 @@ export function buildIncident(): Incident {
     }
     link(source, target, value, t.token, 1, t.ts)
   }
-  const freezeTs = new Map<string, string>()
-  for (const tx of freezes)
-    for (const address of freezeTargets(tx)) if (!freezeTs.has(address)) freezeTs.set(address, tx.ts)
   const lastSeen = new Map<string, string>()
   for (const t of scope) lastSeen.set(t.to, t.ts)
+  const freezeLink = (source: FlowNodeSpec, address: string) => {
+    const ts = frozenByAddress.get(address)?.firstTs ?? ""
+    for (const [token, usd] of frozenUsdByToken(address)) link(source, SINKS.frozen, usd, token, 0, ts)
+  }
   for (const address of wallets) {
     const source = nodeFor(address)!
-    link(source, SINKS.frozen, frozenUsdt(address), "USDT", 0, freezeTs.get(address) ?? "")
-    const net = [...(held.get(address)?.values() ?? [])].reduce((sum, h) => sum + h.usd, 0) - frozenUsdt(address)
+    freezeLink(source, address)
+    const net = [...(held.get(address)?.values() ?? [])].reduce((sum, h) => sum + h.usd, 0) - frozenUsd(address)
     const holdings = openHoldings(address)
     const positive = holdings.reduce((sum, h) => sum + h.usd, 0)
     if (net <= 0 || positive <= 0) continue
     for (const holding of holdings)
       link(source, SINKS.held, (holding.usd / positive) * net, holding.token, 0, lastSeen.get(address) ?? "")
+  }
+
+  for (const f of attackerFrozen) {
+    if (wallets.includes(f.address) || f.usd <= 0) continue
+    const column = Math.min(lastHop, Math.max(1, f.hop))
+    freezeLink({ id: f.address, label: labelFor(f.address), column, kind: "hop", address: f.address }, f.address)
   }
 
   for (let column = 1; column < sinkColumn; column += 1) {
@@ -294,22 +311,44 @@ export function buildIncident(): Incident {
   const used = new Set(keptLinks.flatMap((l) => [l.source, l.target]))
 
   const moments: Array<Moment> = []
-  const drain = outOfBinance[0]
-  if (drain) {
-    moments.push({ ts: drain.ts, title: "Drain starts", detail: describe(drain), hash: drain.tx_hash, freeze: false })
+  const moment = (
+    ts: string,
+    title: string,
+    detail: string,
+    hash: string,
+    open: Details,
+    extra: Partial<Pick<Moment, "freeze" | "addresses" | "focus">> = {},
+  ) => moments.push({ ts, title, detail, hash, open, freeze: false, addresses: [], focus: null, ...extra })
+  const txMoment = (title: string, detail: string, t: Transfer) =>
+    moment(t.ts, title, detail, t.tx_hash, { kind: "tx", hash: t.tx_hash })
+
+  if (takeover) {
+    const { grant, revoke } = takeover
+    moment(
+      grant.ts,
+      "Attacker takes over Binance 14",
+      `${labelFor(grant.from)} sends one transaction with ${takeover.count} EIP-7702 authorizations (nonces ${takeover.firstNonce} to ${takeover.lastNonce}). Each one delegates ${labelFor(grant.to)} to ${labelFor(grant.delegate)}.`,
+      grant.tx_hash,
+      { kind: "delegation" },
+      { addresses: [grant.to, grant.from, grant.delegate], focus: grant.to },
+    )
+    moment(
+      revoke.ts,
+      "Binance revokes the delegation",
+      `${labelFor(revoke.from)} signs a new authorization to the zero address, which clears the attacker's delegation.`,
+      revoke.tx_hash,
+      { kind: "delegation" },
+      { addresses: [revoke.from], focus: revoke.from },
+    )
   }
+  const drain = outOfBinance[0]
+  if (drain) txMoment("Drain starts", describe(drain), drain)
   const largest = outOfBinance.reduce<Transfer | undefined>(
     (top, t) => (!top || usdOf(t) > usdOf(top) ? t : top),
     undefined,
   )
   if (largest && largest.tx_hash !== drain?.tx_hash) {
-    moments.push({
-      ts: largest.ts,
-      title: "Largest single withdrawal",
-      detail: `${describe(largest)}, about ${formatUsd(usdOf(largest))}`,
-      hash: largest.tx_hash,
-      freeze: false,
-    })
+    txMoment("Largest single withdrawal", `${describe(largest)}, about ${formatUsd(usdOf(largest))}`, largest)
   }
   const split = scope.find(
     (t) =>
@@ -318,54 +357,69 @@ export function buildIncident(): Incident {
       HOP_ROLES.has(roleOf(t.to)!) &&
       usdOf(t) >= SIGNIFICANT,
   )
-  if (split) {
-    moments.push({
-      ts: split.ts,
-      title: "Funds split into intermediary wallets",
-      detail: describe(split),
-      hash: split.tx_hash,
-      freeze: false,
-    })
-  }
+  if (split) txMoment("Funds split into intermediary wallets", describe(split), split)
   const swap = scope.find((t) => !isBinance(t.from) && isExit(t.to) && usdOf(t) >= SIGNIFICANT)
-  if (swap) {
-    moments.push({
-      ts: swap.ts,
-      title: "First swap or deposit",
-      detail: describe(swap),
-      hash: swap.tx_hash,
-      freeze: false,
-    })
+  if (swap) txMoment("First swap or deposit", describe(swap), swap)
+
+  const rows = attackerFrozen.flatMap((f) => f.tokens.map((t) => ({ ...t, address: f.address })))
+  const tether = rows.filter((r) => r.issuer === "Tether").sort((a, b) => a.ts.localeCompare(b.ts))
+  if (tether[0]) {
+    const blacklisted = [...new Set(tether.map((r) => r.address))]
+    const minutes = Math.round((Date.parse(tether.at(-1)!.ts) - Date.parse(tether[0].ts)) / 60_000)
+    moment(
+      tether[0].ts,
+      "Tether starts freezing",
+      `Tether blacklists ${blacklisted.length} hack-linked wallets in ${minutes} minutes, starting with ${labelFor(tether[0].address)}.`,
+      tether[0].tx,
+      { kind: "frozen" },
+      { freeze: true, addresses: blacklisted, focus: SINKS.frozen.id },
+    )
   }
-  const attackerFreezes = freezes.filter((tx) => freezeTargets(tx).some((address) => frozenSet.has(address)))
-  const firstFreeze = attackerFreezes[0]
-  const lastFreeze = attackerFreezes.at(-1)
-  if (firstFreeze && lastFreeze) {
-    const minutes = Math.round((Date.parse(lastFreeze.ts) - Date.parse(firstFreeze.ts)) / 60_000)
-    moments.push({
-      ts: firstFreeze.ts,
-      title: "Tether starts freezing",
-      detail: `${frozenSet.size} attacker wallets blacklisted within ${minutes} minutes, locking ${formatUsd(frozen)} USDT`,
-      hash: firstFreeze.hash,
-      freeze: true,
-    })
+  const circle = rows.filter((r) => r.issuer === "Circle").sort((a, b) => (b.usd ?? 0) - (a.usd ?? 0))[0]
+  if (circle?.amount) {
+    moment(
+      circle.ts,
+      `Circle freezes ${formatAmount(circle.amount)} USDC`,
+      `Circle blacklists ${labelFor(circle.address)} while it holds ${formatAmount(circle.amount)} USDC from the hack.`,
+      circle.tx,
+      { kind: "address", address: circle.address },
+      { freeze: true, addresses: [circle.address], focus: circle.address },
+    )
+  }
+  const found = attackerFrozen.filter((f) => f.foundByAmp && !f.weak).sort((a, b) => b.usd - a.usd)[0]
+  const foundToken = found?.tokens.toSorted((a, b) => (b.usd ?? 0) - (a.usd ?? 0))[0]
+  if (found && foundToken?.amount) {
+    moment(
+      foundToken.ts,
+      "A freeze no outside source lists",
+      `${foundToken.issuer} freezes ${formatAmount(foundToken.amount)} ${foundToken.token} at ${labelFor(found.address)}. Amp traced it back to Binance in ${found.path.length} hops.`,
+      foundToken.tx,
+      { kind: "address", address: found.address },
+      { freeze: true, addresses: [found.address, ...found.path.map((p) => p.from)], focus: found.address },
+    )
+  }
+  const widest = attackerFrozen.toSorted((a, b) => b.tokens.length - a.tokens.length)[0]
+  if (widest && widest.tokens.length > 2) {
+    const latest = widest.tokens.at(-1)!
+    const issuers = new Set(widest.tokens.map((t) => t.issuer)).size
+    moment(
+      latest.ts,
+      `Main wallet frozen in ${widest.tokens.length} tokens`,
+      `${latest.issuer} freezes ${latest.token} at ${labelFor(widest.address)}. ${issuers} issuers have now frozen ${widest.tokens.map((t) => t.token).join(", ")} there.`,
+      latest.tx,
+      { kind: "address", address: widest.address },
+      { freeze: true, addresses: [widest.address], focus: widest.address },
+    )
   }
   const last = scope.findLast((t) => HOP_ROLES.has(roleOf(t.from)!) && usdOf(t) >= SIGNIFICANT)
-  if (last) {
-    moments.push({
-      ts: last.ts,
-      title: "Last traced movement",
-      detail: describe(last),
-      hash: last.tx_hash,
-      freeze: false,
-    })
-  }
+  if (last) txMoment("Last traced movement", describe(last), last)
   moments.sort((a, b) => a.ts.localeCompare(b.ts))
 
   return {
     taken,
     frozen,
-    frozenWallets: frozenSet.size,
+    frozenWallets: freezeTotals.attackerAddresses,
+    frozenOnCanvas: keptLinks.filter((l) => l.target === SINKS.frozen.id).reduce((sum, l) => sum + l.value, 0),
     unpricedTokens,
     window: drain && last ? { fromTs: drain.ts, toTs: last.ts } : null,
     flow: {

@@ -5,6 +5,7 @@ import { CanvasView } from "./CanvasView.tsx"
 import { OpenDetails, type Details } from "./details.ts"
 import { DetailsPane } from "./DetailsPane.tsx"
 import { Footer } from "./Footer.tsx"
+import { FrozenCard } from "./Frozen.tsx"
 import { FundFlow } from "./FundFlow.tsx"
 import { Header, type View } from "./Header.tsx"
 import { incident } from "./incident.ts"
@@ -50,7 +51,8 @@ export function App() {
                   <div className="lg:col-span-7">
                     <KeyMoments incident={incident} />
                   </div>
-                  <div className="lg:col-span-5">
+                  <div className="flex flex-col gap-6 lg:col-span-5">
+                    <FrozenCard />
                     <NotFrozen incident={incident} />
                   </div>
                 </div>

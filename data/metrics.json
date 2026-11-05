@@ -56,5 +56,11 @@
     "ms": 5140,
     "rows": 30,
     "blocks": 2392
+  },
+  {
+    "query": "binance14-eip7702",
+    "ms": 5007,
+    "rows": 51,
+    "blocks": 21548
   }
 ]

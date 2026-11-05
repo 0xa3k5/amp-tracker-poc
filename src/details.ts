@@ -5,6 +5,9 @@ export type Details =
   | { kind: "tx"; hash: string }
   | { kind: "sql"; query: string }
   | { kind: "transactions" }
+  | { kind: "frozen" }
+  | { kind: "delegation" }
+  | { kind: "compare" }
 
 export const OpenDetails = createContext<(details: Details) => void>(() => {})
 

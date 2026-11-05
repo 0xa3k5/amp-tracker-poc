@@ -4,7 +4,9 @@ import type { CanvasEdgeData, CanvasNodeData } from "./canvasLayout.ts"
 import { isVisible } from "./canvasState.ts"
 import { tokenColor } from "./FlowEdge.tsx"
 import { formatUsd } from "./format.ts"
+import { DATASET_NAME, freezeTotals } from "./freezes.ts"
 import type { Incident } from "./incident.ts"
+import { SourceLabel } from "./SourceLabel.tsx"
 import { TokenMark } from "./TokenAmount.tsx"
 
 const LEGEND = ["USDT", "USDC", "ETH"]
@@ -20,13 +22,13 @@ interface CanvasSummaryProps {
 
 export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect }: CanvasSummaryProps) {
   const flow = useReactFlow()
-  const kindOf = new Map(nodes.map((node) => [node.id, node.data.kind]))
+  const kindOf = new Map(incident.flow.nodes.map((node) => [node.id, node.kind]))
   let taken = 0
   let frozen = 0
-  for (const edge of edges) {
-    if (!edge.data || !isVisible(edge.data.link.firstTs, time)) continue
-    if (kindOf.get(edge.source) === "binance") taken += edge.data.link.value
-    if (kindOf.get(edge.target) === "frozen") frozen += edge.data.link.value
+  for (const link of incident.flow.links) {
+    if (!isVisible(link.firstTs, time)) continue
+    if (kindOf.get(link.source) === "binance") taken += link.value
+    if (kindOf.get(link.target) === "frozen") frozen += link.value
   }
   const share = incident.taken > 0 ? frozen / incident.taken : 0
 
@@ -37,7 +39,11 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
   const away = largest("held")
   const steps = [
     landed && { node: landed, title: "Where it landed", detail: `${formatUsd(landed.data.value)} goes to one wallet` },
-    stopped && { node: stopped, title: "What Tether stopped", detail: `${formatUsd(stopped.data.value)} USDT frozen` },
+    stopped && {
+      node: stopped,
+      title: "What issuers froze",
+      detail: `${formatUsd(stopped.data.value)} across ${freezeTotals.issuers} issuers`,
+    },
     away && { node: away, title: "What got away", detail: `${formatUsd(away.data.value)} not frozen` },
   ].filter((step) => !!step)
 
@@ -60,7 +66,12 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
     <div className="rounded-8 border-muted bg-subtle flex w-88 flex-col gap-4 border p-4">
       <div className="flex flex-col gap-2">
         <p className="text-20 font-medium text-balance">
-          {formatUsd(taken)} left Binance. Tether froze {formatUsd(frozen)}.
+          {formatUsd(taken)} left Binance. Issuers froze {formatUsd(frozen)}.
+        </p>
+        <p className="text-12 text-muted flex flex-wrap items-center gap-2">
+          Ethereum, hack window
+          <SourceLabel source="amp" detail="Transfers out of the Binance wallets" />
+          <SourceLabel source="dataset" detail={`Freeze events and amounts from ${DATASET_NAME}`} />
         </p>
         <div role="img" aria-label="Share frozen" className="bg-strong flex h-2 overflow-clip rounded-full">
           <div className="bg-status-info-default h-full transition-[width]" style={{ width: `${share * 100}%` }} />

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Button, CodeBlock, DescriptionList } from "@edgeandnode/eds-react"
 
 import { metrics, queries } from "./data.ts"
+import { useOpenDetails } from "./details.ts"
 import { formatBlock, formatSeconds } from "./format.ts"
 import { dataset, datasetSql, runLive, type LiveResult } from "./live.ts"
 
@@ -13,7 +14,8 @@ function title(name: string) {
 }
 
 export function SqlPanel({ initial }: { initial?: string | undefined }) {
-  const [tab, setTab] = useState(initial ?? queries[0]?.name ?? "")
+  const open = useOpenDetails()
+  const [tab, setTab] = useState(initial || queries[0]?.name || "")
   const [live, setLive] = useState<Record<string, LiveState>>({})
   const metric = metrics.find((m) => m.query === tab)
   const state = live[tab]
@@ -37,6 +39,9 @@ export function SqlPanel({ initial }: { initial?: string | undefined }) {
           The exact queries behind this view, run against Amp dataset <span className="font-mono">{dataset}</span>. The
           view shows saved results until you run a query live.
         </p>
+        <Button variant="tertiary" size="small" className="self-start" onClick={() => open({ kind: "compare" })}>
+          Freezes: raw logs vs our dataset
+        </Button>
       </div>
       {queries.length > 0 ? (
         <CodeBlock.Tabs

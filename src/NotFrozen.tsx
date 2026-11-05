@@ -20,7 +20,9 @@ export function NotFrozen({ incident }: { incident: Incident }) {
             <h2 id="not-frozen-title" className="text-18 font-medium">
               Not frozen yet
             </h2>
-            <p className="text-14 text-muted">Largest balances left in attacker wallets at the end of the window.</p>
+            <p className="text-14 text-muted">
+              Largest balances left in attacker wallets at the end of the window, after the tokens frozen there.
+            </p>
           </div>
           <SqlButton query="token-transfers" />
         </div>
@@ -58,10 +60,6 @@ export function NotFrozen({ incident }: { incident: Incident }) {
             )
           })}
         </ol>
-        <p className="text-12 text-muted">
-          CNBC reports that Circle froze the USDC in the main receiving wallet. Circle's freeze event is not in the
-          queried data yet.
-        </p>
       </div>
     </Card>
   )
