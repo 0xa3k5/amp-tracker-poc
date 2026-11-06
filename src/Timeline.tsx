@@ -18,6 +18,14 @@ interface TimelineProps {
 
 const AMOUNT_ARGS = new Set(["value", "wad", "amount", "_balance"])
 
+function tokenTransfer(tx: Transaction) {
+  const [event] = tx.events
+  if (tx.events.length !== 1 || event?.name !== "Transfer" || event.contract !== tx.to) return null
+  const { from, to, value } = event.args
+  if (!from || !to || !value) return null
+  return { from, to, value, contract: event.contract }
+}
+
 function AmountSummary({ tx, txTransfers }: { tx: Transaction; txTransfers: Array<Transfer> }) {
   const destroyed = tx.events.find((event) => event.name === "DestroyedBlackFunds")?.args._balance
   if (destroyed) return <span>{`${formatUnits(destroyed, 6)} USDT destroyed`}</span>
@@ -84,6 +92,7 @@ function EventItem({ event }: { event: DecodedEvent }) {
 }
 
 export function TimelineDetails({ tx }: { tx: Transaction }) {
+  const transfer = tokenTransfer(tx)
   return (
     <div className="flex flex-col gap-4 px-4 pt-1 pb-4">
       <DescriptionList size="small">
@@ -97,13 +106,18 @@ export function TimelineDetails({ tx }: { tx: Transaction }) {
         </DescriptionList.Item>
         <DescriptionList.Item label="Block">{formatBlock(tx.block_num)}</DescriptionList.Item>
         <DescriptionList.Item label="From">
-          <LabelledAddress address={tx.from} />
+          <LabelledAddress address={transfer?.from ?? tx.from} />
         </DescriptionList.Item>
         <DescriptionList.Item label="To">
-          <LabelledAddress address={tx.to} />
+          <LabelledAddress address={transfer?.to ?? tx.to} />
         </DescriptionList.Item>
+        {transfer ? (
+          <DescriptionList.Item label="Value">
+            <ArgValue name="value" value={transfer.value} contract={transfer.contract} />
+          </DescriptionList.Item>
+        ) : null}
       </DescriptionList>
-      {tx.events.length > 0 ? (
+      {transfer ? null : tx.events.length > 0 ? (
         <ul className="flex flex-col gap-4">
           {tx.events.map((event, index) => (
             <EventItem key={index} event={event} />
@@ -127,6 +141,7 @@ function TimelineItem({
 }) {
   const [open, setOpen] = useState(false)
   const freeze = isFreeze(tx)
+  const transfer = tokenTransfer(tx)
 
   return (
     <li id={`tx-${tx.hash}`} className="not-first:border-subtle scroll-mt-2 not-first:border-t">
@@ -145,7 +160,7 @@ function TimelineItem({
               {freeze ? <Status variant="info">USDT freeze</Status> : null}
             </span>
             <span className="text-12 text-muted truncate">
-              {labelFor(tx.from)} to {labelFor(tx.to)}
+              {labelFor(transfer?.from ?? tx.from)} to {labelFor(transfer?.to ?? tx.to)}
             </span>
           </span>
           <span className="text-14 shrink-0 text-end">
