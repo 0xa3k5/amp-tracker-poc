@@ -28,15 +28,15 @@ The tracer is the example. The output is what we learned about Amp as consumers.
 
 Measured on staging, over the 21,548-block window unless noted.
 
-| Query | Time |
-| --- | --- |
-| Freeze events, 8 issuers, 42 rows | 9.1 s |
-| EIP-7702 authorizations, 51 rows | 5 to 8 s |
-| Freeze query on our dataset vs raw logs | 1.8 s vs 6.8 s |
-| Net flow on our dataset vs raw logs | 2.9 s vs 13.6 s |
-| Build our dataset | 4 min 41 s |
-| 7-hop transfer trace from the Binance wallets, 20 queries, 99 addresses | 152.6 s |
-| Full USDT history for one address | timed out at 10 min |
+| Query                                                                   | Time                |
+| ----------------------------------------------------------------------- | ------------------- |
+| Freeze events, 8 issuers, 42 rows                                       | 9.1 s               |
+| EIP-7702 authorizations, 51 rows                                        | 5 to 8 s            |
+| Freeze query on our dataset vs raw logs                                 | 1.8 s vs 6.8 s      |
+| Net flow on our dataset vs raw logs                                     | 2.9 s vs 13.6 s     |
+| Build our dataset                                                       | 4 min 41 s          |
+| 7-hop transfer trace from the Binance wallets, 20 queries, 99 addresses | 152.6 s             |
+| Full USDT history for one address                                       | timed out at 10 min |
 
 About 4 minutes of the dataset build was walking empty blocks from genesis, because a derived deploy has no start block.
 
