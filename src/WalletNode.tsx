@@ -1,18 +1,18 @@
-import { Status, Tag, type TagProps } from "@edgeandnode/eds-react"
+import { Status, Tag, Tooltip, type TagProps } from "@edgeandnode/eds-react"
+import { LockIcon } from "@edgeandnode/eds-react/icons"
 import { formatAddress } from "@edgeandnode/eds-utils"
 import { ExchangeBinance, ExchangeUniswap, TokenAAVE } from "@web3icons/react"
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react"
 
-import type { CanvasNodeData } from "./canvasLayout.ts"
+import type { CanvasKind, CanvasNodeData } from "./canvasLayout.ts"
 import { isVisible, useCanvasState } from "./canvasState.ts"
 import { formatUsd } from "./format.ts"
 import { frozenByAddress } from "./freezes.ts"
 import { UnreportedTag } from "./Frozen.tsx"
-import type { FlowKind } from "./incident.ts"
 
 export type WalletCanvasNode = Node<CanvasNodeData, "wallet">
 
-const KIND: Record<FlowKind, { name: string; tag: TagProps["variant"] }> = {
+const KIND: Record<CanvasKind, { name: string; tag: TagProps["variant"] }> = {
   binance: { name: "Binance", tag: "solar" },
   attacker: { name: "Attacker", tag: "sonja" },
   hop: { name: "Intermediary", tag: "muted" },
@@ -20,6 +20,8 @@ const KIND: Record<FlowKind, { name: string; tag: TagProps["variant"] }> = {
   held: { name: "Not frozen", tag: "sonja" },
   unlabelled: { name: "Unlabelled", tag: "muted" },
   defi: { name: "DEX or lending", tag: "elevated" },
+  operator: { name: "Attacker", tag: "sonja" },
+  contract: { name: "Contract", tag: "sonja" },
 }
 
 const HANDLE = "i:opacity-0 i:pointer-events-none"
@@ -31,6 +33,24 @@ function Logo({ data }: { data: CanvasNodeData }) {
   return null
 }
 
+function issuersAt(address: string | undefined, time: string) {
+  const tokens = address ? (frozenByAddress.get(address)?.tokens ?? []) : []
+  return [...new Set(tokens.filter((t) => t.ts <= time).map((t) => t.issuer))]
+}
+
+function LockTag({ issuers }: { issuers: Array<string> }) {
+  return (
+    <Tooltip>
+      <Tag size="xsmall" variant="galactic" addonBefore={LockIcon} className="shrink-0">
+        {issuers.length}
+        <span className="sr-only">
+          , <Tooltip.Content>Frozen by {issuers.join(", ")}</Tooltip.Content>
+        </span>
+      </Tag>
+    </Tooltip>
+  )
+}
+
 export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
   const { time, focus, selected, lit, live, touched } = useCanvasState()
   const kind = KIND[data.kind]
@@ -38,6 +58,8 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
   const fresh = live && touched.has(data.id)
   const frozenLive = data.kind === "frozen" && visible
   const unreported = data.address ? (frozenByAddress.get(data.address)?.unreported ?? null) : null
+  const issuers = data.live ? [] : issuersAt(data.address, time)
+  const locked = issuers.length > 0
 
   if (data.minor) {
     return (
@@ -53,9 +75,12 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
           data-selected={selected === data.id || undefined}
           data-clickable={data.address !== undefined || undefined}
           data-new={fresh || undefined}
-          className="border-subtle bg-canvas text-12 text-muted data-clickable:hover:border-default data-selected:border-default data-selected:text-default data-new:border-brand-default data-new:text-default flex w-full items-center justify-between gap-2 rounded-full border px-3 py-1.5 data-clickable:cursor-pointer"
+          className="border-subtle bg-canvas text-14 text-muted data-clickable:hover:border-default data-selected:border-default data-selected:text-default data-new:border-brand-default data-new:text-default flex w-full items-center justify-between gap-2 rounded-full border px-3 py-1.5 data-clickable:cursor-pointer"
         >
-          <span className="truncate">{data.label}</span>
+          <span className="flex min-w-0 items-center gap-1.5">
+            {locked ? <LockTag issuers={issuers} /> : null}
+            <span className="truncate">{data.label}</span>
+          </span>
           <span className="shrink-0">{formatUsd(data.value)}</span>
         </span>
         <Handle type="source" position={Position.Right} className={HANDLE} />
@@ -73,18 +98,20 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
       data-selected={selected === data.id || undefined}
       data-clickable={data.address !== undefined || undefined}
       data-new={fresh || undefined}
-      className="rounded-8 border-muted bg-subtle data-[kind=attacker]:border-status-error-default data-[kind=binance]:border-status-warning-default data-[kind=frozen]:border-status-info-default data-[kind=held]:border-status-error-muted data-selected:bg-elevated data-clickable:hover:border-default data-new:border-brand-default flex h-23 w-62 flex-col justify-between gap-1 border px-3 py-2.5 transition-[opacity,background-color] duration-300 data-clickable:cursor-pointer data-dimmed:opacity-25 data-gone:invisible data-hidden:opacity-10 data-new:border-2 data-selected:border-2"
+      data-locked={locked || undefined}
+      className="rounded-8 border-muted bg-subtle data-locked:border-status-info-default data-[kind=attacker]:border-status-error-default data-[kind=operator]:border-status-error-default data-[kind=binance]:border-status-warning-default data-[kind=frozen]:border-status-info-default data-[kind=held]:border-status-error-muted data-selected:bg-elevated data-clickable:hover:border-default data-new:border-brand-default flex h-23 w-62 flex-col justify-between gap-1 border px-3 py-2.5 transition-[opacity,background-color] duration-300 data-clickable:cursor-pointer data-dimmed:opacity-25 data-gone:invisible data-hidden:opacity-10 data-new:border-2 data-selected:border-2"
     >
       <Handle type="target" position={Position.Left} className={HANDLE} />
-      <span className="flex items-center gap-2">
+      <span className="flex items-center gap-2 overflow-hidden">
         <Logo data={data} />
         {data.live ? null : (
-          <Tag size="xsmall" variant={kind.tag}>
+          <Tag size="xsmall" variant={kind.tag} className="shrink-0">
             {kind.name}
           </Tag>
         )}
+        {locked ? <LockTag issuers={issuers} /> : null}
         {fresh ? (
-          <Tag size="xsmall" variant="brand">
+          <Tag size="xsmall" variant="brand" className="shrink-0">
             {data.live ? "New" : "New activity"}
           </Tag>
         ) : null}
@@ -94,7 +121,9 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
       <span className="text-14 truncate">{data.label}</span>
       <span className="text-12 text-muted flex justify-between gap-2">
         <span className="font-mono">{data.address ? formatAddress(data.address) : ""}</span>
-        <span className="text-default font-medium">{formatUsd(data.value)}</span>
+        <span className="text-default font-medium">
+          {data.kind === "operator" || data.kind === "contract" ? "EIP-7702" : formatUsd(data.value)}
+        </span>
       </span>
       <Handle type="source" position={Position.Right} className={HANDLE} />
     </div>

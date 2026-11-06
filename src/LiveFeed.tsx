@@ -2,15 +2,14 @@ import { Tag } from "@edgeandnode/eds-react"
 
 import { formatBlock } from "./format.ts"
 import { LiveEventRow } from "./LiveEventRow.tsx"
-import { eventKey, HACK_END_BLOCK, isSignificant, newestFirst, useLive, type LiveEvent } from "./liveStream.ts"
+import { eventKey, feedEvents, HACK_END_BLOCK, useLive, type LiveEvent } from "./liveStream.ts"
 import { SourceLabel } from "./SourceLabel.tsx"
 
 const SHOWN = 6
 
 export function LiveFeed({ onPick }: { onPick: (event: LiveEvent) => void }) {
   const { events, mode } = useLive()
-  const shown = events.filter((e) => e.kind === "freeze" || isSignificant(e)).toSorted(newestFirst)
-  const small = events.length - shown.length
+  const { shown, small } = feedEvents(events)
 
   return (
     <div className="rounded-8 border-muted bg-subtle flex w-88 flex-col gap-3 border p-4">

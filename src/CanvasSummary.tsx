@@ -1,14 +1,14 @@
 import { Tag } from "@edgeandnode/eds-react"
-import { useReactFlow, type Edge, type Node } from "@xyflow/react"
+import type { Node } from "@xyflow/react"
 
-import type { CanvasEdgeData, CanvasNodeData } from "./canvasLayout.ts"
+import type { CanvasNodeData } from "./canvasLayout.ts"
 import { isVisible } from "./canvasState.ts"
 import { tokenColor } from "./FlowEdge.tsx"
-import { formatUsd } from "./format.ts"
-import { DATASET_NAME } from "./freezes.ts"
+import { formatBlock, formatUsd } from "./format.ts"
+import { DATASET_NAME, frozenAddresses } from "./freezes.ts"
 import type { Incident } from "./incident.ts"
 import type { LiveFrozen } from "./liveGraph.ts"
-import { LIVE_DATASET } from "./liveStream.ts"
+import { HACK_END_BLOCK, LIVE_DATASET, type LiveMode } from "./liveStream.ts"
 import { SourceLabel } from "./SourceLabel.tsx"
 import { TokenMark } from "./TokenAmount.tsx"
 
@@ -17,23 +17,22 @@ const LEGEND = ["USDT", "USDC", "ETH"]
 interface CanvasSummaryProps {
   incident: Incident
   nodes: Array<Node<CanvasNodeData>>
-  edges: Array<Edge<CanvasEdgeData>>
   time: string
   selected: string | null
-  onSelect: (id: string | null) => void
+  onFocus: (id: string | null) => void
   liveFrozen: LiveFrozen | null
+  quiet: { mode: LiveMode; small: number } | null
 }
 
-export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect, liveFrozen }: CanvasSummaryProps) {
-  const flow = useReactFlow()
+const attackerFreezes = frozenAddresses.filter((f) => !f.binance).flatMap((f) => f.tokens)
+
+export function CanvasSummary({ incident, nodes, time, selected, onFocus, liveFrozen, quiet }: CanvasSummaryProps) {
   const kindOf = new Map(incident.flow.nodes.map((node) => [node.id, node.kind]))
   let taken = 0
-  let frozen = 0
   for (const link of incident.flow.links) {
-    if (!isVisible(link.firstTs, time)) continue
-    if (kindOf.get(link.source) === "binance") taken += link.value
-    if (kindOf.get(link.target) === "frozen") frozen += link.value
+    if (isVisible(link.firstTs, time) && kindOf.get(link.source) === "binance") taken += link.value
   }
+  let frozen = attackerFreezes.filter((t) => t.ts <= time).reduce((sum, t) => sum + (t.usd ?? 0), 0)
   const newFrozen = liveFrozen && liveFrozen.events.length > 0 ? liveFrozen : null
   frozen += newFrozen?.usd ?? 0
   const share = incident.taken > 0 ? frozen / incident.taken : 0
@@ -43,26 +42,18 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
   const landed = largest("attacker")
   const stopped = largest("frozen")
   const away = largest("held")
+  const notFrozen = Math.max(0, incident.taken - incident.frozen)
   const steps = [
     landed && { node: landed, title: "Where it landed", detail: formatUsd(landed.data.value) },
-    stopped && { node: stopped, title: "What issuers froze", detail: formatUsd(stopped.data.value) },
-    away && { node: away, title: "What got away", detail: formatUsd(away.data.value) },
+    stopped && { node: stopped, title: "What issuers froze", detail: formatUsd(incident.frozen) },
+    away && {
+      node: away,
+      title: "Not frozen on chain",
+      detail: `${formatUsd(notFrozen)}, of which ${formatUsd(away.data.value)} is still in attacker wallets`,
+    },
   ].filter((step) => !!step)
 
-  const focusOn = (id: string) => {
-    if (selected === id) {
-      onSelect(null)
-      void flow.fitView({ duration: 600, padding: 0.08 })
-      return
-    }
-    onSelect(id)
-    const ids = new Set([id])
-    for (const edge of edges) {
-      if (edge.source === id) ids.add(edge.target)
-      if (edge.target === id) ids.add(edge.source)
-    }
-    void flow.fitView({ nodes: [...ids].map((nodeId) => ({ id: nodeId })), duration: 600, padding: 0.2 })
-  }
+  const focusOn = (id: string) => onFocus(selected === id ? null : id)
 
   return (
     <div className="rounded-8 border-muted bg-subtle flex w-88 flex-col gap-4 border p-4">
@@ -76,6 +67,13 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
           <SourceLabel source="amp" detail="Transfers out of the Binance wallets" />
           <SourceLabel source="dataset" detail={`Freeze events and amounts from ${DATASET_NAME}`} />
         </p>
+        {quiet ? (
+          <p className="text-12 text-muted">
+            {quiet.mode === "connecting" ? "Connecting to the stream" : "Nothing new"} after block{" "}
+            {formatBlock(HACK_END_BLOCK)}
+            {quiet.small > 0 ? `, ${quiet.small} small ${quiet.small === 1 ? "transfer" : "transfers"} hidden` : ""}
+          </p>
+        ) : null}
         {newFrozen ? (
           <p className="text-12 text-muted flex flex-wrap items-center gap-2">
             <Tag size="xsmall" variant="brand">

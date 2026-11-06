@@ -1,12 +1,15 @@
+import type { Ref } from "react"
 import { Button } from "@edgeandnode/eds-react"
 import { PauseIcon, PlayIcon } from "@edgeandnode/eds-react/icons"
 
 import { useOpenDetails } from "./details.ts"
 import { formatTime } from "./format.ts"
+import { takeover } from "./freezes.ts"
 import type { Moment } from "./incident.ts"
 import { KNEE, STEPS, type TimeScale } from "./timeScale.ts"
 
 interface ScrubberProps {
+  ref: Ref<HTMLDivElement>
   scale: TimeScale
   step: number
   moments: Array<Moment>
@@ -18,6 +21,7 @@ interface ScrubberProps {
 }
 
 export function Scrubber({
+  ref,
   scale,
   step,
   moments,
@@ -30,7 +34,10 @@ export function Scrubber({
   const open = useOpenDetails()
 
   return (
-    <div className="rounded-8 border-muted bg-subtle flex w-[min(56rem,calc(100vw-2rem))] items-center gap-4 border p-3">
+    <div
+      ref={ref}
+      className="rounded-8 border-muted bg-subtle pointer-events-auto flex w-full max-w-224 items-center gap-4 border p-3"
+    >
       <Button
         variant="primary"
         size="small"
@@ -42,8 +49,11 @@ export function Scrubber({
       </Button>
       <div className="relative flex min-w-0 flex-1 flex-col gap-1 pt-7">
         <span
-          className="rounded-4 bg-elevated text-12 pointer-events-none absolute top-0 -translate-x-1/2 px-1.5 py-0.5 font-medium whitespace-nowrap"
-          style={{ left: `calc(${(step / STEPS) * 100}% + ${(0.5 - step / STEPS) * 16}px)` }}
+          className="rounded-4 bg-elevated text-12 pointer-events-none absolute top-0 px-1.5 py-0.5 font-medium whitespace-nowrap"
+          style={{
+            left: `calc(${(step / STEPS) * 100}% + ${(0.5 - step / STEPS) * 16}px)`,
+            transform: `translateX(-${(step / STEPS) * 100}%)`,
+          }}
         >
           {formatTime(scale.toTime(step))}
         </span>
@@ -81,7 +91,7 @@ export function Scrubber({
           ))}
         </div>
         <div className="text-10 text-muted relative h-3">
-          <span className="absolute start-0">Drain starts</span>
+          <span className="absolute start-0">{takeover ? "Takeover" : "Drain starts"}</span>
           <span className="absolute -translate-x-1/2" style={{ left: `${(KNEE / STEPS) * 100}%` }}>
             {formatTime(scale.knee)}
           </span>

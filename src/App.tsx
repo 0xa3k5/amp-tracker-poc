@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react"
 import { Pane, usePane } from "@edgeandnode/eds-react"
 
-import { CanvasView } from "./CanvasView.tsx"
+import { CanvasView, type Lookup } from "./CanvasView.tsx"
 import { OpenDetails, type Details } from "./details.ts"
 import { DetailsPane } from "./DetailsPane.tsx"
 import { Footer } from "./Footer.tsx"
@@ -14,12 +14,16 @@ import { LiveContext, useLiveStream } from "./liveStream.ts"
 import { NotFrozen } from "./NotFrozen.tsx"
 import { Summary } from "./Summary.tsx"
 
+const PANE_WIDTH = 560
+
 export function App() {
   const live = useLiveStream()
   const [details, setDetails] = useState<Details | null>(null)
   const [view, setView] = useState<View>("canvas")
   const pane = usePane("details", { defaultCollapsed: true })
-  const { layout, setCollapsed, setOverlayOpen } = pane
+  const { layout, overlayOpen, setCollapsed, setOverlayOpen } = pane
+  const [lookup, setLookup] = useState<Lookup | null>(null)
+  const rightInset = layout === "overlay" && overlayOpen ? Math.min(PANE_WIDTH, window.innerWidth - 32) : 0
 
   const openDetails = useCallback(
     (next: Details) => {
@@ -41,10 +45,14 @@ export function App() {
         <Pane.Container className="flex h-dvh">
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="border-subtle shrink-0 border-b px-4 py-3 lg:px-6">
-              <Header view={view} onViewChange={setView} />
+              <Header
+                view={view}
+                onViewChange={setView}
+                onLookup={(address) => setLookup({ address, at: Date.now() })}
+              />
             </div>
             {view === "canvas" ? (
-              <CanvasView incident={incident} />
+              <CanvasView incident={incident} rightInset={rightInset} lookup={lookup} />
             ) : (
               <div className="min-h-0 flex-1 overflow-y-auto">
                 <div className="mx-auto flex min-h-full w-full max-w-360 flex-col gap-10 p-4 sm:p-6 lg:p-8">

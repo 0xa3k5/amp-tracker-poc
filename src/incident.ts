@@ -51,6 +51,7 @@ export interface Moment {
   freeze: boolean
   addresses: Array<string>
   focus: string | null
+  until: string | null
   open: Details
 }
 
@@ -318,8 +319,8 @@ export function buildIncident(): Incident {
     detail: string,
     hash: string,
     open: Details,
-    extra: Partial<Pick<Moment, "freeze" | "addresses" | "focus">> = {},
-  ) => moments.push({ ts, title, detail, hash, open, freeze: false, addresses: [], focus: null, ...extra })
+    extra: Partial<Pick<Moment, "freeze" | "addresses" | "focus" | "until">> = {},
+  ) => moments.push({ ts, title, detail, hash, open, freeze: false, addresses: [], focus: null, until: null, ...extra })
   const onCanvas = (address: string) => {
     const id = used.has(address) ? address : nodeFor(address.toLowerCase())?.id
     return id && used.has(id) ? id : null
@@ -381,7 +382,7 @@ export function buildIncident(): Incident {
       `${blacklisted.length} wallets in ${minutes} minutes`,
       tether[0].tx,
       { kind: "frozen" },
-      { freeze: true, addresses: blacklisted, focus: SINKS.frozen.id },
+      { freeze: true, addresses: blacklisted, focus: blacklisted[0]!, until: tether.at(-1)!.ts },
     )
   }
   const circle = rows.filter((r) => r.issuer === "Circle").sort((a, b) => (b.usd ?? 0) - (a.usd ?? 0))[0]

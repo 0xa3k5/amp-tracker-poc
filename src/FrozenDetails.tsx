@@ -26,6 +26,7 @@ export function FrozenDetails({ frozen }: { frozen: FrozenAddress }) {
                 <TokenMark symbol={t.token} />
                 {t.amount !== null ? `${formatAmount(t.amount)} ${t.token}` : t.token}
                 <span className="text-muted">by {t.issuer}</span>
+                {t.amount === null ? <span className="text-12 text-muted">amount not in event</span> : null}
               </span>
               <span className="text-12 text-muted flex items-center gap-2">
                 {formatTime(t.ts)}

@@ -10,7 +10,13 @@ import { isAddress, normalizeAddress } from "./trace.ts"
 
 export type View = "canvas" | "report"
 
-export function Header({ view, onViewChange }: { view: View; onViewChange: (view: View) => void }) {
+interface HeaderProps {
+  view: View
+  onViewChange: (view: View) => void
+  onLookup: (address: string) => void
+}
+
+export function Header({ view, onViewChange, onLookup }: HeaderProps) {
   const open = useOpenDetails()
   const [value, setValue] = useState("")
   const [invalid, setInvalid] = useState(false)
@@ -41,7 +47,9 @@ export function Header({ view, onViewChange }: { view: View; onViewChange: (view
             event.preventDefault()
             const address = normalizeAddress(value)
             setInvalid(!isAddress(address))
-            if (isAddress(address)) open({ kind: "address", address })
+            if (!isAddress(address)) return
+            open({ kind: "address", address })
+            onLookup(address)
           }}
         >
           <Input

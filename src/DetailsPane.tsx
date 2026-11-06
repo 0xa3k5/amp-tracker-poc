@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { Button, CopyButton, DescriptionList, Link, Status, Tag } from "@edgeandnode/eds-react"
+import { Button, CopyButton, DescriptionList, Link, Status, Tag, Tooltip } from "@edgeandnode/eds-react"
 import { XIcon } from "@edgeandnode/eds-react/icons"
 import { formatAddress } from "@edgeandnode/eds-utils"
 
@@ -8,9 +8,9 @@ import { DatasetCompare } from "./DatasetCompare.tsx"
 import { Delegation } from "./Delegation.tsx"
 import type { Details } from "./details.ts"
 import { addressUrl } from "./explorer.ts"
-import { formatUsd } from "./format.ts"
+import { formatAmount, formatUsd } from "./format.ts"
 import { frozenByAddress } from "./freezes.ts"
-import { FreezeTags, FrozenList } from "./Frozen.tsx"
+import { FrozenList, UnreportedTag } from "./Frozen.tsx"
 import { FrozenDetails } from "./FrozenDetails.tsx"
 import { LiveActivity, LiveTransaction } from "./LiveDetails.tsx"
 import { labelFor, ROLES } from "./roles.ts"
@@ -43,11 +43,12 @@ function AddressDetails({ address }: { address: string }) {
       tokens.set(t.token, token)
     }
     const holdings = [...tokens]
-      .filter(([, h]) => h.amount > 0 && h.usd >= 0)
+      .filter(([, h]) => h.amount > 0 && h.usd >= 0 && formatAmount(h.amount) !== "0")
       .sort((a, b) => b[1].usd - a[1].usd)
       .slice(0, 4)
     return { txs, own, received, sent, holdings }
   }, [address])
+  const outside = !info && !frozen && summary.own.length === 0 && summary.txs.length === 0
 
   return (
     <div className="flex flex-col gap-6">
@@ -65,19 +66,58 @@ function AddressDetails({ address }: { address: string }) {
           {frozen ? (
             <Status variant="info">Frozen by {[...new Set(frozen.tokens.map((t) => t.issuer))].join(", ")}</Status>
           ) : null}
-          {frozen ? <FreezeTags frozen={frozen} /> : null}
-          {info ? <SourceLabel source={info.source === "Amp trace" ? "amp" : "outside"} detail={info.source} /> : null}
+          {frozen?.unreported ? <UnreportedTag strength={frozen.unreported} /> : null}
+          {frozen?.weak && !frozen.unreported ? (
+            <Tooltip>
+              <Tag size="xsmall" variant="muted">
+                Weak link
+                <span className="sr-only">
+                  ,{" "}
+                  <Tooltip.Content>
+                    This address has more than 50 senders, so the path from Binance may be a coincidence.
+                  </Tooltip.Content>
+                </span>
+              </Tag>
+            </Tooltip>
+          ) : null}
         </div>
-        <p className="text-12 text-muted flex items-center gap-1 font-mono">
+        <p className="text-12 text-muted flex flex-wrap items-center gap-1 font-mono">
           <span title={address}>{formatAddress(address)}</span>
           <CopyButton variant="naked" size="small" value={address} />
           <Link href={addressUrl(address)} target="_blank" variant="secondary" className="font-sans">
             Etherscan
           </Link>
+          {info ? (
+            <span className="ms-2 flex items-center gap-1 font-sans">
+              Label from
+              <SourceLabel source={info.source === "Amp trace" ? "amp" : "outside"} detail={info.source} />
+            </span>
+          ) : null}
         </p>
       </div>
+      {outside ? <p className="text-14 text-muted">Not part of this incident on Ethereum in the hack window</p> : null}
       {frozen ? <FrozenDetails frozen={frozen} /> : null}
       <LiveActivity address={address} />
+      {outside ? null : <AddressFlows summary={summary} />}
+      {outside ? null : (
+        <div className="flex flex-col gap-3">
+          <h3 className="text-16 font-medium">Transactions ({summary.txs.length})</h3>
+          <Timeline transactions={summary.txs} transfers={summary.own} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface FlowSummary {
+  received: number
+  sent: number
+  holdings: Array<[string, { amount: number; usd: number }]>
+}
+
+function AddressFlows({ summary }: { summary: FlowSummary }) {
+  return (
+    <div className="flex flex-col gap-2">
       <DescriptionList size="small">
         <DescriptionList.Item label="Received">{formatUsd(summary.received)}</DescriptionList.Item>
         <DescriptionList.Item label="Sent">{formatUsd(summary.sent)}</DescriptionList.Item>
@@ -93,10 +133,12 @@ function AddressDetails({ address }: { address: string }) {
           )}
         </DescriptionList.Item>
       </DescriptionList>
-      <div className="flex flex-col gap-3">
-        <h3 className="text-16 font-medium">Transactions ({summary.txs.length})</h3>
-        <Timeline transactions={summary.txs} transfers={summary.own} />
-      </div>
+      {summary.sent > summary.received + 1 ? (
+        <p className="text-12 text-muted">
+          Sent is higher than received because tokens without a USD price and ETH received inside contract calls are not
+          counted.
+        </p>
+      ) : null}
     </div>
   )
 }

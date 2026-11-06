@@ -1,19 +1,19 @@
+import { takeover } from "./freezes.ts"
 import type { FlowKind, FlowLinkSpec, Incident } from "./incident.ts"
-import { STEPS, type TimeScale } from "./timeScale.ts"
+import { labelFor } from "./roles.ts"
 
 export const CARD_WIDTH = 248
 export const CARD_HEIGHT = 92
 export const COLUMN_GAP = 160
 export const ROW_GAP = 28
-const TIME_WIDTH = 3600
 
-export type LayoutMode = "hops" | "time"
+export type CanvasKind = FlowKind | "operator" | "contract"
 
 export interface CanvasNodeData {
   [key: string]: unknown
   id: string
   label: string
-  kind: FlowKind
+  kind: CanvasKind
   address: string | undefined
   value: number
   firstTs: string
@@ -29,10 +29,14 @@ export interface CanvasEdgeData {
   live: boolean
 }
 
-interface LayoutOptions {
-  mode: LayoutMode
-  scale: TimeScale
+export interface DelegationEdgeData {
+  [key: string]: unknown
+  label: string
+  from: string
+  until: string
 }
+
+export const takeoverIds = takeover ? [takeover.grant.from, takeover.grant.delegate] : []
 
 function stack<T extends { id: string }>(
   items: Array<T>,
@@ -44,7 +48,7 @@ function stack<T extends { id: string }>(
   items.forEach((item, index) => into.set(item.id, { x, y: offset + index * (CARD_HEIGHT + ROW_GAP) }))
 }
 
-export function canvasLayout(incident: Incident, { mode, scale }: LayoutOptions) {
+export function canvasLayout(incident: Incident) {
   const { links } = incident.flow
   const into = new Map<string, number>()
   const out = new Map<string, number>()
@@ -62,58 +66,80 @@ export function canvasLayout(incident: Incident, { mode, scale }: LayoutOptions)
     kind !== "frozen" && kind !== "binance" && value(id) < incident.taken * 0.02
 
   const nodes = incident.flow.nodes
-
-  const sinkColumn = Math.max(...nodes.map((node) => node.column))
   const byValue = (a: { id: string }, b: { id: string }) => value(b.id) - value(a.id)
   const positions = new Map<string, { x: number; y: number }>()
 
-  if (mode === "hops") {
-    const columns = Map.groupBy(nodes, (node) => node.column)
-    const tallest = Math.max(...[...columns.values()].map((column) => column.length))
-    for (const [column, members] of columns) {
-      stack(members.toSorted(byValue), column * (CARD_WIDTH + COLUMN_GAP), tallest, positions)
-    }
-  } else {
-    const timeX = (id: string) => (scale.toStep(first.get(id) ?? "") / STEPS) * TIME_WIDTH
-    const flowing = nodes.filter((node) => node.column !== sinkColumn).toSorted((a, b) => timeX(a.id) - timeX(b.id))
-    const rowEnds: Array<number> = []
-    for (const node of flowing) {
-      const x = timeX(node.id)
-      let row = rowEnds.findIndex((end) => end <= x)
-      if (row === -1) row = rowEnds.length
-      rowEnds[row] = x + CARD_WIDTH + 40
-      positions.set(node.id, { x, y: row * (CARD_HEIGHT + ROW_GAP) })
-    }
-    const sinks = nodes.filter((node) => node.column === sinkColumn).toSorted(byValue)
-    stack(sinks, Math.max(TIME_WIDTH, ...rowEnds) + COLUMN_GAP, Math.max(sinks.length, rowEnds.length), positions)
+  const columns = Map.groupBy(nodes, (node) => node.column)
+  const tallest = Math.max(...[...columns.values()].map((column) => column.length))
+  for (const [column, members] of columns) {
+    stack(members.toSorted(byValue), column * (CARD_WIDTH + COLUMN_GAP), tallest, positions)
   }
 
-  const total = Math.max(1, ...links.map((link) => link.value))
-  return {
-    nodes: nodes.map((node) => ({
+  const flowNodes = nodes.map((node) => ({
+    id: node.id,
+    position: positions.get(node.id) ?? { x: 0, y: 0 },
+    data: {
       id: node.id,
-      position: positions.get(node.id) ?? { x: 0, y: 0 },
-      data: {
-        id: node.id,
-        label: node.label,
-        kind: node.kind,
-        address: node.address,
-        value: value(node.id),
-        firstTs: first.get(node.id) ?? "",
-        minor: isMinor(node.kind, node.id),
-        live: false,
-      } satisfies CanvasNodeData,
-    })),
-    edges: links.map((link) => ({
-      id: `${link.source}>${link.target}`,
-      source: link.source,
-      target: link.target,
-      data: {
-        link,
-        token: [...link.tokens].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "",
-        share: link.value / total,
-        live: false,
-      } satisfies CanvasEdgeData,
-    })),
+      label: node.label,
+      kind: node.kind,
+      address: node.address,
+      value: value(node.id),
+      firstTs: node.kind === "binance" ? "" : (first.get(node.id) ?? ""),
+      minor: isMinor(node.kind, node.id),
+      live: false,
+    } satisfies CanvasNodeData,
+  }))
+
+  const total = Math.max(1, ...links.map((link) => link.value))
+  const flowEdges = links.map((link) => ({
+    id: `${link.source}>${link.target}`,
+    source: link.source,
+    target: link.target,
+    data: {
+      link,
+      token: [...link.tokens].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "",
+      share: link.value / total,
+      live: false,
+    } satisfies CanvasEdgeData,
+  }))
+
+  const authority = takeover ? positions.get(takeover.grant.to) : undefined
+  if (!takeover || !authority) return { nodes: flowNodes, edges: flowEdges, delegations: [] }
+
+  const { grant, revoke } = takeover
+  const x = authority.x - (CARD_WIDTH + COLUMN_GAP)
+  const step = (CARD_HEIGHT + ROW_GAP) / 2
+  const card = (address: string, kind: CanvasKind, label: string, y: number) => ({
+    id: address,
+    position: { x, y },
+    data: {
+      id: address,
+      label,
+      kind,
+      address,
+      value: 0,
+      firstTs: grant.ts,
+      minor: false,
+      live: false,
+    } satisfies CanvasNodeData,
+  })
+  const edge = (source: string, label: string) => ({
+    id: `delegation:${source}`,
+    source,
+    target: grant.to,
+    data: { label, from: grant.ts, until: revoke.ts } satisfies DelegationEdgeData,
+  })
+
+  return {
+    nodes: [
+      card(grant.from, "operator", labelFor(grant.from), authority.y - step),
+      card(grant.delegate, "contract", "Sweeper contract", authority.y + step),
+      ...flowNodes,
+    ],
+    edges: flowEdges,
+    delegations: [
+      edge(grant.from, `Sends ${takeover.count} EIP-7702 authorizations`),
+      edge(grant.delegate, "Delegate"),
+    ],
   }
 }

@@ -38,6 +38,11 @@ export function isSignificant(event: StreamTransfer) {
   return event.amount_usd === undefined || Number(event.amount_usd) >= MIN_LIVE_USD
 }
 
+export function feedEvents(events: Array<LiveEvent>) {
+  const shown = events.filter((e) => e.kind === "freeze" || isSignificant(e)).toSorted(newestFirst)
+  return { shown, small: events.length - shown.length }
+}
+
 export function newestFirst(a: LiveEvent, b: LiveEvent) {
   return b.block_num - a.block_num || b.log_index - a.log_index
 }
