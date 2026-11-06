@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { Button, CopyButton, DescriptionList, Link, Status, Tag } from "@edgeandnode/eds-react"
 import { XIcon } from "@edgeandnode/eds-react/icons"
+import { formatAddress } from "@edgeandnode/eds-utils"
 
 import { addressBook, transactions, transfers } from "./data.ts"
 import { DatasetCompare } from "./DatasetCompare.tsx"
@@ -67,9 +68,9 @@ function AddressDetails({ address }: { address: string }) {
           {frozen ? <FreezeTags frozen={frozen} /> : null}
           {info ? <SourceLabel source={info.source === "Amp trace" ? "amp" : "outside"} detail={info.source} /> : null}
         </div>
-        <p className="text-12 text-muted flex items-center gap-1 font-mono break-all">
-          {address}
-          <CopyButton value={address} />
+        <p className="text-12 text-muted flex items-center gap-1 font-mono">
+          <span title={address}>{formatAddress(address)}</span>
+          <CopyButton variant="naked" size="small" value={address} />
           <Link href={addressUrl(address)} target="_blank" variant="secondary" className="font-sans">
             Etherscan
           </Link>

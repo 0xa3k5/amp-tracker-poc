@@ -7,6 +7,7 @@ import type { CanvasNodeData } from "./canvasLayout.ts"
 import { isVisible, useCanvasState } from "./canvasState.ts"
 import { formatUsd } from "./format.ts"
 import { frozenByAddress } from "./freezes.ts"
+import { UnreportedTag } from "./Frozen.tsx"
 import type { FlowKind } from "./incident.ts"
 
 export type WalletCanvasNode = Node<CanvasNodeData, "wallet">
@@ -36,6 +37,7 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
   const visible = data.live ? live : isVisible(data.firstTs, time) || (lit?.has(data.id) ?? false)
   const fresh = live && touched.has(data.id)
   const frozenLive = data.kind === "frozen" && visible
+  const unreported = data.address ? (frozenByAddress.get(data.address)?.unreported ?? null) : null
 
   if (data.minor) {
     return (
@@ -87,11 +89,7 @@ export function WalletNode({ data }: NodeProps<WalletCanvasNode>) {
           </Tag>
         ) : null}
         {frozenLive ? <Status variant="info">Locked</Status> : null}
-        {data.address && frozenByAddress.get(data.address)?.foundByAmp ? (
-          <Tag size="xsmall" variant="galactic">
-            Found by Amp
-          </Tag>
-        ) : null}
+        {unreported ? <UnreportedTag strength={unreported} /> : null}
       </span>
       <span className="text-14 truncate">{data.label}</span>
       <span className="text-12 text-muted flex justify-between gap-2">

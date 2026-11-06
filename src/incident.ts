@@ -395,12 +395,14 @@ export function buildIncident(): Incident {
       { freeze: true, addresses: [circle.address], focus: circle.address },
     )
   }
-  const found = attackerFrozen.filter((f) => f.foundByAmp && !f.weak).sort((a, b) => b.usd - a.usd)[0]
+  const found = attackerFrozen
+    .filter((f) => f.unreported !== null && f.unreported !== "weak")
+    .sort((a, b) => b.usd - a.usd)[0]
   const foundToken = found?.tokens.toSorted((a, b) => (b.usd ?? 0) - (a.usd ?? 0))[0]
   if (found && foundToken?.amount) {
     moment(
       foundToken.ts,
-      "A freeze no outside source lists",
+      "A freeze not in public reports",
       `${formatAmount(foundToken.amount)} ${foundToken.token} at ${labelFor(found.address)}, ${found.path.length} hops from Binance`,
       foundToken.tx,
       { kind: "address", address: found.address },

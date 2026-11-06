@@ -49,6 +49,8 @@ export interface FrozenToken {
   event: string
 }
 
+export type LinkStrength = "strong" | "medium" | "weak"
+
 export interface FrozenAddress {
   address: string
   tokens: Array<FrozenToken>
@@ -57,7 +59,7 @@ export interface FrozenAddress {
   hop: number
   path: Array<PathStep>
   binance: boolean
-  foundByAmp: boolean
+  unreported: LinkStrength | null
   weak: boolean
 }
 
@@ -80,11 +82,11 @@ export const ISSUERS: Record<string, string> = {
 
 const USD_PEGGED = new Set(["USDT", "USDC", "RLUSD", "USD1", "FDUSD", "PYUSD"])
 
-const FOUND_BY_AMP = new Set([
-  "0xe7024ab80143b1ef843efe6a58368696cb87958d",
-  "0xa97bf7836f8a08f9ed91d41453d371493fae8d10",
-  "0xcf4ca2bdf21bc3a467a00b6afe72b833982723e0",
-  "0x8c1c499b1796d7f3c2521ac37186b52de024e58c",
+const NOT_IN_PUBLIC_REPORTS = new Map<string, LinkStrength>([
+  ["0xe7024ab80143b1ef843efe6a58368696cb87958d", "strong"],
+  ["0xcf4ca2bdf21bc3a467a00b6afe72b833982723e0", "strong"],
+  ["0xa97bf7836f8a08f9ed91d41453d371493fae8d10", "medium"],
+  ["0x8c1c499b1796d7f3c2521ac37186b52de024e58c", "weak"],
 ])
 
 function frozenToken(row: Freeze): FrozenToken {
@@ -117,7 +119,7 @@ export const frozenAddresses: Array<FrozenAddress> = [...Map.groupBy(freezes, (r
         first.path,
       ),
       binance: addressBook.get(address)?.role === "binance",
-      foundByAmp: FOUND_BY_AMP.has(address),
+      unreported: NOT_IN_PUBLIC_REPORTS.get(address) ?? null,
       weak: rows.some((row) => row.hub),
     }
   })

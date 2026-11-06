@@ -4,13 +4,48 @@ import { formatAddress } from "@edgeandnode/eds-utils"
 import { useOpenDetails } from "./details.ts"
 import { txUrl } from "./explorer.ts"
 import { formatTime, formatUsd, shortHash } from "./format.ts"
-import { DATASET_NAME, freezeTotals, frozenAddresses, type FrozenAddress } from "./freezes.ts"
+import { DATASET_NAME, freezeTotals, frozenAddresses, type FrozenAddress, type LinkStrength } from "./freezes.ts"
 import { labelFor } from "./roles.ts"
 import { SourceLabel } from "./SourceLabel.tsx"
 import { CompareButton } from "./SqlButton.tsx"
 import { TokenAmount, TokenMark } from "./TokenAmount.tsx"
 
 export const FROZEN_SOURCE = `Freeze events from ${DATASET_NAME}. Amounts are net inflow inside the hack window, not absolute balances, so Binance's own wallets show none.`
+
+const STRENGTH: Record<LinkStrength, { name: string; detail: string }> = {
+  strong: { name: "Strong link", detail: "Link strength: strong." },
+  medium: {
+    name: "Medium link",
+    detail:
+      "Link strength: medium. One transfer from a Binance hot wallet that also pays customers, but three issuers froze it.",
+  },
+  weak: {
+    name: "Weak link",
+    detail:
+      "Link strength: weak. This address has more than 50 senders, so the path from Binance may be a coincidence.",
+  },
+}
+
+export function UnreportedTag({ strength }: { strength: LinkStrength }) {
+  return (
+    <Tooltip>
+      <Tag size="xsmall" variant="galactic">
+        Not in public reports
+        <span className="sr-only">
+          ,{" "}
+          <Tooltip.Content>
+            <span className="flex flex-col gap-1">
+              <span>
+                Amp linked this frozen address to the Binance wallets by following transfers. No public report names it.
+              </span>
+              <span>{STRENGTH[strength].detail}</span>
+            </span>
+          </Tooltip.Content>
+        </span>
+      </Tag>
+    </Tooltip>
+  )
+}
 
 export function FreezeTags({ frozen }: { frozen: FrozenAddress }) {
   return (
@@ -20,18 +55,13 @@ export function FreezeTags({ frozen }: { frozen: FrozenAddress }) {
           Binance wallet
         </Tag>
       ) : null}
-      {frozen.foundByAmp ? (
-        <Tooltip>
-          <Tag size="xsmall" variant="galactic">
-            Found by Amp
-            <span className="sr-only">
-              ,{" "}
-              <Tooltip.Content>No outside source lists this frozen address. Amp linked it to Binance.</Tooltip.Content>
-            </span>
-          </Tag>
-        </Tooltip>
+      {frozen.unreported ? <UnreportedTag strength={frozen.unreported} /> : null}
+      {frozen.unreported ? (
+        <Tag size="xsmall" variant="muted">
+          {STRENGTH[frozen.unreported].name}
+        </Tag>
       ) : null}
-      {frozen.weak ? (
+      {frozen.weak && !frozen.unreported ? (
         <Tooltip>
           <Tag size="xsmall" variant="muted">
             Weak link
