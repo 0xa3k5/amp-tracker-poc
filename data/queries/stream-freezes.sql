@@ -2,7 +2,7 @@
 -- read from our derived dataset a3k5/stablecoin_forensics@0.2.0. That version has no end
 -- block, so Amp keeps the table at the chain head.
 -- Streaming: SETTINGS stream = true. `watched` is true when the account is one of the
--- 27 incident wallets the transfer stream follows.
+-- 21 wallets the transfer stream follows or an account frozen in freezes.json.
 SELECT block_num, timestamp, evm_decode_hex(tx_hash) AS tx_hash,
        arrow_cast(log_index, 'Int64') AS log_index,
        evm_decode_hex(token) AS token_address, symbol, event, action,
@@ -30,7 +30,6 @@ SELECT block_num, timestamp, evm_decode_hex(tx_hash) AS tx_hash,
     evm_encode_hex('0xaa246bf639586a6ba46762d378ce50ca4fc654a0'),
     evm_encode_hex('0xb171ca86f82070282138352ff7111b494060c8c3'),
     evm_encode_hex('0xb3ddec0ccc5c3ba733fcdf5a15f98c95ec5a5fdb'),
-    evm_encode_hex('0xbeef02961503351625926ea9a11ae13b29f5c555'),
     evm_encode_hex('0xc887af690e0301cd4edbbce8f8d31b4ec65b286a'),
     evm_encode_hex('0xccbef95633adb5cd2b5038db5a38d77e726ca263'),
     evm_encode_hex('0xcf4ca2bdf21bc3a467a00b6afe72b833982723e0'),

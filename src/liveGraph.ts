@@ -11,7 +11,7 @@ import {
 import { addresses, transfers } from "./data.ts"
 import { freezes } from "./freezes.ts"
 import type { FlowLinkSpec, Incident } from "./incident.ts"
-import { isSignificant, type LiveEvent } from "./liveStream.ts"
+import type { LiveEvent } from "./liveStream.ts"
 import { labelFor } from "./roles.ts"
 import type { StreamFreeze } from "./stream.ts"
 
@@ -60,12 +60,21 @@ export function liveGraph(incident: Incident, base: Array<Node<CanvasNodeData>>,
     if (added.has(address)) return address
     return isNeverSeen(address) ? null : incident.nodeIdFor(address)
   }
-  const place = (address: string, ts: string) => {
+  // Every streamed transfer is an outflow of a watched wallet (stream-transfers.sql), so each new
+  // wallet hangs off its sender: one column to the right of the sender's live column, or in the
+  // first live column when the sender is on the incident canvas.
+  const columnOf = new Map<string, number>()
+  const rows: Array<number> = []
+  const place = (address: string, ts: string, after: string | null) => {
     const existing = idFor(address)
     if (existing) return existing
+    const column = after !== null && columnOf.has(after) ? (columnOf.get(after) ?? 0) + 1 : 0
+    const row = rows[column] ?? 0
+    rows[column] = row + 1
+    columnOf.set(address, column)
     added.set(address, {
       id: address,
-      position: { x: right, y: top + added.size * (CARD_HEIGHT + ROW_GAP) },
+      position: { x: right + column * (CARD_WIDTH + COLUMN_GAP), y: top + row * (CARD_HEIGHT + ROW_GAP) },
       data: {
         id: address,
         label: labelFor(address),
@@ -82,9 +91,10 @@ export function liveGraph(incident: Incident, base: Array<Node<CanvasNodeData>>,
 
   const ordered = events.toSorted((a, b) => a.block_num - b.block_num || a.log_index - b.log_index)
   for (const event of ordered) {
-    if (event.kind !== "transfer" || !isSignificant(event)) continue
-    const source = place(event.from, event.ts)
-    const target = place(event.to, event.ts)
+    // All of them, small ones included: a gas top-up is often how a new wallet joins the trail
+    if (event.kind !== "transfer") continue
+    const source = place(event.from, event.ts, null)
+    const target = place(event.to, event.ts, source)
     if (source === target) continue
     touched.add(source).add(target)
     const usd = Number(event.amount_usd ?? 0)

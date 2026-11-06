@@ -1,12 +1,10 @@
--- Live ERC-20 transfers and plain ETH transfers to or from the 27 watched wallets.
+-- Live outflows of the 21 watched wallets: ERC-20 transfers and plain ETH they send.
 -- Streaming: SETTINGS stream = true. Amp runs it in microbatches as new blocks land and
 -- the server resumes it from its last cursor after a restart.
--- Watched: attackers, intermediaries and every frozen account from addresses.json and
--- freezes.json. Exchanges, issuers and Binance hot wallets are left out (8,639 transfers in
--- 300 blocks); transfers between them and a watched wallet still match.
+-- Watched: the attacker and intermediary wallets in addresses.json. Not watched: 0xbeef, a trading contract called by a dozen 0xbee… wallets; 2,289 of 2,927 live rows were its trades.
+-- Only known tokens (scripts/trace/token-meta.json): a spam token can fake any sender.
 --   0x008f06f04b72da2621a4f37f5531cc7352187dcd  intermediary: Received 88
 --   0x0ddf0480016e6bcb2c1f5d190d221fba1320697e  intermediary: First hop
---   0x28c6c06298d514db089934071355e5743bf21d60  frozen USDT (AddedBlackList)
 --   0x42cdf00c85005630cc8605731b9364f712077810  intermediary: Received UNI and ONDO from 0x5227
 --   0x5227f603c1ee34ce3c06efe6477003bdfccb2f8c  attacker: Main receiving wallet (Etherscan label: Binance Hot Wallet Exploiter 2)
 --   0x5c23023ca6633f91ded909b4a753a3ca00fea4fc  intermediary: Received 88
@@ -18,19 +16,14 @@
 --   0x811f15855476156ebf86ba3b84fafb8ceaa4e84c  intermediary: Relay
 --   0x8532fa14acaf483729c449b8458aeddb900543d4  attacker: Etherscan label: Binance Hot Wallet Exploiter 8
 --   0x897c80d1a9729e94460e2bd93178bd5215158df3  intermediary: Received 57,891
---   0x8c1c499b1796d7f3c2521ac37186b52de024e58c  frozen USDC (Blacklisted)
 --   0x8d53903625b8e839b9df4bd28b0efb1cd6b8639a  attacker: Etherscan label: Binance Hot Wallet Exploiter 3
 --   0x9749292d74fd460982d0912ea9515ea24736c762  intermediary: First hop
---   0xa97bf7836f8a08f9ed91d41453d371493fae8d10  frozen PYUSD (FreezeAddress)
 --   0xaa246bf639586a6ba46762d378ce50ca4fc654a0  intermediary: Received 175M USDT at 21:08:23 UTC
 --   0xb171ca86f82070282138352ff7111b494060c8c3  intermediary: End of the hop chain
 --   0xb3ddec0ccc5c3ba733fcdf5a15f98c95ec5a5fdb  intermediary: Received WBTC and USDe from 0x5227
---   0xbeef02961503351625926ea9a11ae13b29f5c555  intermediary: Hop 1
 --   0xc887af690e0301cd4edbbce8f8d31b4ec65b286a  intermediary: ETH collector
 --   0xccbef95633adb5cd2b5038db5a38d77e726ca263  intermediary: Hop chain
---   0xcf4ca2bdf21bc3a467a00b6afe72b833982723e0  frozen FDUSD (Freeze)
 --   0xe7024ab80143b1ef843efe6a58368696cb87958d  intermediary: Hop 1
---   0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055  frozen USDC (Blacklisted)
 -- ETH moved inside contract calls is not here: the dataset has no traces table.
 SELECT block_num, timestamp, evm_decode_hex(tx_hash) AS tx_hash,
        arrow_cast(log_index, 'Int64') AS log_index,
@@ -45,10 +38,9 @@ FROM (
   WHERE _block_num >= {{from_block}}
     AND topic0 = evm_topic('Transfer(address indexed from, address indexed to, uint256 value)')
     AND topic3 IS NULL  -- ERC-20 only, ERC-721 indexes tokenId in topic3
-    AND (topic1 IN (
+    AND topic1 IN (
     evm_encode_hex('0x000000000000000000000000008f06f04b72da2621a4f37f5531cc7352187dcd'),
     evm_encode_hex('0x0000000000000000000000000ddf0480016e6bcb2c1f5d190d221fba1320697e'),
-    evm_encode_hex('0x00000000000000000000000028c6c06298d514db089934071355e5743bf21d60'),
     evm_encode_hex('0x00000000000000000000000042cdf00c85005630cc8605731b9364f712077810'),
     evm_encode_hex('0x0000000000000000000000005227f603c1ee34ce3c06efe6477003bdfccb2f8c'),
     evm_encode_hex('0x0000000000000000000000005c23023ca6633f91ded909b4a753a3ca00fea4fc'),
@@ -60,48 +52,186 @@ FROM (
     evm_encode_hex('0x000000000000000000000000811f15855476156ebf86ba3b84fafb8ceaa4e84c'),
     evm_encode_hex('0x0000000000000000000000008532fa14acaf483729c449b8458aeddb900543d4'),
     evm_encode_hex('0x000000000000000000000000897c80d1a9729e94460e2bd93178bd5215158df3'),
-    evm_encode_hex('0x0000000000000000000000008c1c499b1796d7f3c2521ac37186b52de024e58c'),
     evm_encode_hex('0x0000000000000000000000008d53903625b8e839b9df4bd28b0efb1cd6b8639a'),
     evm_encode_hex('0x0000000000000000000000009749292d74fd460982d0912ea9515ea24736c762'),
-    evm_encode_hex('0x000000000000000000000000a97bf7836f8a08f9ed91d41453d371493fae8d10'),
     evm_encode_hex('0x000000000000000000000000aa246bf639586a6ba46762d378ce50ca4fc654a0'),
     evm_encode_hex('0x000000000000000000000000b171ca86f82070282138352ff7111b494060c8c3'),
     evm_encode_hex('0x000000000000000000000000b3ddec0ccc5c3ba733fcdf5a15f98c95ec5a5fdb'),
-    evm_encode_hex('0x000000000000000000000000beef02961503351625926ea9a11ae13b29f5c555'),
     evm_encode_hex('0x000000000000000000000000c887af690e0301cd4edbbce8f8d31b4ec65b286a'),
     evm_encode_hex('0x000000000000000000000000ccbef95633adb5cd2b5038db5a38d77e726ca263'),
-    evm_encode_hex('0x000000000000000000000000cf4ca2bdf21bc3a467a00b6afe72b833982723e0'),
-    evm_encode_hex('0x000000000000000000000000e7024ab80143b1ef843efe6a58368696cb87958d'),
-    evm_encode_hex('0x000000000000000000000000ee7ae85f2fe2239e27d9c1e23fffe168d63b4055')
-    ) OR topic2 IN (
-    evm_encode_hex('0x000000000000000000000000008f06f04b72da2621a4f37f5531cc7352187dcd'),
-    evm_encode_hex('0x0000000000000000000000000ddf0480016e6bcb2c1f5d190d221fba1320697e'),
-    evm_encode_hex('0x00000000000000000000000028c6c06298d514db089934071355e5743bf21d60'),
-    evm_encode_hex('0x00000000000000000000000042cdf00c85005630cc8605731b9364f712077810'),
-    evm_encode_hex('0x0000000000000000000000005227f603c1ee34ce3c06efe6477003bdfccb2f8c'),
-    evm_encode_hex('0x0000000000000000000000005c23023ca6633f91ded909b4a753a3ca00fea4fc'),
-    evm_encode_hex('0x00000000000000000000000063e842b054bd624a465454d533c33f573e9c6fae'),
-    evm_encode_hex('0x00000000000000000000000077edef23fbd05921c26fe29fcc3a65e14d2ac3eb'),
-    evm_encode_hex('0x0000000000000000000000007aa4d3029e4c6a8e916300014ad95b6d6c03bfd1'),
-    evm_encode_hex('0x0000000000000000000000007c8601d4645b93cea45f71e118a729332e6b5ca0'),
-    evm_encode_hex('0x0000000000000000000000007f9dc988b46336ad536828fad50fa8fa1e5415e3'),
-    evm_encode_hex('0x000000000000000000000000811f15855476156ebf86ba3b84fafb8ceaa4e84c'),
-    evm_encode_hex('0x0000000000000000000000008532fa14acaf483729c449b8458aeddb900543d4'),
-    evm_encode_hex('0x000000000000000000000000897c80d1a9729e94460e2bd93178bd5215158df3'),
-    evm_encode_hex('0x0000000000000000000000008c1c499b1796d7f3c2521ac37186b52de024e58c'),
-    evm_encode_hex('0x0000000000000000000000008d53903625b8e839b9df4bd28b0efb1cd6b8639a'),
-    evm_encode_hex('0x0000000000000000000000009749292d74fd460982d0912ea9515ea24736c762'),
-    evm_encode_hex('0x000000000000000000000000a97bf7836f8a08f9ed91d41453d371493fae8d10'),
-    evm_encode_hex('0x000000000000000000000000aa246bf639586a6ba46762d378ce50ca4fc654a0'),
-    evm_encode_hex('0x000000000000000000000000b171ca86f82070282138352ff7111b494060c8c3'),
-    evm_encode_hex('0x000000000000000000000000b3ddec0ccc5c3ba733fcdf5a15f98c95ec5a5fdb'),
-    evm_encode_hex('0x000000000000000000000000beef02961503351625926ea9a11ae13b29f5c555'),
-    evm_encode_hex('0x000000000000000000000000c887af690e0301cd4edbbce8f8d31b4ec65b286a'),
-    evm_encode_hex('0x000000000000000000000000ccbef95633adb5cd2b5038db5a38d77e726ca263'),
-    evm_encode_hex('0x000000000000000000000000cf4ca2bdf21bc3a467a00b6afe72b833982723e0'),
-    evm_encode_hex('0x000000000000000000000000e7024ab80143b1ef843efe6a58368696cb87958d'),
-    evm_encode_hex('0x000000000000000000000000ee7ae85f2fe2239e27d9c1e23fffe168d63b4055')
-    ))
+    evm_encode_hex('0x000000000000000000000000e7024ab80143b1ef843efe6a58368696cb87958d')
+    )
+    AND address IN (
+    evm_encode_hex('0x081131434f93063751813c619ecca9c4dc7862a3'),
+    evm_encode_hex('0x0923a3c1c705cd1ecda3d5c4e8c91d395d02f4db'),
+    evm_encode_hex('0x0a0d53b6684c7b32b4cbef5fe8483bfcc8406742'),
+    evm_encode_hex('0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e'),
+    evm_encode_hex('0x0d8775f648430679a709e98d2b0cb6250d2887ef'),
+    evm_encode_hex('0x0ef2346003cfe35022a16da4cd8ed2c8980f2b59'),
+    evm_encode_hex('0x0f5d2fb29fb7d3cfee444a200298f468908cc942'),
+    evm_encode_hex('0x0fc2a55d5bd13033f1ee0cdd11f60f7efe66f467'),
+    evm_encode_hex('0x0fd10b9899882a6f2fcb5c371e17e70fdee00c38'),
+    evm_encode_hex('0x111111111117dc0aa78b770fa6a738034120c302'),
+    evm_encode_hex('0x11d0647b8fee5662eab6f0257404ee57c7261cac'),
+    evm_encode_hex('0x12d16e7826decea6e9ff724991f39128d490b058'),
+    evm_encode_hex('0x163f8c2467924be0ae7b5347228cabf260318753'),
+    evm_encode_hex('0x1776e1f26f98b1a5df9cd347953a26dd3cb46671'),
+    evm_encode_hex('0x17ca0e405e488ba70f5e31216c63d385e024d41f'),
+    evm_encode_hex('0x18084fba666a33d37592fa2633fd49a74dd93a88'),
+    evm_encode_hex('0x1b54e762aa34cf6e28e9c082f2848e28e45da6b8'),
+    evm_encode_hex('0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'),
+    evm_encode_hex('0x2216848e673541199b9ce168af2b6148f2ad9247'),
+    evm_encode_hex('0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'),
+    evm_encode_hex('0x232ce3bd40fcd6f80f3d55a522d03f25df784ee2'),
+    evm_encode_hex('0x23878914efe38d27c4d67ab83ed1b93a74d4086a'),
+    evm_encode_hex('0x2c2c7ca05420dbe3eabe3b96037b903d862aa6eb'),
+    evm_encode_hex('0x31c8eacbffdd875c74b94b077895bd78cf1e64a3'),
+    evm_encode_hex('0x320623b8e4ff03373931769a31fc52a4e78b5d70'),
+    evm_encode_hex('0x32b4d049fe4c888d2b92eecaf729f44df6b1f36e'),
+    evm_encode_hex('0x34d0c59a5664d005d534f20593480f6737b7dfa3'),
+    evm_encode_hex('0x3632dea96a953c11dac2f00b4a05a32cd1063fae'),
+    evm_encode_hex('0x3845badade8e6dff049820680d1f14bd3903a5d0'),
+    evm_encode_hex('0x39a2f7eff2c5a5a9a2afaea201e562194303a59e'),
+    evm_encode_hex('0x3f94d2c70b266553f52dead90a7c678375bf69d2'),
+    evm_encode_hex('0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f'),
+    evm_encode_hex('0x419d0d8bdd9af5e606ae2232ed285aff190e711b'),
+    evm_encode_hex('0x43dd18c42c7b63e864ddedcd1c98d3afb86620a6'),
+    evm_encode_hex('0x44ff8620b8ca30902395a7bd3f2407e1a091bf73'),
+    evm_encode_hex('0x455e53cbb86018ac2b8092fdcd39d8444affc3f6'),
+    evm_encode_hex('0x45804880de22913dafe09f4980848ece6ecbaf78'),
+    evm_encode_hex('0x470ebf5f030ed85fc1ed4c2d36b9dd02e77cf1b7'),
+    evm_encode_hex('0x491604c0fdf08347dd1fa4ee062a822a5dd06b5d'),
+    evm_encode_hex('0x4a220e6096b25eadb88358cb44068a3248254675'),
+    evm_encode_hex('0x4c1746a800d224393fe2470c70a35717ed4ea5f1'),
+    evm_encode_hex('0x4c9edd5852cd905f086c759e8383e09bff1e68b3'),
+    evm_encode_hex('0x4d224452801aced8b2f0aebe155379bb5d594381'),
+    evm_encode_hex('0x4d5f47fa6a74757f35c14fd3a6ef8e3c9bc514e8'),
+    evm_encode_hex('0x4d7078ddd6ccfed2f85db5b7d3ff16828d378d48'),
+    evm_encode_hex('0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b'),
+    evm_encode_hex('0x514910771af9ca656af840dff83e8264ecf986ca'),
+    evm_encode_hex('0x51dd8687ecc330e337e62acbf931dc251802ffff'),
+    evm_encode_hex('0x526526528f35ac738177003b8773b402b8df8143'),
+    evm_encode_hex('0x5283d291dbcf85356a21ba090e6db59121208b44'),
+    evm_encode_hex('0x559b9ebc75dbeacda97d0bfa6c780a946eee9354'),
+    evm_encode_hex('0x56072c95faa701256059aa122697b133aded9279'),
+    evm_encode_hex('0x57e114b691db790c35207b2e685d4a43181e6061'),
+    evm_encode_hex('0x58d97b57bb95320f9a05dc918aef65434969c2b2'),
+    evm_encode_hex('0x5a98fcbea516cf06857215779fd812ca3bef1b32'),
+    evm_encode_hex('0x5e4650bb2723bbbe47886cf13fe13c8f36d7dbf4'),
+    evm_encode_hex('0x5ee5bf7ae06d1be5997a1a72006fe6c607ec6de8'),
+    evm_encode_hex('0x5eefad5cc7b8172aac5946552ba1ed0c8da40d7c'),
+    evm_encode_hex('0x6033f7f88332b8db6ad452b7c6d5bb643990ae3f'),
+    evm_encode_hex('0x62d0a8458ed7719fdaf978fe5929c6d342b0bfce'),
+    evm_encode_hex('0x643c4e15d7d62ad0abec4a9bd4b001aa3ef52d66'),
+    evm_encode_hex('0x68749665ff8d2d112fa859aa293f07a622782f38'),
+    evm_encode_hex('0x6982508145454ce325ddbe47a25d4ec3d2311933'),
+    evm_encode_hex('0x6985884c4392d348587b19cb9eaaf157f13271cd'),
+    evm_encode_hex('0x69af81e73a73b40adf4f3d4223cd9b1ece623074'),
+    evm_encode_hex('0x6b175474e89094c44da98b954eedeac495271d0f'),
+    evm_encode_hex('0x6b7774cb12ed7573a7586e7d0e62a2a563ddd3f0'),
+    evm_encode_hex('0x6bef15d938d4e72056ac92ea4bdd0d76b1c4ad29'),
+    evm_encode_hex('0x6c5ba91642f10282b576d91922ae6448c9d52f4e'),
+    evm_encode_hex('0x6c6ee5e31d828de241282b9606c8e98ea48526e2'),
+    evm_encode_hex('0x6dcb3cb5348fb46be4ff54d5e863d119dba683f0'),
+    evm_encode_hex('0x6e37d7fa0a5c151794d94543a7411cc2b5c54df8'),
+    evm_encode_hex('0x743f1b0291a490b924ffcfe8508af2a9ac1a6552'),
+    evm_encode_hex('0x767fe9edc9e0df98e07454847909b5e959d7ca0e'),
+    evm_encode_hex('0x774fd60e0c717d2578e477f8b366e7a7b511fea6'),
+    evm_encode_hex('0x77ac255544d60b83f74e8eb4b4e3b8eec62bf8ce'),
+    evm_encode_hex('0x77e06c9eccf2e797fd462a92b6d7642ef85b0a44'),
+    evm_encode_hex('0x7a7c5a2dbff5e916c570c8ef61e2dc253242e5f7'),
+    evm_encode_hex('0x7cf9a80db3b29ee8efe3710aadb7b95270572d47'),
+    evm_encode_hex('0x7d17fadca2ef174a5c2f5f703fc5ddb5cc00ec7b'),
+    evm_encode_hex('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'),
+    evm_encode_hex('0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9'),
+    evm_encode_hex('0x808507121b80c02388fad14726482e061b8da827'),
+    evm_encode_hex('0x8207c1ffc5b6804f6024322ccf34f29c3541ae26'),
+    evm_encode_hex('0x8236a87084f8b84306f72007f36f2618a5634494'),
+    evm_encode_hex('0x8292bb45bf1ee4d140127049757c2e0ff06317ed'),
+    evm_encode_hex('0x83b4cab9aeea9efb57ed5fdcf5fc72fe6f898c34'),
+    evm_encode_hex('0x8408d45b61f5823298f19a09b53b7339c0280489'),
+    evm_encode_hex('0x85f17cf997934a597031b2e18a9ab6ebd4b9f6a4'),
+    evm_encode_hex('0x8745ab394097123fcd4e53fe6adb328cebddea70'),
+    evm_encode_hex('0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d'),
+    evm_encode_hex('0x9393ab581a34c93c9f118568f69e8956076b79ca'),
+    evm_encode_hex('0x93a2db22b7c736b341c32ff666307f4a9ed910f5'),
+    evm_encode_hex('0x940a2db1b7008b6c776d4faaca729d6d4a4aa551'),
+    evm_encode_hex('0x95abf04f20005e02639078ab92b1881b14af80b3'),
+    evm_encode_hex('0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce'),
+    evm_encode_hex('0x98c23e9d8f34fefb1b7bd6a91b7ff122f4e16f5c'),
+    evm_encode_hex('0x9c5c1960690ddc128ba6f03b331440de216acfeb'),
+    evm_encode_hex('0x9c7beba8f6ef6643abd725e45a4e8387ef260649'),
+    evm_encode_hex('0x9cba1dd997187197e011d02435c6e05264709574'),
+    evm_encode_hex('0x9d1a7a3191102e9f900faa10540837ba84dcbae7'),
+    evm_encode_hex('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'),
+    evm_encode_hex('0xa12cc123ba206d4031d1c7f6223d1c2ec249f4f3'),
+    evm_encode_hex('0xa1b0354a9217133cc5e54c2eeb5a570d1d32f6c0'),
+    evm_encode_hex('0xa2a2b4f27e478eb8afc3435fbce26291e8937120'),
+    evm_encode_hex('0xa2e3356610840701bdf5611a53974510ae27e2e1'),
+    evm_encode_hex('0xa3931d71877c0e7a3148cb7eb4463524fec27fbd'),
+    evm_encode_hex('0xa522e78e4fe5128b394e80d191521ce3fcb09998'),
+    evm_encode_hex('0xae78736cd615f374d3085123a210448e74fc6393'),
+    evm_encode_hex('0xae7ab96520de3a18e5e111b5eaab095312d7fe84'),
+    evm_encode_hex('0xaea46a60368a7bd060eec7df8cba43b7ef41ad85'),
+    evm_encode_hex('0xaf3ad1996d53017b83519ad85e2f43247e92d86f'),
+    evm_encode_hex('0xaf48cf833331fbc1485e34e0842892abd3e0398c'),
+    evm_encode_hex('0xaf83dc8606a725dd8fdf5f33df6694a220581a35'),
+    evm_encode_hex('0xb09487de12371591e4bbe0470ce41bd524da0b32'),
+    evm_encode_hex('0xb3e5ad5ac95ed5c740b6a9ab8ddfd3d0ea7a33c8'),
+    evm_encode_hex('0xb50721bcf8d664c30412cfbc6cf7a15145234ad1'),
+    evm_encode_hex('0xb67718b98d52318240c52e71a898335da4a28c42'),
+    evm_encode_hex('0xb8c77482e45f1f44de1745f52c74426c631bdd52'),
+    evm_encode_hex('0xbb0e17ef65f82ab018d8edd776e8dd940327b28b'),
+    evm_encode_hex('0xc00e94cb662c3520282e6f5717214004a7f26888'),
+    evm_encode_hex('0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f'),
+    evm_encode_hex('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'),
+    evm_encode_hex('0xc18360217d8f7ab5e7c516566761ea12ce7f9d72'),
+    evm_encode_hex('0xc20059e0317de91738d13af027dfc4a50781b066'),
+    evm_encode_hex('0xc2da8e5fde943e1da13232c2677609857c664d43'),
+    evm_encode_hex('0xc43c6bfeda065fe2c4c11765bf838789bd0bb5de'),
+    evm_encode_hex('0xc5f0f7b66764f6ec8c8dff7ba683102295e16409'),
+    evm_encode_hex('0xc9ed2373c1bc41616a1f6fd41339031fd5008b3f'),
+    evm_encode_hex('0xc9eef266834730340a55b6cc24621b31baf55581'),
+    evm_encode_hex('0xcacd6fd266af91b8aed52accc382b4e165586e29'),
+    evm_encode_hex('0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf'),
+    evm_encode_hex('0xcccccccccc33d538dbc2ee4feab0a7a1ff4e8a94'),
+    evm_encode_hex('0xce52824fef21dae6b24c0beabf8855be45a24f6a'),
+    evm_encode_hex('0xd34a99bc0f67ae1bbd63c660e6d0b0dd03e263b7'),
+    evm_encode_hex('0xd389a3f4e7d1d1517568051a316dde94ddce2b7b'),
+    evm_encode_hex('0xd49c8a7a0fb707c1effbe8ec57a02ce6416ecb47'),
+    evm_encode_hex('0xd533a949740bb3306d119cc777fa900ba034cd52'),
+    evm_encode_hex('0xda5e1988097297dcdc1f90d4dfe7909e847cbef6'),
+    evm_encode_hex('0xdac17f958d2ee523a2206206994597c13d831ec7'),
+    evm_encode_hex('0xdc035d45d973e3ec169d2276ddab16f1e407384f'),
+    evm_encode_hex('0xddb3422497e61e13543bea06989c0789117555c5'),
+    evm_encode_hex('0xde30da39c46104798bb5aa3fe8b9e0e1f348163f'),
+    evm_encode_hex('0xdec5e32b6a8124eb345eb40b1f281b9950e9685b'),
+    evm_encode_hex('0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab'),
+    evm_encode_hex('0xe0f63a424a4439cbe457d80e4f4b51ad25b2c56c'),
+    evm_encode_hex('0xe1be424f442d0687129128c6c38aace44f8c8dbc'),
+    evm_encode_hex('0xe29797910d413281d2821d5d9a989262c8121cc2'),
+    evm_encode_hex('0xe2ad0bf751834f2fbdc62a41014f84d67ca1de2a'),
+    evm_encode_hex('0xe41d2489571d322189246dafa5ebde1f4699f498'),
+    evm_encode_hex('0xe430d281f19eca78df4541520e55197c62520e9d'),
+    evm_encode_hex('0xe5174a33e20d9e7cb0d5e498ec7b91cd8fbf487e'),
+    evm_encode_hex('0xe53ec727dbdeb9e2d5456c3be40cff031ab40a55'),
+    evm_encode_hex('0xe76c6c83af64e4c60245d8c7de953df673a7a33d'),
+    evm_encode_hex('0xe9117349defd31e31d18a927e2e359eb6af46e14'),
+    evm_encode_hex('0xea51d7853eefb32b6ee06b1c12e6dcca88be0ffe'),
+    evm_encode_hex('0xec53bf9167f50cdeb3ae105f56099aaab9061f83'),
+    evm_encode_hex('0xee9b6b0fa78a81e5c7d2876a921c74707075287f'),
+    evm_encode_hex('0xf280b16ef293d8e534e370794ef26bf312694126'),
+    evm_encode_hex('0xf2be22ef5603a2c43c0f6723beaa3a126444d31d'),
+    evm_encode_hex('0xf57e7e7c23978c3caec3c3548e3d615c346e79ff'),
+    evm_encode_hex('0xf5d62f4fcb8de26a6f6ed45d55e93b4051af7ba6'),
+    evm_encode_hex('0xfa1c09fc8b491b6a4d3ff53a10cad29381b3f949'),
+    evm_encode_hex('0xfaba6f8e4a5e8ab82f62fe7c39859fa577269be3'),
+    evm_encode_hex('0xfc82bb4ba86045af6f327323a46e80412b91b27d'),
+    evm_encode_hex('0xfd9f7875b995e75a3625a43d2667499142435d9a'),
+    evm_encode_hex('0xfda09936dbd717368de0835ba441d9e62069d36f'),
+    evm_encode_hex('0xfdffb411c4a70aa7c95d5c981a6fb4da867e1111'),
+    evm_encode_hex('0xfe0c30065b384f05761f15d0cc899d4f9f9cc0eb')
+    )
 ) erc20
 WHERE d['value'] <> '0'
 UNION ALL
@@ -110,10 +240,9 @@ SELECT block_num, timestamp, evm_decode_hex(tx_hash), arrow_cast(-1, 'Int64'), '
 FROM "{{dataset}}".transactions
 WHERE _block_num >= {{from_block}}
   AND value <> '0'
-  AND ("from" IN (
+  AND "from" IN (
     evm_encode_hex('0x008f06f04b72da2621a4f37f5531cc7352187dcd'),
     evm_encode_hex('0x0ddf0480016e6bcb2c1f5d190d221fba1320697e'),
-    evm_encode_hex('0x28c6c06298d514db089934071355e5743bf21d60'),
     evm_encode_hex('0x42cdf00c85005630cc8605731b9364f712077810'),
     evm_encode_hex('0x5227f603c1ee34ce3c06efe6477003bdfccb2f8c'),
     evm_encode_hex('0x5c23023ca6633f91ded909b4a753a3ca00fea4fc'),
@@ -125,46 +254,13 @@ WHERE _block_num >= {{from_block}}
     evm_encode_hex('0x811f15855476156ebf86ba3b84fafb8ceaa4e84c'),
     evm_encode_hex('0x8532fa14acaf483729c449b8458aeddb900543d4'),
     evm_encode_hex('0x897c80d1a9729e94460e2bd93178bd5215158df3'),
-    evm_encode_hex('0x8c1c499b1796d7f3c2521ac37186b52de024e58c'),
     evm_encode_hex('0x8d53903625b8e839b9df4bd28b0efb1cd6b8639a'),
     evm_encode_hex('0x9749292d74fd460982d0912ea9515ea24736c762'),
-    evm_encode_hex('0xa97bf7836f8a08f9ed91d41453d371493fae8d10'),
     evm_encode_hex('0xaa246bf639586a6ba46762d378ce50ca4fc654a0'),
     evm_encode_hex('0xb171ca86f82070282138352ff7111b494060c8c3'),
     evm_encode_hex('0xb3ddec0ccc5c3ba733fcdf5a15f98c95ec5a5fdb'),
-    evm_encode_hex('0xbeef02961503351625926ea9a11ae13b29f5c555'),
     evm_encode_hex('0xc887af690e0301cd4edbbce8f8d31b4ec65b286a'),
     evm_encode_hex('0xccbef95633adb5cd2b5038db5a38d77e726ca263'),
-    evm_encode_hex('0xcf4ca2bdf21bc3a467a00b6afe72b833982723e0'),
-    evm_encode_hex('0xe7024ab80143b1ef843efe6a58368696cb87958d'),
-    evm_encode_hex('0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055')
-  ) OR "to" IN (
-    evm_encode_hex('0x008f06f04b72da2621a4f37f5531cc7352187dcd'),
-    evm_encode_hex('0x0ddf0480016e6bcb2c1f5d190d221fba1320697e'),
-    evm_encode_hex('0x28c6c06298d514db089934071355e5743bf21d60'),
-    evm_encode_hex('0x42cdf00c85005630cc8605731b9364f712077810'),
-    evm_encode_hex('0x5227f603c1ee34ce3c06efe6477003bdfccb2f8c'),
-    evm_encode_hex('0x5c23023ca6633f91ded909b4a753a3ca00fea4fc'),
-    evm_encode_hex('0x63e842b054bd624a465454d533c33f573e9c6fae'),
-    evm_encode_hex('0x77edef23fbd05921c26fe29fcc3a65e14d2ac3eb'),
-    evm_encode_hex('0x7aa4d3029e4c6a8e916300014ad95b6d6c03bfd1'),
-    evm_encode_hex('0x7c8601d4645b93cea45f71e118a729332e6b5ca0'),
-    evm_encode_hex('0x7f9dc988b46336ad536828fad50fa8fa1e5415e3'),
-    evm_encode_hex('0x811f15855476156ebf86ba3b84fafb8ceaa4e84c'),
-    evm_encode_hex('0x8532fa14acaf483729c449b8458aeddb900543d4'),
-    evm_encode_hex('0x897c80d1a9729e94460e2bd93178bd5215158df3'),
-    evm_encode_hex('0x8c1c499b1796d7f3c2521ac37186b52de024e58c'),
-    evm_encode_hex('0x8d53903625b8e839b9df4bd28b0efb1cd6b8639a'),
-    evm_encode_hex('0x9749292d74fd460982d0912ea9515ea24736c762'),
-    evm_encode_hex('0xa97bf7836f8a08f9ed91d41453d371493fae8d10'),
-    evm_encode_hex('0xaa246bf639586a6ba46762d378ce50ca4fc654a0'),
-    evm_encode_hex('0xb171ca86f82070282138352ff7111b494060c8c3'),
-    evm_encode_hex('0xb3ddec0ccc5c3ba733fcdf5a15f98c95ec5a5fdb'),
-    evm_encode_hex('0xbeef02961503351625926ea9a11ae13b29f5c555'),
-    evm_encode_hex('0xc887af690e0301cd4edbbce8f8d31b4ec65b286a'),
-    evm_encode_hex('0xccbef95633adb5cd2b5038db5a38d77e726ca263'),
-    evm_encode_hex('0xcf4ca2bdf21bc3a467a00b6afe72b833982723e0'),
-    evm_encode_hex('0xe7024ab80143b1ef843efe6a58368696cb87958d'),
-    evm_encode_hex('0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055')
-  ))
+    evm_encode_hex('0xe7024ab80143b1ef843efe6a58368696cb87958d')
+  )
 SETTINGS stream = true

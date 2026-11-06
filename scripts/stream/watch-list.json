@@ -8,10 +8,6 @@
     "why": "intermediary: First hop"
   },
   {
-    "address": "0x28c6c06298d514db089934071355e5743bf21d60",
-    "why": "frozen USDT (AddedBlackList)"
-  },
-  {
     "address": "0x42cdf00c85005630cc8605731b9364f712077810",
     "why": "intermediary: Received UNI and ONDO from 0x5227"
   },
@@ -56,20 +52,12 @@
     "why": "intermediary: Received 57,891"
   },
   {
-    "address": "0x8c1c499b1796d7f3c2521ac37186b52de024e58c",
-    "why": "frozen USDC (Blacklisted)"
-  },
-  {
     "address": "0x8d53903625b8e839b9df4bd28b0efb1cd6b8639a",
     "why": "attacker: Etherscan label: Binance Hot Wallet Exploiter 3"
   },
   {
     "address": "0x9749292d74fd460982d0912ea9515ea24736c762",
     "why": "intermediary: First hop"
-  },
-  {
-    "address": "0xa97bf7836f8a08f9ed91d41453d371493fae8d10",
-    "why": "frozen PYUSD (FreezeAddress)"
   },
   {
     "address": "0xaa246bf639586a6ba46762d378ce50ca4fc654a0",
@@ -84,10 +72,6 @@
     "why": "intermediary: Received WBTC and USDe from 0x5227"
   },
   {
-    "address": "0xbeef02961503351625926ea9a11ae13b29f5c555",
-    "why": "intermediary: Hop 1"
-  },
-  {
     "address": "0xc887af690e0301cd4edbbce8f8d31b4ec65b286a",
     "why": "intermediary: ETH collector"
   },
@@ -96,15 +80,7 @@
     "why": "intermediary: Hop chain"
   },
   {
-    "address": "0xcf4ca2bdf21bc3a467a00b6afe72b833982723e0",
-    "why": "frozen FDUSD (Freeze)"
-  },
-  {
     "address": "0xe7024ab80143b1ef843efe6a58368696cb87958d",
     "why": "intermediary: Hop 1"
-  },
-  {
-    "address": "0xee7ae85f2fe2239e27d9c1e23fffe168d63b4055",
-    "why": "frozen USDC (Blacklisted)"
   }
 ]
