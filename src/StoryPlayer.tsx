@@ -54,6 +54,12 @@ export function StoryPlayer({
     const to = scale.toStep(current.ts)
     const until = current.until ? scale.toStep(current.until) : null
     const sequence = current.sequence.map((entry) => ({ ...entry, at: scale.toStep(entry.ts) }))
+    onSelect(current.primary)
+    if (current.primary) focusRef.current(current.primary, current.nodeIds)
+    if (pausedRef.current) {
+      onStepChange(until ?? to)
+      return
+    }
     const shown: Array<string> = []
     const started = performance.now()
     let frame = 0
@@ -78,9 +84,6 @@ export function StoryPlayer({
       if (progress < 1) frame = requestAnimationFrame(tick)
     }
     frame = requestAnimationFrame(tick)
-
-    onSelect(current.primary)
-    if (current.primary) focusRef.current(current.primary, current.nodeIds)
     return () => cancelAnimationFrame(frame)
   }, [current, scale, onStepChange, onSelect])
 

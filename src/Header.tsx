@@ -20,13 +20,14 @@ export function Header({ view, onViewChange, onLookup }: HeaderProps) {
   const open = useOpenDetails()
   const [value, setValue] = useState("")
   const [invalid, setInvalid] = useState(false)
+  const showSql = () => open({ kind: "sql", query: queries[0]?.name ?? "" })
 
   return (
-    <header className="flex flex-wrap items-start justify-between gap-4">
+    <header className="@container flex flex-wrap items-start justify-between gap-4">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-16 flex items-center gap-2 font-medium">
           <EthereumMark size={20} />
-          Binance hot wallet hack · 29 October 2026
+          Binance hot wallet hack<span className="@max-5xl:hidden"> · 29 October 2026</span>
         </h1>
         {isMock ? <Tag variant="solar">Mock data</Tag> : null}
         <LiveIndicator />
@@ -62,7 +63,7 @@ export function Header({ view, onViewChange, onLookup }: HeaderProps) {
             message={invalid ? "Not a valid address" : undefined}
             spellCheck={false}
             autoComplete="off"
-            className="w-80"
+            className="w-80 @max-5xl:w-48"
           />
           <Button type="submit" variant="secondary" size="small" className="shrink-0">
             Look up
@@ -72,7 +73,18 @@ export function Header({ view, onViewChange, onLookup }: HeaderProps) {
           variant="tertiary"
           size="small"
           addonBefore={TerminalWindowIcon}
-          onClick={() => open({ kind: "sql", query: queries[0]?.name ?? "" })}
+          className="@max-5xl:hidden"
+          onClick={showSql}
+        >
+          How Amp got this
+        </Button>
+        <Button
+          variant="tertiary"
+          size="small"
+          addonBefore={TerminalWindowIcon}
+          hideLabel
+          className="hidden @max-5xl:inline-flex"
+          onClick={showSql}
         >
           How Amp got this
         </Button>

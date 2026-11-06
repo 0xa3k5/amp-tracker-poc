@@ -348,7 +348,7 @@ export function buildIncident(): Incident {
       "Delegation reset to the zero address",
       revoke.tx_hash,
       { kind: "delegation" },
-      { addresses: [revoke.from], focus: revoke.from },
+      { addresses: [revoke.from, grant.from, grant.delegate], focus: revoke.from },
     )
   }
   const drain = outOfBinance[0]

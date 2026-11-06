@@ -1,4 +1,5 @@
-import { Tag } from "@edgeandnode/eds-react"
+import { Button, Tag } from "@edgeandnode/eds-react"
+import { CaretDownIcon, CaretUpIcon } from "@edgeandnode/eds-react/icons"
 import type { Node } from "@xyflow/react"
 
 import type { CanvasNodeData } from "./canvasLayout.ts"
@@ -22,11 +23,23 @@ interface CanvasSummaryProps {
   onFocus: (id: string | null) => void
   liveFrozen: LiveFrozen | null
   quiet: { mode: LiveMode; small: number } | null
+  collapsed: boolean | null
+  onToggle: () => void
 }
 
 const attackerFreezes = frozenAddresses.filter((f) => !f.binance).flatMap((f) => f.tokens)
 
-export function CanvasSummary({ incident, nodes, time, selected, onFocus, liveFrozen, quiet }: CanvasSummaryProps) {
+export function CanvasSummary({
+  incident,
+  nodes,
+  time,
+  selected,
+  onFocus,
+  liveFrozen,
+  quiet,
+  collapsed,
+  onToggle,
+}: CanvasSummaryProps) {
   const kindOf = new Map(incident.flow.nodes.map((node) => [node.id, node.kind]))
   let taken = 0
   for (const link of incident.flow.links) {
@@ -54,14 +67,39 @@ export function CanvasSummary({ incident, nodes, time, selected, onFocus, liveFr
   ].filter((step) => !!step)
 
   const focusOn = (id: string) => onFocus(selected === id ? null : id)
+  const headline = `${taken > 0 ? `${formatUsd(taken)} left Binance.` : "Nothing has left Binance yet."} ${
+    frozen > 0 ? `Issuers froze ${formatUsd(frozen)}.` : taken > 0 ? "No freezes yet." : ""
+  }`
+  const toggle =
+    collapsed === null ? null : (
+      <Button
+        variant="tertiary"
+        size="small"
+        addonBefore={collapsed ? CaretDownIcon : CaretUpIcon}
+        hideLabel
+        className="shrink-0"
+        onClick={onToggle}
+      >
+        {collapsed ? "Show summary" : "Hide summary"}
+      </Button>
+    )
+
+  if (collapsed) {
+    return (
+      <div className="rounded-8 border-muted bg-subtle flex max-w-88 items-center gap-2 border py-1 ps-3 pe-1">
+        <p className="text-14 font-medium">{headline}</p>
+        {toggle}
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-8 border-muted bg-subtle flex w-88 flex-col gap-4 border p-4">
       <div className="flex flex-col gap-2">
-        <p className="text-20 font-medium text-balance">
-          {taken > 0 ? `${formatUsd(taken)} left Binance.` : "Nothing has left Binance yet."}{" "}
-          {frozen > 0 ? `Issuers froze ${formatUsd(frozen)}.` : taken > 0 ? "No freezes yet." : null}
-        </p>
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-20 font-medium text-balance">{headline}</p>
+          {toggle}
+        </div>
         <p className="text-12 text-muted flex flex-wrap items-center gap-2">
           Ethereum
           <SourceLabel source="amp" detail="Transfers out of the Binance wallets" />

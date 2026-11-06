@@ -45,6 +45,7 @@ const GAP = 8
 const MOVE_MS = 600
 const REAPPLY_MS = 1200
 const CONTROLS_SPACE = 48
+const COMPACT_WIDTH = 1100
 
 const FLOW_STYLE = {
   "--xy-background-color": "var(--background-color-canvas)",
@@ -158,6 +159,13 @@ function Canvas({ incident, rightInset, lookup }: CanvasProps) {
     [time, focus, selected, lit, showLive, liveLayer],
   )
 
+  const compact = width > 0 && width < COMPACT_WIDTH
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  useEffect(() => setSummaryOpen(false), [compact])
+  const collapsed = compact && !summaryOpen
+  const collapsedRef = useRef(collapsed)
+  collapsedRef.current = collapsed
+
   const summaryRef = useRef<HTMLDivElement>(null)
   const storyRef = useRef<HTMLDivElement>(null)
   const scrubberRef = useRef<HTMLDivElement>(null)
@@ -166,11 +174,16 @@ function Canvas({ incident, rightInset, lookup }: CanvasProps) {
 
   const area = useCallback(() => {
     const below = (element: HTMLElement | null) => (element ? element.offsetHeight + PANEL_MARGIN + GAP : 0)
+    const summary = playingRef.current ? null : summaryRef.current
+    const top = Math.max(
+      storyRef.current ? below(storyRef.current) : PANEL_MARGIN,
+      summary && collapsedRef.current ? below(summary) : 0,
+    )
     return visibleArea(width, height, {
-      top: storyRef.current ? below(storyRef.current) : PANEL_MARGIN,
+      top,
       right: rightInset + PANEL_MARGIN,
       bottom: below(scrubberRef.current),
-      left: playingRef.current || !summaryRef.current ? 0 : summaryRef.current.offsetWidth + PANEL_MARGIN + GAP,
+      left: !summary || collapsedRef.current ? 0 : summary.offsetWidth + PANEL_MARGIN + GAP,
     })
   }, [width, height, rightInset])
 
@@ -335,11 +348,13 @@ function Canvas({ incident, rightInset, lookup }: CanvasProps) {
               onFocus={focusNode}
               liveFrozen={showLive ? liveLayer.frozen : null}
               quiet={quiet ? { mode, small: feed.small } : null}
+              collapsed={compact ? collapsed : null}
+              onToggle={() => setSummaryOpen(!summaryOpen)}
             />
-            {quiet ? null : <LiveFeed onPick={pickLive} />}
+            {quiet || collapsed ? null : <LiveFeed onPick={pickLive} />}
           </div>
         </Panel>
-        {showLive ? (
+        {showLive && !compact ? (
           <Panel position="top-right" style={sideStyle}>
             <FreezeNotice onPick={pickLive} />
           </Panel>
