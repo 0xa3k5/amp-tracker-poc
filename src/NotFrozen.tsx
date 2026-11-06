@@ -16,14 +16,9 @@ export function NotFrozen({ incident }: { incident: Incident }) {
     <Card variant="tertiary" as="section" aria-labelledby="not-frozen-title">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <h2 id="not-frozen-title" className="text-18 font-medium">
-              Not frozen yet
-            </h2>
-            <p className="text-14 text-muted">
-              Largest balances left in attacker wallets at the end of the window, after the tokens frozen there.
-            </p>
-          </div>
+          <h2 id="not-frozen-title" className="text-18 font-medium">
+            Not frozen yet
+          </h2>
           <SqlButton query="token-transfers" />
         </div>
         <ol className="flex flex-col">

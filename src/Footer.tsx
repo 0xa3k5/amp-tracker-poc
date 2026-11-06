@@ -15,10 +15,7 @@ const SOURCES = [
 export function Footer() {
   return (
     <footer className="border-subtle text-12 text-muted mt-auto flex flex-col gap-2 border-t pt-6">
-      <p>
-        Address labels and attribution come from TRM Labs, Chainalysis and the FBI. This tool shows what the chain
-        records and makes no attribution claims of its own. All on-chain data is queried from Amp.
-      </p>
+      <p>Attribution from TRM Labs, Chainalysis and the FBI. On-chain data from Amp.</p>
       <p className="flex flex-wrap gap-4">
         <span>Sources:</span>
         {SOURCES.map((source) => (

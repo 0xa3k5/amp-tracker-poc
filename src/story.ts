@@ -42,7 +42,7 @@ export function storySteps(incident: Incident): Array<StoryStep> {
   steps.push({
     ts: incident.window?.toTs ?? steps.at(-1)?.ts ?? "",
     title: "Where it is now",
-    detail: `${formatUsd(incident.frozen)} frozen by issuers on Ethereum in the hack window, ${formatUsd(held)} still in the attacker's wallets.`,
+    detail: `${formatUsd(incident.frozen)} frozen, ${formatUsd(held)} not frozen`,
     hash: null,
     nodeIds: resolve([FROZEN, HELD]),
     primary: null,

@@ -3,7 +3,8 @@ import { Link } from "@edgeandnode/eds-react"
 import { useOpenDetails } from "./details.ts"
 import { txUrl } from "./explorer.ts"
 import { formatAmount, formatTime, shortHash } from "./format.ts"
-import { DATASET_NAME, type FrozenAddress } from "./freezes.ts"
+import type { FrozenAddress } from "./freezes.ts"
+import { FROZEN_SOURCE } from "./Frozen.tsx"
 import { labelFor } from "./roles.ts"
 import { SourceLabel } from "./SourceLabel.tsx"
 import { TokenMark } from "./TokenAmount.tsx"
@@ -16,7 +17,7 @@ export function FrozenDetails({ frozen }: { frozen: FrozenAddress }) {
       <div className="flex flex-col gap-2">
         <h3 className="text-16 flex items-center gap-2 font-medium">
           Frozen here
-          <SourceLabel source="dataset" detail={`Freeze events and net flow from ${DATASET_NAME}`} />
+          <SourceLabel source="dataset" detail={FROZEN_SOURCE} />
         </h3>
         <ul className="flex flex-col gap-2">
           {frozen.tokens.map((t) => (
@@ -35,11 +36,6 @@ export function FrozenDetails({ frozen }: { frozen: FrozenAddress }) {
             </li>
           ))}
         </ul>
-        <p className="text-12 text-muted">
-          {frozen.binance
-            ? "This is a Binance wallet. Its balance before the hack is not in the window, so no amount is shown."
-            : "Amounts are the net inflow inside the hack window, not absolute balances."}
-        </p>
       </div>
       {frozen.path.length > 0 ? (
         <div className="flex flex-col gap-2">
@@ -47,11 +43,6 @@ export function FrozenDetails({ frozen }: { frozen: FrozenAddress }) {
             Path from Binance
             <SourceLabel source="amp" detail="Hop-by-hop transfer trace from the three Binance wallets, run on Amp" />
           </h3>
-          {frozen.weak ? (
-            <p className="text-12 text-muted">
-              Weak link. This address has more than 50 senders, so this path may be a coincidence.
-            </p>
-          ) : null}
           <ol className="border-subtle flex flex-col gap-3 border-s ps-4">
             {frozen.path.map((step, index) => (
               <li key={step.tx_hash + index} className="text-14 flex flex-col gap-0.5">

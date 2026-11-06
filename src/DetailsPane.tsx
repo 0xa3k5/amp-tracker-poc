@@ -9,10 +9,10 @@ import type { Details } from "./details.ts"
 import { addressUrl } from "./explorer.ts"
 import { formatUsd } from "./format.ts"
 import { frozenByAddress } from "./freezes.ts"
-import { FreezeTags, FrozenList, FrozenNote } from "./Frozen.tsx"
+import { FreezeTags, FrozenList } from "./Frozen.tsx"
 import { FrozenDetails } from "./FrozenDetails.tsx"
 import { LiveActivity, LiveTransaction } from "./LiveDetails.tsx"
-import { fullLabel, labelFor, ROLES } from "./roles.ts"
+import { labelFor, ROLES } from "./roles.ts"
 import { SourceLabel } from "./SourceLabel.tsx"
 import { SqlPanel } from "./SqlPanel.tsx"
 import { Timeline, TimelineDetails } from "./Timeline.tsx"
@@ -65,6 +65,7 @@ function AddressDetails({ address }: { address: string }) {
             <Status variant="info">Frozen by {[...new Set(frozen.tokens.map((t) => t.issuer))].join(", ")}</Status>
           ) : null}
           {frozen ? <FreezeTags frozen={frozen} /> : null}
+          {info ? <SourceLabel source={info.source === "Amp trace" ? "amp" : "outside"} detail={info.source} /> : null}
         </div>
         <p className="text-12 text-muted flex items-center gap-1 font-mono break-all">
           {address}
@@ -73,13 +74,6 @@ function AddressDetails({ address }: { address: string }) {
             Etherscan
           </Link>
         </p>
-        {info ? <p className="text-14 text-muted">{fullLabel(address)}</p> : null}
-        {info ? (
-          <p className="text-12 text-muted flex flex-wrap items-center gap-2">
-            Label source: {info.source}
-            <SourceLabel source={info.source === "Amp trace" ? "amp" : "outside"} detail={info.source} />
-          </p>
-        ) : null}
       </div>
       {frozen ? <FrozenDetails frozen={frozen} /> : null}
       <LiveActivity address={address} />
@@ -152,11 +146,8 @@ export function DetailsPane({ details, onClose }: { details: Details | null; onC
       {details?.kind === "sql" ? <SqlPanel key={details.query} initial={details.query} /> : null}
       {details?.kind === "transactions" ? <Timeline transactions={transactions} transfers={transfers} /> : null}
       {details?.kind === "frozen" ? (
-        <div className="flex flex-col gap-3">
-          <FrozenNote />
-          <div className="-mx-2">
-            <FrozenList />
-          </div>
+        <div className="-mx-2">
+          <FrozenList />
         </div>
       ) : null}
       {details?.kind === "delegation" ? <Delegation /> : null}

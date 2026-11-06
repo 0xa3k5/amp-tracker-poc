@@ -215,9 +215,7 @@ function Canvas({ incident }: { incident: Incident }) {
               style={{ transform: `translate(${liveLayer.column.x}px, ${liveLayer.column.y - 56}px)` }}
             >
               <span className="font-medium">New</span>
-              <span className="text-12 text-muted">
-                Wallets that enter the flow after block {formatBlock(HACK_END_BLOCK)}
-              </span>
+              <span className="text-12 text-muted">After block {formatBlock(HACK_END_BLOCK)}</span>
             </div>
           </ViewportPortal>
         ) : null}

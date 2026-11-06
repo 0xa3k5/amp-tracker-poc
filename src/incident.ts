@@ -80,7 +80,7 @@ const usdOf = (t: Transfer) => Number(t.amount_usd ?? 0)
 const byTime = (a: Transfer, b: Transfer) => a.block_num - b.block_num || a.ts.localeCompare(b.ts)
 
 function describe(t: Transfer) {
-  return `${labelFor(t.from)} sends ${formatAmount(Number(t.amount))} ${t.token} to ${labelFor(t.to)}`
+  return `${formatAmount(Number(t.amount))} ${t.token} to ${labelFor(t.to)}`
 }
 
 function reachable() {
@@ -336,7 +336,7 @@ export function buildIncident(): Incident {
     moment(
       grant.ts,
       "Attacker takes over Binance 14",
-      `${labelFor(grant.from)} sends one transaction with ${takeover.count} EIP-7702 authorizations (nonces ${takeover.firstNonce} to ${takeover.lastNonce}). Each one delegates ${labelFor(grant.to)} to ${labelFor(grant.delegate)}.`,
+      `${takeover.count} EIP-7702 authorizations from ${labelFor(grant.from)}`,
       grant.tx_hash,
       { kind: "delegation" },
       { addresses: [grant.to, grant.from, grant.delegate], focus: grant.to },
@@ -344,7 +344,7 @@ export function buildIncident(): Incident {
     moment(
       revoke.ts,
       "Binance revokes the delegation",
-      `${labelFor(revoke.from)} signs a new authorization to the zero address, which clears the attacker's delegation.`,
+      "Delegation reset to the zero address",
       revoke.tx_hash,
       { kind: "delegation" },
       { addresses: [revoke.from], focus: revoke.from },
@@ -357,7 +357,7 @@ export function buildIncident(): Incident {
     undefined,
   )
   if (largest && largest.tx_hash !== drain?.tx_hash) {
-    txMoment("Largest single withdrawal", `${describe(largest)}, about ${formatUsd(usdOf(largest))}`, largest)
+    txMoment("Largest single withdrawal", describe(largest), largest)
   }
   const split = scope.find(
     (t) =>
@@ -378,7 +378,7 @@ export function buildIncident(): Incident {
     moment(
       tether[0].ts,
       "Tether starts freezing",
-      `Tether blacklists ${blacklisted.length} hack-linked wallets in ${minutes} minutes, starting with ${labelFor(tether[0].address)}.`,
+      `${blacklisted.length} wallets in ${minutes} minutes`,
       tether[0].tx,
       { kind: "frozen" },
       { freeze: true, addresses: blacklisted, focus: SINKS.frozen.id },
@@ -389,7 +389,7 @@ export function buildIncident(): Incident {
     moment(
       circle.ts,
       `Circle freezes ${formatAmount(circle.amount)} USDC`,
-      `Circle blacklists ${labelFor(circle.address)} while it holds ${formatAmount(circle.amount)} USDC from the hack.`,
+      `At ${labelFor(circle.address)}`,
       circle.tx,
       { kind: "address", address: circle.address },
       { freeze: true, addresses: [circle.address], focus: circle.address },
@@ -401,7 +401,7 @@ export function buildIncident(): Incident {
     moment(
       foundToken.ts,
       "A freeze no outside source lists",
-      `${foundToken.issuer} freezes ${formatAmount(foundToken.amount)} ${foundToken.token} at ${labelFor(found.address)}. Amp traced it back to Binance in ${found.path.length} hops.`,
+      `${formatAmount(foundToken.amount)} ${foundToken.token} at ${labelFor(found.address)}, ${found.path.length} hops from Binance`,
       foundToken.tx,
       { kind: "address", address: found.address },
       { freeze: true, addresses: [found.address, ...found.path.map((p) => p.from)], focus: found.address },
@@ -414,7 +414,7 @@ export function buildIncident(): Incident {
     moment(
       latest.ts,
       `Main wallet frozen in ${widest.tokens.length} tokens`,
-      `${latest.issuer} freezes ${latest.token} at ${labelFor(widest.address)}. ${issuers} issuers have now frozen ${widest.tokens.map((t) => t.token).join(", ")} there.`,
+      `${widest.tokens.map((t) => t.token).join(", ")} by ${issuers} issuers`,
       latest.tx,
       { kind: "address", address: widest.address },
       { freeze: true, addresses: [widest.address], focus: widest.address },

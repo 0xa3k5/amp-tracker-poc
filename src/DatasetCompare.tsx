@@ -66,7 +66,7 @@ function QueryRun({ name, title, reads, source }: (typeof QUERIES)[number]) {
         </Button>
         {state?.status === "error" ? (
           <p role="alert" className="text-12 text-status-error-default">
-            {state.message} The view keeps the saved results.
+            {state.message}
           </p>
         ) : null}
       </div>
@@ -82,15 +82,9 @@ export function DatasetCompare() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <p className="text-14 text-muted">
-          The freezes in this view come from <span className="font-mono">{DATASET_NAME}</span>, a derived dataset we
-          built on Amp staging. It decodes freeze, unfreeze and seizure events from 8 issuers once, so a query reads a
-          small table instead of decoding the raw logs again.
-        </p>
         {raw && derived ? (
           <p className="text-14 flex flex-wrap items-center gap-2">
-            Same {derived.rows} events: {formatSeconds(derived.ms)} from our dataset, {formatSeconds(raw.ms)} from raw
-            logs.
+            {derived.rows} events: {formatSeconds(derived.ms)} from our dataset, {formatSeconds(raw.ms)} from raw logs
             <Tag size="xsmall" variant="galactic">
               {(raw.ms / derived.ms).toFixed(1)}× faster
             </Tag>

@@ -39,12 +39,12 @@ export function LiveTransaction({ hash }: { hash: string }) {
         <ol className="flex flex-col">
           {rows.map((event) => (
             <li key={eventKey(event)} className="not-last:border-subtle py-3 not-last:border-b">
-              <LiveEventRow event={event} />
+              <LiveEventRow event={event} route />
             </li>
           ))}
         </ol>
       ) : (
-        <p className="text-14 text-muted">The stream no longer has this transaction. A reorg may have removed it.</p>
+        <p className="text-14 text-muted">No longer in the stream</p>
       )}
     </div>
   )

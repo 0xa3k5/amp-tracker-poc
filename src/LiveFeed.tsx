@@ -44,13 +44,11 @@ export function LiveFeed({ onPick }: { onPick: (event: LiveEvent) => void }) {
           ))}
         </ol>
       ) : (
-        <p className="text-12 text-muted">
-          {mode === "connecting" ? "Waiting for the first blocks." : "No new transfers or freezes yet."}
-        </p>
+        <p className="text-12 text-muted">{mode === "connecting" ? "Connecting" : "Nothing new yet"}</p>
       )}
       {small > 0 ? (
         <p className="text-12 text-muted">
-          {small} {small === 1 ? "transfer" : "transfers"} under $1K or in unknown tokens not shown.
+          {small} small {small === 1 ? "transfer" : "transfers"} hidden
         </p>
       ) : null}
     </div>

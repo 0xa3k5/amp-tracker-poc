@@ -10,6 +10,8 @@ import { SourceLabel } from "./SourceLabel.tsx"
 import { CompareButton } from "./SqlButton.tsx"
 import { TokenAmount, TokenMark } from "./TokenAmount.tsx"
 
+export const FROZEN_SOURCE = `Freeze events from ${DATASET_NAME}. Amounts are net inflow inside the hack window, not absolute balances, so Binance's own wallets show none.`
+
 export function FreezeTags({ frozen }: { frozen: FrozenAddress }) {
   return (
     <>
@@ -96,15 +98,6 @@ export function FrozenList() {
   )
 }
 
-export function FrozenNote() {
-  return (
-    <p className="text-12 text-muted">
-      Amounts are the net inflow inside the hack window, not absolute balances. Wallets that held a token before the
-      window show no amount for it, and Binance's own wallets show none.
-    </p>
-  )
-}
-
 export function FrozenCard() {
   return (
     <Card variant="tertiary" as="section" aria-labelledby="frozen-title">
@@ -113,17 +106,15 @@ export function FrozenCard() {
           <div className="flex flex-col gap-1">
             <h2 id="frozen-title" className="text-18 flex items-center gap-2 font-medium">
               Frozen on chain
-              <SourceLabel source="dataset" detail={`Freeze events from ${DATASET_NAME}`} />
+              <SourceLabel source="dataset" detail={FROZEN_SOURCE} />
             </h2>
             <p className="text-14 text-muted">
-              {freezeTotals.addresses} hack-linked addresses, {freezeTotals.events} freeze events from{" "}
-              {freezeTotals.issuers} issuers. Ethereum, hack window.
+              {freezeTotals.addresses} addresses · {freezeTotals.events} events · {freezeTotals.issuers} issuers
             </p>
           </div>
           <CompareButton />
         </div>
         <FrozenList />
-        <FrozenNote />
       </div>
     </Card>
   )

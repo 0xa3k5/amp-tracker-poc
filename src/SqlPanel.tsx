@@ -35,10 +35,7 @@ export function SqlPanel({ initial }: { initial?: string | undefined }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <p className="text-14 text-muted">
-          The exact queries behind this view, run against Amp dataset <span className="font-mono">{dataset}</span>. The
-          view shows saved results until you run a query live.
-        </p>
+        <p className="text-12 text-muted font-mono">{dataset}</p>
         <Button variant="tertiary" size="small" className="self-start" onClick={() => open({ kind: "compare" })}>
           Freezes: raw logs vs our dataset
         </Button>
@@ -85,7 +82,7 @@ export function SqlPanel({ initial }: { initial?: string | undefined }) {
         </Button>
         {state?.status === "error" ? (
           <p role="alert" className="text-12 text-status-error-default">
-            {state.message} The view keeps the saved results.
+            {state.message}
           </p>
         ) : null}
       </div>

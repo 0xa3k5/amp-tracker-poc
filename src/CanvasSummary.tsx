@@ -5,7 +5,7 @@ import type { CanvasEdgeData, CanvasNodeData } from "./canvasLayout.ts"
 import { isVisible } from "./canvasState.ts"
 import { tokenColor } from "./FlowEdge.tsx"
 import { formatUsd } from "./format.ts"
-import { DATASET_NAME, freezeTotals } from "./freezes.ts"
+import { DATASET_NAME } from "./freezes.ts"
 import type { Incident } from "./incident.ts"
 import type { LiveFrozen } from "./liveGraph.ts"
 import { LIVE_DATASET } from "./liveStream.ts"
@@ -44,13 +44,9 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
   const stopped = largest("frozen")
   const away = largest("held")
   const steps = [
-    landed && { node: landed, title: "Where it landed", detail: `${formatUsd(landed.data.value)} goes to one wallet` },
-    stopped && {
-      node: stopped,
-      title: "What issuers froze",
-      detail: `${formatUsd(stopped.data.value)} across ${freezeTotals.issuers} issuers`,
-    },
-    away && { node: away, title: "What got away", detail: `${formatUsd(away.data.value)} not frozen` },
+    landed && { node: landed, title: "Where it landed", detail: formatUsd(landed.data.value) },
+    stopped && { node: stopped, title: "What issuers froze", detail: formatUsd(stopped.data.value) },
+    away && { node: away, title: "What got away", detail: formatUsd(away.data.value) },
   ].filter((step) => !!step)
 
   const focusOn = (id: string) => {
@@ -76,7 +72,7 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
           {frozen > 0 ? `Issuers froze ${formatUsd(frozen)}.` : taken > 0 ? "No freezes yet." : null}
         </p>
         <p className="text-12 text-muted flex flex-wrap items-center gap-2">
-          Ethereum, hack window
+          Ethereum
           <SourceLabel source="amp" detail="Transfers out of the Binance wallets" />
           <SourceLabel source="dataset" detail={`Freeze events and amounts from ${DATASET_NAME}`} />
         </p>
@@ -87,7 +83,7 @@ export function CanvasSummary({ incident, nodes, edges, time, selected, onSelect
             </Tag>
             {newFrozen.usd > 0
               ? `${formatUsd(newFrozen.usd)} frozen after the hack window`
-              : `${newFrozen.events.length} new ${newFrozen.events.length === 1 ? "freeze" : "freezes"} on watched wallets`}
+              : `${newFrozen.events.length} new ${newFrozen.events.length === 1 ? "freeze" : "freezes"}`}
             <SourceLabel source="dataset" detail={`Freeze events streamed from ${LIVE_DATASET}`} />
           </p>
         ) : null}

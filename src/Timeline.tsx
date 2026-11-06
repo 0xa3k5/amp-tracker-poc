@@ -117,15 +117,13 @@ export function TimelineDetails({ tx }: { tx: Transaction }) {
           </DescriptionList.Item>
         ) : null}
       </DescriptionList>
-      {transfer ? null : tx.events.length > 0 ? (
+      {!transfer && tx.events.length > 0 ? (
         <ul className="flex flex-col gap-4">
           {tx.events.map((event, index) => (
             <EventItem key={index} event={event} />
           ))}
         </ul>
-      ) : (
-        <p className="text-12 text-muted">No decoded events. Plain ETH transfers emit no logs.</p>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -141,7 +139,6 @@ function TimelineItem({
 }) {
   const [open, setOpen] = useState(false)
   const freeze = isFreeze(tx)
-  const transfer = tokenTransfer(tx)
 
   return (
     <li id={`tx-${tx.hash}`} className="not-first:border-subtle scroll-mt-2 not-first:border-t">
@@ -154,14 +151,9 @@ function TimelineItem({
       >
         <summary className="hover:bg-muted group-data-freeze:bg-status-info-subtle flex cursor-pointer list-none items-start gap-3 px-4 py-3">
           <span className="text-12 text-muted w-24 shrink-0">{formatTime(tx.ts)}</span>
-          <span className="text-14 flex min-w-0 flex-1 flex-col gap-1">
-            <span className="flex flex-wrap items-center gap-2">
-              {tx.method ? <CodeInline>{tx.method}</CodeInline> : <span>ETH transfer</span>}
-              {freeze ? <Status variant="info">USDT freeze</Status> : null}
-            </span>
-            <span className="text-12 text-muted truncate">
-              {labelFor(transfer?.from ?? tx.from)} to {labelFor(transfer?.to ?? tx.to)}
-            </span>
+          <span className="text-14 flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            {tx.method ? <CodeInline>{tx.method}</CodeInline> : <span>ETH transfer</span>}
+            {freeze ? <Status variant="info">USDT freeze</Status> : null}
           </span>
           <span className="text-14 shrink-0 text-end">
             <AmountSummary tx={tx} txTransfers={txTransfers} />

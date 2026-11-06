@@ -15,7 +15,7 @@ export function freezeTitle(event: StreamFreeze) {
   return `${issuer} ${event.action === "seize" ? "seized" : "froze"} ${event.token}`
 }
 
-export function LiveEventRow({ event }: { event: LiveEvent }) {
+export function LiveEventRow({ event, route = false }: { event: LiveEvent; route?: boolean }) {
   return (
     <span className="flex min-w-0 flex-col gap-1">
       {event.kind === "transfer" ? (
@@ -35,11 +35,13 @@ export function LiveEventRow({ event }: { event: LiveEvent }) {
           )}
         </span>
       )}
-      <span className="text-12 text-muted truncate">
-        {event.kind === "transfer"
-          ? `${labelFor(event.from)} to ${labelFor(event.to)}`
-          : `at ${labelFor(event.address)}`}
-      </span>
+      {event.kind === "freeze" ? (
+        <span className="text-12 text-muted truncate">{labelFor(event.address)}</span>
+      ) : route ? (
+        <span className="text-12 text-muted truncate">
+          {labelFor(event.from)} to {labelFor(event.to)}
+        </span>
+      ) : null}
       <span className="text-12 text-muted">
         Block {formatBlock(event.block_num)} · {formatTime(event.ts)}
       </span>

@@ -37,14 +37,14 @@ export function FreezeNotice({ onPick }: { onPick: (event: StreamFreeze) => void
       <button type="button" onClick={() => onPick(shown)} className="flex min-w-0 flex-1 flex-col gap-1 text-start">
         <span className="flex flex-wrap items-center gap-2">
           <Status variant={shown.action === "unfreeze" ? "default" : "info"}>{freezeTitle(shown)}</Status>
+          {shown.watched ? null : (
+            <Tag size="xsmall" variant="muted">
+              Not a watched wallet
+            </Tag>
+          )}
           <SourceLabel source="dataset" detail={`Streamed from ${LIVE_DATASET}, our derived dataset`} />
         </span>
         <span className="text-14">at {labelFor(shown.address)}</span>
-        <span className="text-12 text-muted">
-          {shown.watched
-            ? "A watched wallet. Counted in the frozen total."
-            : "Not a watched wallet, so not counted in the frozen total."}
-        </span>
         <span className="text-12 text-muted">
           Block {formatBlock(shown.block_num)} · {formatTime(shown.ts)}
         </span>

@@ -51,7 +51,7 @@ export function Header({ view, onViewChange }: { view: View; onViewChange: (view
             value={value}
             onValueChange={setValue}
             status={invalid ? "error" : undefined}
-            message={invalid ? "Paste a full address: 0x and 40 hex characters." : undefined}
+            message={invalid ? "Not a valid address" : undefined}
             spellCheck={false}
             autoComplete="off"
             className="w-80"

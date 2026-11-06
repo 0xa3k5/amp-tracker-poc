@@ -90,11 +90,7 @@ export function FundFlow({ incident }: { incident: Incident }) {
             <h2 id="flow-title" className="text-18 font-medium">
               Where the money went
             </h2>
-            <p className="text-14 text-muted">
-              Width is USD value. A hop is one transfer from one wallet to the next. Click a wallet to see its balance
-              and transactions. Swap proceeds arrive as internal ETH transfers that the data lacks, so a wallet that
-              sent more than it received is scaled to what it received.
-            </p>
+            <p className="text-14 text-muted">Width is USD value</p>
           </div>
           <SqlButton query="fund-flow" />
         </div>

@@ -21,7 +21,7 @@ function Tx({ hash }: { hash: string }) {
 
 export function Delegation() {
   const open = useOpenDetails()
-  if (!takeover) return <p className="text-14 text-muted">The EIP-7702 query has no results in data/ yet.</p>
+  if (!takeover) return <p className="text-14 text-muted">No EIP-7702 results yet</p>
   const { grant, revoke } = takeover
   const address = (value: string) => (
     <button type="button" className="hover:underline" onClick={() => open({ kind: "address", address: value })}>
@@ -31,11 +31,8 @@ export function Delegation() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="text-14 text-muted flex flex-wrap items-center gap-2">
-          Amp reads each type-4 transaction's authorization list, so the takeover shows up directly in the data.
-          <SourceLabel source="amp" detail="transactions.authorization_list, edgeandnode/ethereum_mainnet@0.0.2" />
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <SourceLabel source="amp" detail="transactions.authorization_list, edgeandnode/ethereum_mainnet@0.0.2" />
         <SqlButton query="binance14-eip7702" />
       </div>
       <section className="flex flex-col gap-3">
@@ -57,7 +54,7 @@ export function Delegation() {
         <h3 className="text-16 font-medium">Revocation · {formatTime(revoke.ts)}</h3>
         <DescriptionList size="small">
           <DescriptionList.Item label="Sent by">{address(revoke.from)}</DescriptionList.Item>
-          <DescriptionList.Item label="Delegates to">Zero address, which clears the delegation</DescriptionList.Item>
+          <DescriptionList.Item label="Delegates to">Zero address</DescriptionList.Item>
           <DescriptionList.Item label="Block">{revoke.block_num}</DescriptionList.Item>
           <DescriptionList.Item label="Transaction">
             <Tx hash={revoke.tx_hash} />
